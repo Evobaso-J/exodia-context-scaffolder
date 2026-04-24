@@ -82,7 +82,7 @@ fi
 Classify into one of three modes:
 
 - **Fresh** — no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
-- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it by `##` sections, and move each section into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source (`CLAUDE.md` becomes a pointer in Step 10 regardless).
+- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it by `##` sections, and move each section into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
 - **Incremental** — `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom — do not ask the dir-name question again.
 
 ### Step 2 — Scan the repo
@@ -101,9 +101,8 @@ Delegate the initial scan to an `Explore` subagent with **medium** thoroughness 
 >    - monorepo (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, `packages/`, `apps/`)
 >    - data / ML (`notebooks/`, `models/`, `data/`, ipynb files, pytorch / tf / jax deps)
 >    - infra (`terraform/`, `helm/`, `k8s/`, `.tf` files, CloudFormation)
-> 6. **Agent integrations present**: `.claude/`, `.cursor/`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`.
-> 7. **Lint/test/typecheck scripts** detected in `package.json`, `pyproject.toml`, `Gemfile`, `go.mod`, `Cargo.toml`, `Makefile`. Name the commands (e.g. `pnpm lint`, `pytest`).
-> 8. **Existing docs** — if `AGENTS.md` / `CLAUDE.md` / `README.md` has structured sections, list the `##` headings.
+> 6. **Lint/test/typecheck scripts** detected in `package.json`, `pyproject.toml`, `Gemfile`, `go.mod`, `Cargo.toml`, `Makefile`. Name the commands (e.g. `pnpm lint`, `pytest`).
+> 7. **Existing docs** — if `AGENTS.md` / `CLAUDE.md` / `README.md` has structured sections, list the `##` headings.
 >
 > Output the report as a structured list. Do not speculate — cite files for everything.
 
@@ -158,7 +157,7 @@ If preflight classified as Merge (the user already granted permission in Step 1)
 2. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<source-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
 3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
 4. Present the mapping table via `AskUserQuestion` (or a numbered prompt if too many rows for four options). Let the user reassign rows.
-5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied — the original file will be replaced by Step 8 (router) and, if it was `CLAUDE.md`, by a pointer at Step 10. No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `context/`) rather than destroyed.
+5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied — the original file is replaced by Step 8 (router). No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `context/`) rather than destroyed.
 
 ### Step 5 — Initialize structure
 
@@ -221,24 +220,7 @@ Ask the user whether to seed L3 files from the codebase:
 
 If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` where `{type}` is `gotcha`, `pb`, `adr`, or `rv`.
 
-### Step 10 — Emit agent pointer files
-
-Every agent runtime has its own conventions for where top-level instructions live (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`, something custom, or nothing at all). The scaffolder does not ship a hardcoded list — the target repo picks.
-
-Flow:
-
-1. From `$SCAN`, note any agent-integration files already present (`.claude/`, `.cursor/`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`, etc.). Mention them in the question prose as *hints only*.
-2. `AskUserQuestion`: *"Which pointer files should point to `AGENTS.md`? Provide one or more repo-relative paths (e.g. `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, or any custom path). Leave empty to skip this step."* Do not preselect a known-runtime list — the user knows their own setup.
-3. For each path the user supplies, run:
-
-   ```bash
-   bash "$SKILL_DIR/scripts/symlink_agents.sh" "$TARGET" "<pointer-path>" [<pointer-path> ...]
-   ```
-
-   The script accepts one or more literal paths. Each becomes a symlink back to `AGENTS.md` (or a one-line pointer file on filesystems without symlink support). Paths must not contain `..` segments and must not be absolute.
-4. If the user provides no paths, skip this step entirely.
-
-### Step 11 — Optional Stop hook install
+### Step 10 — Optional Stop hook install
 
 Skip this step entirely if the target repo is not on Claude Code — the Stop hook is a Claude-Code-specific lifecycle feature and has no counterpart on other runtimes. If the user is on Claude Code (detect via `$TARGET/.claude/` presence or ask), explain the hook in full **before** asking for consent, so the user knows exactly what gets installed and how to back out.
 
@@ -284,11 +266,11 @@ bash "$SKILL_DIR/scripts/install_hook.sh" "$TARGET" "$CONTEXT_DIR"
 
 `$CONTEXT_DIR` is the second argument — the installer copies the hook into `$TARGET/.claude/hooks/exodia-stop-reminder.sh`, substitutes `{{CONTEXT_DIR}}` in the copied file with the actual value, and registers the hook in `$TARGET/.claude/settings.json` under `"hooks.Stop"`. The installer is idempotent.
 
-### Step 12 — Wrap up
+### Step 11 — Wrap up
 
 Print a short summary:
 
-- What was created (counts: L2 files, L3 files, pointer files, hook yes/no)
+- What was created (counts: L2 files, L3 files, hook yes/no)
 - Next steps for the user (how to iterate: just edit the files; the self-update rules handle growth)
 - Reminder: running `/exodia` again triggers incremental re-run, not a fresh scaffold
 
@@ -298,7 +280,7 @@ Print a short summary:
 
 When preflight detects an existing exodia setup:
 
-0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it — preserving the existing directory name is required so symlinks, hook substitutions, and router paths stay consistent.
+0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it — preserving the existing directory name is required so hook substitutions and router paths stay consistent.
 1. Re-run Step 2 (scan).
 2. For each L2 file under `$TARGET/$CONTEXT_DIR/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
 3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker — if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).

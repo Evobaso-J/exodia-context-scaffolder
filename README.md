@@ -16,7 +16,6 @@ A single `CLAUDE.md` / `AGENTS.md` file grows into an unreadable pile. `/exodia`
 
 ```
 AGENTS.md                          # router + rules + quick action table
-CLAUDE.md → AGENTS.md              # symlink for Claude Code
 context/
   architecture/   ARCHITECTURE.md + decisions.jsonl
   patterns/       PATTERNS.md     + reviews.jsonl
@@ -31,7 +30,7 @@ Agents load the router, pick the right module, and optionally read the data file
 
 - **Interactive scaffolder** — `/exodia` scans your repo, proposes categories, drafts narrative modules, and walks you through them section-by-section.
 - **Fixed-5 + detected extras** — five canonical categories, plus optional `mobile/`, `workspace/`, `data/`, `infra/` when the skill detects them.
-- **Agent-agnostic output** — canonical `AGENTS.md`; symlinks or pointer files for Claude Code (`CLAUDE.md`), Cursor (`.cursorrules`), Windsurf (`.windsurfrules`), and Copilot (`.github/copilot-instructions.md`) as detected.
+- **Agent-agnostic output** — canonical `AGENTS.md`, respected by any tool that follows the [agents.md](https://agents.md) convention.
 - **Self-update reinforcement** — embedded prose rules + optional Claude Code `Stop` hook that reminds agents to capture new signals at turn end.
 - **Safe re-runs** — running `/exodia` again on a repo that already has the setup does an incremental diff and proposes additions only, never overwriting user-edited prose.
 - **Existing-file merge** — if your repo already has `CLAUDE.md` or `AGENTS.md`, the skill parses it, maps sections to categories, and backs up the original.
@@ -62,8 +61,7 @@ You'll be interviewed about:
 2. **Existing content** (if any) — review the proposed section-to-category mapping.
 3. **Per-category drafts** — for each `##` heading, accept / edit / reject.
 4. **L3 seeding** — optionally seed `gotchas.jsonl` from `TODO`/`FIXME` comments and `decisions.jsonl` from any detected ADRs.
-5. **Agent symlinks** — which agent pointer files to emit.
-6. **Self-update hook** — (Claude Code only) optionally install a `Stop` hook that reinforces the self-update rules.
+5. **Self-update hook** — (Claude Code only) optionally install a `Stop` hook that reinforces the self-update rules.
 
 ## Layout
 
