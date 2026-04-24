@@ -71,7 +71,8 @@ Delegate the initial scan to an `Explore` subagent with **medium** thoroughness 
 >
 > 1. **Stack**: languages, frameworks, build tool, test tool, package manager. Cite files.
 > 2. **Architecture summary**: routing style, state management, module layout, SSR/CSR split, backend/frontend divide. One paragraph.
-> 3. **Domain signals**: top-level entities or models you can name (from `models/`, `entities/`, `schemas/`, `prisma/`, `openapi`, etc.).
+> 3. **Data-model signals**: top-level entities, schemas, or generated-type sources you can name (from `models/`, `entities/`, `schemas/`, `prisma/`, `openapi`, etc.). These feed `architecture/entities.yaml`.
+> 3a. **Domain signals**: user-facing journeys, business-rule invariants, named domain events. These feed `domain/`. Cite files (controllers, state machines, event emitters) where present.
 > 4. **Operations signals**: i18n presence (i18n dirs, vue-i18n / next-intl / react-i18next / i18next deps, locale files), multi-env config (env files, `deploy/`, k8s, helm, terraform), multi-tenant patterns, feature-flag tools.
 > 5. **Category-tweak triggers** — report presence/absence of each:
 >    - i18n / multi-market
