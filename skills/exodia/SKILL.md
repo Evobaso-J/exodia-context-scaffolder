@@ -148,7 +148,6 @@ Compose `$TARGET/AGENTS.md` from:
 
 - `$SKILL_DIR/rules/universal.md` (always included)
 - `$SKILL_DIR/rules/conditional/operations-awareness.md` (always — operations is always present)
-- `$SKILL_DIR/rules/conditional/stop-hook.md` only if `$TARGET/.claude/settings.json` exists with a `Stop` hook
 - `$SKILL_DIR/rules/conditional/lint-check.md` if scan detected any lint/test/typecheck scripts — substitute the detected commands into the snippet
 - `$SKILL_DIR/rules/self-update.md` (always — near the top)
 
