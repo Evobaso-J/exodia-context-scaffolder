@@ -23,10 +23,9 @@ After computing adds, present the full proposed set to the user with `AskUserQue
 
 - Accept as proposed
 - Drop optional categories they don't want
-- Rename any category (including core) — the internal directory name follows the user's choice
 - Add a custom category not in the table (skill must then ask for a short purpose statement and scaffold an empty L2 stub with no template content)
 
-The five canonical categories cannot be dropped. They are the minimum context envelope.
+The five canonical categories cannot be dropped or renamed. They are the minimum context envelope, and `init_structure.sh` validates their presence by literal name. A future version may add aliasing, but today the internal directory names must match exactly.
 
 ## Agent-integration detection (separate from categories)
 
