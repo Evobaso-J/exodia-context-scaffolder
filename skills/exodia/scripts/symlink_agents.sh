@@ -27,13 +27,14 @@ fi
 
 supports_symlinks () {
   [[ "${FORCE_POINTER:-0}" != "1" ]] || return 1
-  local probe
-  probe="$(mktemp -u "$TARGET/.exodia-symlink-probe-XXXX")"
-  if ln -s AGENTS.md "$probe" 2>/dev/null; then
-    rm -f "$probe"
-    return 0
+  local probe_dir
+  probe_dir="$(mktemp -d "$TARGET/.exodia-symlink-probe.XXXXXX")" || return 1
+  local rc=1
+  if ln -s AGENTS.md "$probe_dir/link" 2>/dev/null; then
+    rc=0
   fi
-  return 1
+  rm -rf "$probe_dir"
+  return $rc
 }
 
 emit_pointer () {
