@@ -4,7 +4,7 @@
   <img src="assets/exodia.webp" alt="Exodia, the Forbidden One" width="420">
 </p>
 
-<p align="center"><em>5 pieces. 5 modules of progressive disclosure. All we need to <strong>OBLITERATE</strong> token consumption.</em></p>
+<p align="center"><em>"I have assembled all 5 special modules, all 5 pieces of the puzzle! Exodia! <strong>OBLITERATE</strong> token consumption!"</em></p>
 
 > One-shot scaffolder that bootstraps durable, self-maintaining agent context for any codebase.
 
