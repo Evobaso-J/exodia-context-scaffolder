@@ -2,19 +2,25 @@
 # install_hook.sh — install the Claude Code Stop hook that reinforces the Self-Update Rules.
 #
 # Usage:
-#   install_hook.sh <target-dir>
+#   install_hook.sh <target-dir> <context-dir>
 #
-# Idempotent. Creates .claude/hooks/exodia-stop-reminder.sh and registers it in
-# .claude/settings.json under hooks.Stop.
+# <context-dir> is the name of the context directory the scaffold used
+# (e.g. "context", "docs", ".agents"). The hook source contains
+# {{CONTEXT_DIR}} placeholders that are substituted with this value
+# at install time so the reminder text points to the right paths.
+#
+# Idempotent. Creates .claude/hooks/exodia-stop-reminder.sh and registers
+# it in .claude/settings.json under hooks.Stop.
 
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-  echo "usage: $0 <target-dir>" >&2
+if [[ $# -ne 2 ]]; then
+  echo "usage: $0 <target-dir> <context-dir>" >&2
   exit 64
 fi
 
 TARGET="$1"
+CONTEXT_DIR="$2"
 SKILL_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 HOOK_SRC="$SKILL_DIR/hooks/stop-reminder.sh"
 
@@ -23,9 +29,24 @@ if [[ ! -f "$HOOK_SRC" ]]; then
   exit 66
 fi
 
+if [[ -z "$CONTEXT_DIR" || "$CONTEXT_DIR" == "." || "$CONTEXT_DIR" == ".." ]]; then
+  echo "error: invalid context dir name: '$CONTEXT_DIR'" >&2
+  exit 65
+fi
+context_dir_re='^[a-z._-][a-z0-9._-]*$'
+if [[ ! "$CONTEXT_DIR" =~ $context_dir_re ]]; then
+  echo "error: invalid context dir name: '$CONTEXT_DIR' (must match $context_dir_re)" >&2
+  exit 65
+fi
+
 mkdir -p "$TARGET/.claude/hooks"
 HOOK_DEST="$TARGET/.claude/hooks/exodia-stop-reminder.sh"
 cp "$HOOK_SRC" "$HOOK_DEST"
+# Substitute {{CONTEXT_DIR}} placeholder with the chosen value.
+# -i.bak is used for cross-platform (macOS + GNU) compatibility;
+# the backup is removed right after.
+sed -i.bak "s|{{CONTEXT_DIR}}|${CONTEXT_DIR}|g" "$HOOK_DEST"
+rm -f "${HOOK_DEST}.bak"
 chmod +x "$HOOK_DEST"
 echo "installed: $HOOK_DEST"
 

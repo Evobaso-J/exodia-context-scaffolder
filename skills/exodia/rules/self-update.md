@@ -2,6 +2,8 @@ The context files are **shared, living documentation** about the codebase — no
 
 ### When to update
 
+All target-file paths below are relative to the context directory (`{{CONTEXT_DIR}}/`).
+
 | Signal during conversation | Target file | What to write |
 | -------------------------- | ----------- | ------------- |
 | Codebase assumption corrected by user or by evidence | L2 `.md` file for that area | Update the incorrect section |

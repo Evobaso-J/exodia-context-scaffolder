@@ -47,6 +47,7 @@ Execute steps in order. **Do not skip steps**. Use `AskUserQuestion` for user in
 - Confirm `$TARGET` = current working directory.
 - Confirm `$SKILL_DIR` = directory of this SKILL.md. If you cannot resolve it, fall back to `~/.claude/skills/exodia`.
 - Check `git rev-parse --is-inside-work-tree` in `$TARGET`. If not a git repo, continue but warn the user ("branch-scoped dedup in self-update rules will be ineffective without git").
+- Hold a variable `$CONTEXT_DIR` throughout the run. It names the directory that will hold the context tree inside `$TARGET`. Default is `context`; the user may pick another name in Step 3a (Fresh / Merge) or it is auto-detected in Step 1 (Incremental).
 
 ### Step 1 — Preflight
 
@@ -54,14 +55,35 @@ Detect what already exists:
 
 ```bash
 ls -la "$TARGET/AGENTS.md" "$TARGET/CLAUDE.md" 2>/dev/null
-ls -d "$TARGET/context" 2>/dev/null
+```
+
+Probe for an existing exodia context tree. The directory name is no longer hardcoded — any top-level dir whose markdown files contain `<!-- exodia:section:` markers is an exodia context tree. Cheap probe first, fallback scan second:
+
+```bash
+# Cheap: try common names.
+EXISTING_CONTEXT_DIR=""
+for candidate in context docs knowledge .agents ai; do
+  if [[ -d "$TARGET/$candidate" ]] && grep -lr 'exodia:section:' "$TARGET/$candidate" --include='*.md' 2>/dev/null | head -1 >/dev/null; then
+    EXISTING_CONTEXT_DIR="$candidate"
+    break
+  fi
+done
+# Fallback: any top-level dir at all.
+if [[ -z "$EXISTING_CONTEXT_DIR" ]]; then
+  for d in "$TARGET"/*/; do
+    if grep -lr 'exodia:section:' "$d" --include='*.md' 2>/dev/null | head -1 >/dev/null; then
+      EXISTING_CONTEXT_DIR="$(basename "$d")"
+      break
+    fi
+  done
+fi
 ```
 
 Classify into one of three modes:
 
-- **Fresh** — none of the above exist. Go to Step 2.
-- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no `context/`. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it by `##` sections, and move each section into the appropriate module under `context/`. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source (`CLAUDE.md` becomes a pointer in Step 10 regardless).
-- **Incremental** — `context/` already exists with exodia markers. Jump to the *Incremental re-run* section at the bottom.
+- **Fresh** — no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
+- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it by `##` sections, and move each section into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source (`CLAUDE.md` becomes a pointer in Step 10 regardless).
+- **Incremental** — `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom — do not ask the dir-name question again.
 
 ### Step 2 — Scan the repo
 
@@ -110,6 +132,14 @@ Use `AskUserQuestion`: "Here's the proposed category set: [list]. OK to proceed?
 
 The target repo picks the shape. Users may drop any canonical category that does not apply: a pure library may have no `operations/`, a data pipeline may have no `patterns/`, a CLI tool may have no `domain/`. `init_structure.sh` accepts any subset of category names matching `^[a-z][a-z0-9_-]*$` — the core set is a default, not an enforced minimum.
 
+### Step 3a — Name the context directory
+
+Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1).
+
+`AskUserQuestion`: *"Where should the context tree live? Default: `context/`. You may pick any path-safe single-segment name — `docs`, `knowledge`, `.agents`, `ai`, whatever fits your repo's conventions."*
+
+Accept any value matching `^[a-z._-][a-z0-9._-]*$` (single safe filesystem segment, no slashes, no `..`, no `.` alone). Store as `$CONTEXT_DIR`. Default to `context` if the user accepts the default. Validate the answer before continuing.
+
 ### Step 4 — Existing-file merge (Merge mode only)
 
 If preflight classified as Merge (the user already granted permission in Step 1):
@@ -127,10 +157,10 @@ If preflight classified as Merge (the user already granted permission in Step 1)
 Run the scaffolder helper:
 
 ```bash
-bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" <space-separated-category-names>
+bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" "$CONTEXT_DIR" <space-separated-category-names>
 ```
 
-This creates the directory tree, copies `.tmpl` files from `$SKILL_DIR/templates/`, and writes the `_schema` line into each `.jsonl`. YAML stubs ship with their top-level key + a comment block.
+`$CONTEXT_DIR` is the second positional argument. This creates `$TARGET/$CONTEXT_DIR/<category>/` for each requested category, copies `.tmpl` files from `$SKILL_DIR/templates/`, and writes the `_schema` line into each `.jsonl`. YAML stubs ship with their top-level key + a comment block.
 
 ### Step 6 — Draft L2 content
 
@@ -151,7 +181,7 @@ Walk each L2 draft with the user. For each `##` section:
 - `AskUserQuestion` with options: *accept*, *edit*, *reject (leave empty for later)*.
 - If edit: let the user dictate changes, re-draft, loop until accepted.
 
-Then `Write` the finalized L2 file to `$TARGET/context/<category>/<CATEGORY>.md`.
+Then `Write` the finalized L2 file to `$TARGET/$CONTEXT_DIR/<category>/<CATEGORY>.md`.
 
 ### Step 8 — Emit the AGENTS.md router
 
@@ -166,11 +196,13 @@ Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
 1. Project overview (one paragraph from scan)
 2. Commands (point to the detected package manifest file)
-3. Context Router table (one row per confirmed category)
+3. Context Router table (one row per confirmed category, linking to `$CONTEXT_DIR/<category>/<CATEGORY>.md`)
 4. Behavioral Rules (universal + conditional)
 5. Self-Update Rules (full block)
 6. Quick Action Table (common dev phrases → file to read)
-7. Context Structure (tree diagram)
+7. Context Structure (tree diagram, rooted at `$CONTEXT_DIR/`)
+
+Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-update.md`, and the `{{CONTEXT_TREE}}` diagram) contain `{{CONTEXT_DIR}}` placeholders. Substitute all occurrences with the actual value of `$CONTEXT_DIR` before writing the emitted `AGENTS.md`.
 
 ### Step 9 — L3 seeding prompt
 
@@ -207,10 +239,10 @@ If the user is on Claude Code (detect via `$TARGET/.claude/` presence or ask), o
 If yes:
 
 ```bash
-bash "$SKILL_DIR/scripts/install_hook.sh" "$TARGET"
+bash "$SKILL_DIR/scripts/install_hook.sh" "$TARGET" "$CONTEXT_DIR"
 ```
 
-This writes `$SKILL_DIR/hooks/stop-reminder.sh` into `$TARGET/.claude/hooks/exodia-stop-reminder.sh` and registers it in `$TARGET/.claude/settings.json` under `"hooks.Stop"`. The installer is idempotent.
+`$CONTEXT_DIR` is the second argument — the installer copies the hook into `$TARGET/.claude/hooks/exodia-stop-reminder.sh`, substitutes `{{CONTEXT_DIR}}` in the copied file with the actual value, and registers the hook in `$TARGET/.claude/settings.json` under `"hooks.Stop"`. The installer is idempotent.
 
 ### Step 12 — Wrap up
 
@@ -226,8 +258,9 @@ Print a short summary:
 
 When preflight detects an existing exodia setup:
 
+0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it — preserving the existing directory name is required so symlinks, hook substitutions, and router paths stay consistent.
 1. Re-run Step 2 (scan).
-2. For each L2 file, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
+2. For each L2 file under `$TARGET/$CONTEXT_DIR/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
 3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker — if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
 4. Show the proposed diffs via `AskUserQuestion` (accept / skip per section).
 5. Append to L3 files from the scan using the same Step 9 logic.
