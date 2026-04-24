@@ -1,7 +1,7 @@
 # Operations
 
 <!-- exodia:section:intro -->
-Environments, configuration, deploys, and per-variant behavior (markets, tenants, feature flags). Read this when touching env vars, build config, or anything that differs by environment or tenant.
+Environments, configuration, deploys, and any per-variant behavior the codebase supports (environments, tenants, feature-flag cohorts, deployment targets — whatever applies). Read this when touching env vars, build config, or anything that differs between environments or variants.
 
 ## Environments
 
@@ -11,7 +11,7 @@ Environments, configuration, deploys, and per-variant behavior (markets, tenants
 ## Variants
 
 <!-- exodia:section:variants -->
-{{MULTI_MARKET_OR_MULTI_TENANT_MODEL if applicable. What varies per variant vs per environment. Where the matrix lives.}}
+{{VARIANT_MODEL_IF_ANY — what varies per variant vs per environment. Where the matrix lives. Skip if single-variant.}}
 
 ## Configuration System
 
@@ -23,12 +23,12 @@ Environments, configuration, deploys, and per-variant behavior (markets, tenants
 <!-- exodia:section:deploy -->
 {{DEPLOY_PIPELINE — CI, build artifacts, where the app runs, release strategy.}}
 
-## i18n / Localization
+## Localization / i18n (if applicable)
 
 <!-- exodia:section:i18n -->
-{{TRANSLATION_SYSTEM if any — where strings live, how to add a key, pluralization rules, translation service integration.}}
+{{SKIP IF N/A — TRANSLATION_SYSTEM: where strings live, how to add a key, pluralization rules, translation service integration.}}
 
 ## L3 Data
 
 <!-- exodia:section:l3 -->
-- `variants.yaml` — per-variant behavioral differences (markets, tenants, feature flags).
+- `variants.yaml` — per-variant behavioral differences (any axis the codebase varies along).
