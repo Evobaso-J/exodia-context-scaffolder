@@ -51,7 +51,7 @@ ls -d "$TARGET/context" 2>/dev/null
 Classify into one of three modes:
 
 - **Fresh** — none of the above exist. Go to Step 2.
-- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no `context/`. Existing file(s) will be parsed and distributed. Continue to Step 2 normally; Step 4 handles the merge. If both exist, `AGENTS.md` is the merge source of truth (`CLAUDE.md` is treated as a secondary pointer) — both are backed up, but only `AGENTS.md` is parsed for sections.
+- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no `context/`. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it by `##` sections, and move each section into the appropriate module under `context/`. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source (`CLAUDE.md` becomes a pointer in Step 10 regardless).
 - **Incremental** — `context/` already exists with exodia markers. Jump to the *Incremental re-run* section at the bottom.
 
 ### Step 2 — Scan the repo
@@ -101,21 +101,15 @@ Use `AskUserQuestion` with one question: "Here's the proposed category set: [lis
 
 ### Step 4 — Existing-file merge (Merge mode only)
 
-If preflight classified as Merge:
+If preflight classified as Merge (the user already granted permission in Step 1):
 
-1. Pick the merge source:
-   - If `AGENTS.md` exists (with or without `CLAUDE.md`), it is the source. Parse it.
+1. Pick the parse source:
+   - If `AGENTS.md` exists (with or without `CLAUDE.md`), it is the source.
    - If only `CLAUDE.md` exists, parse that.
 2. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<source-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
 3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
 4. Present the mapping table via `AskUserQuestion` (or a numbered prompt if too many rows for four options). Let the user reassign rows.
-5. **Back up every pre-existing file that Step 8 or Step 10 will overwrite.** Both `AGENTS.md` and `CLAUDE.md` must be backed up if they exist, since Step 8 rewrites `AGENTS.md` and Step 10 may replace `CLAUDE.md` with a pointer file. For each existing file:
-   ```bash
-   cp "$TARGET/AGENTS.md"  "$TARGET/AGENTS.md.pre-exodia.bak"   # if present
-   cp "$TARGET/CLAUDE.md"  "$TARGET/CLAUDE.md.pre-exodia.bak"   # if present
-   ```
-   Skip a `cp` only when the file does not exist. Do **not** skip a backup just because that file is not the parse source — Step 8/10 still touch it.
-6. Carry the accepted mapping into Step 6 as **seed content** for each category draft.
+5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied — the original file will be replaced by Step 8 (router) and, if it was `CLAUDE.md`, by a pointer at Step 10. No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `context/`) rather than destroyed.
 
 ### Step 5 — Initialize structure
 
