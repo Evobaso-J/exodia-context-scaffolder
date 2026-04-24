@@ -26,6 +26,20 @@ if [[ ! -d "$TARGET" ]]; then
   exit 66
 fi
 
+# Reject category names that could escape $TARGET/context/ or otherwise
+# produce surprising paths. Allow: lowercase letters, digits, dashes,
+# underscores. Must start with a letter. This covers the core set
+# (architecture, patterns, ...) and the documented optional set
+# (mobile, workspace, data, infra) while refusing "../etc",
+# "/abs/path", "foo/bar", "", and whitespace.
+category_re='^[a-z][a-z0-9_-]*$'
+for c in "${CATEGORIES[@]}"; do
+  if [[ ! "$c" =~ $category_re ]]; then
+    echo "error: invalid category name: '$c' (must match $category_re)" >&2
+    exit 65
+  fi
+done
+
 mkdir -p "$TARGET/context"
 
 core_categories=(architecture patterns domain operations debugging)
