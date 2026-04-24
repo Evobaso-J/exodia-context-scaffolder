@@ -97,7 +97,7 @@ Then, based on `$SCAN` and `$SKILL_DIR/heuristics/detectors.md`, compute optiona
 | ML/data stack detected | `data/` |
 | Infra-as-code detected | `infra/` |
 
-Use `AskUserQuestion` with one question: "Here's the proposed category set: [list]. OK to proceed?" Offer options: *accept*, *rename one*, *drop non-core*, *add custom*. If the user wants changes, iterate until they confirm. Never drop the five canonical categories — they are the minimum.
+Use `AskUserQuestion` with one question: "Here's the proposed category set: [list]. OK to proceed?" Offer options: *accept*, *drop non-core*, *add custom*. If the user wants changes, iterate until they confirm. The five canonical categories cannot be renamed or dropped — `init_structure.sh` validates their presence by literal name.
 
 ### Step 4 — Existing-file merge (Merge mode only)
 
