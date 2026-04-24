@@ -116,12 +116,21 @@ Entries use the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` (sortabl
 
 **Optional Stop hook** (Claude Code only)
 
-If the target repo runs on Claude Code, exodia offers to install a `Stop` hook that fires at the end of every agent turn. It prints a short stderr reminder ("walk AGENTS.md §Self-Update Rules; if the turn produced a signal, append now") and exits 0. Non-blocking, no file writes, no network. Installed files:
+The prose self-update rules above work on their own. The hook exists because prose rules are easy to forget mid-task: agents finish a bug fix, hand back to the user, and the gotcha never gets logged. A `Stop` hook fires on every turn end and gives the agent one last nudge before it yields.
+
+What happens when the hook is installed:
+
+1. **Trigger**: Claude Code runs the hook every time the agent finishes a turn (stops and returns control to the user).
+2. **Action**: the hook script writes a short reminder to stderr listing each self-update signal and its target file (gotcha, playbook, ADR, review, glossary, variant).
+3. **Effect on the agent**: Claude Code forwards that stderr text back to the agent as stop-event context. The agent re-reads §Self-Update Rules in `AGENTS.md` and, if the turn actually produced a signal, appends the corresponding entry before yielding.
+4. **Guarantees**: the hook `exit 0`s unconditionally. It cannot fail a turn, cancel in-flight work, edit files, or make network calls. Its only side effect is the stderr message.
+
+Installed files:
 
 - `.claude/hooks/exodia-stop-reminder.sh`: the 25-line reminder script, with `{{CONTEXT_DIR}}` substituted to your chosen directory name.
 - `.claude/settings.json`: the hook is registered under `hooks.Stop`. exodia merges into an existing file rather than replacing, and refuses to touch a malformed settings shape.
 
-To disable: delete the hook script and remove the matching entry from `settings.json`. The prose self-update rules work without the hook; the hook just makes the reminder more insistent.
+To disable: delete the hook script and remove the matching entry from `settings.json`.
 
 ## Credits
 
