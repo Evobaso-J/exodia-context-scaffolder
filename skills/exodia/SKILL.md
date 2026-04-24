@@ -183,18 +183,20 @@ If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}
 
 ### Step 10 — Emit agent pointer files
 
-Run:
+Every agent runtime has its own conventions for where top-level instructions live (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`, something custom, or nothing at all). The scaffolder does not ship a hardcoded list — the target repo picks.
 
-```bash
-bash "$SKILL_DIR/scripts/symlink_agents.sh" "$TARGET" <space-separated-agent-tools>
-```
+Flow:
 
-Pass the detected agent list from `$SCAN` (e.g. `claude cursor windsurf copilot`). The script:
+1. From `$SCAN`, note any agent-integration files already present (`.claude/`, `.cursor/`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`, etc.). Mention them in the question prose as *hints only*.
+2. `AskUserQuestion`: *"Which pointer files should point to `AGENTS.md`? Provide one or more repo-relative paths (e.g. `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, or any custom path). Leave empty to skip this step."* Do not preselect a known-runtime list — the user knows their own setup.
+3. For each path the user supplies, run:
 
-- Creates `CLAUDE.md` as a symlink → `AGENTS.md` (or a one-line pointer on filesystems that don't support symlinks)
-- Does the same for `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md` as requested
+   ```bash
+   bash "$SKILL_DIR/scripts/symlink_agents.sh" "$TARGET" "<pointer-path>" [<pointer-path> ...]
+   ```
 
-Ask the user first which pointer files to emit — don't assume all. Default: only the ones whose agent integrations were detected in `$SCAN`.
+   The script accepts one or more literal paths. Each becomes a symlink back to `AGENTS.md` (or a one-line pointer file on filesystems without symlink support). Paths must not contain `..` segments and must not be absolute.
+4. If the user provides no paths, skip this step entirely.
 
 ### Step 11 — Optional Stop hook install
 

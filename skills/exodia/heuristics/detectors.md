@@ -25,16 +25,7 @@ The canonical five are a strong default, not an enforced minimum. Users may drop
 
 ## Agent-integration detection (separate from categories)
 
-Used for the symlink step, not for categories:
-
-| Present | Pointer file |
-| ------- | ------------ |
-| `.claude/` dir or `.claude.json` | `CLAUDE.md` |
-| `.cursor/` dir or existing `.cursorrules` | `.cursorrules` |
-| `.windsurfrules` | `.windsurfrules` |
-| `.github/copilot-instructions.md` | `.github/copilot-instructions.md` |
-
-If none detected, default: emit only `CLAUDE.md`. User can override via the symlink-step prompt.
+The Explore scan reports any agent-integration files present at the repo root (e.g. `.claude/`, `.cursor/`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`). These are surfaced in Step 10 as *hints* so the user knows what already exists — nothing is auto-emitted. The user supplies the final list of pointer paths (any repo-relative path) or skips the step entirely. The scaffolder does not assume a canonical agent-runtime registry; each target repo declares its own pointers.
 
 ## Lint/test/typecheck detection
 
