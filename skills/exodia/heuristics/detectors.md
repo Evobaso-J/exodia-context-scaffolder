@@ -1,0 +1,57 @@
+# Category-tweak detectors
+
+How `/exodia` decides which optional categories to propose, beyond the fixed 5 (architecture, patterns, domain, operations, debugging).
+
+The Explore subagent reports which triggers fire. Apply this table verbatim.
+
+## Core category keeps
+
+`operations/` is **always kept**. Even a single-environment, single-tenant repo has config, scripts, and deploy concerns worth documenting. If nothing variant-specific exists yet, the file stays thin — that is fine.
+
+## Optional adds
+
+| Trigger (any of) | Add category | Template |
+| ---------------- | ------------ | -------- |
+| `package.json` deps include one of: `react-native`, `expo`, `@react-native-*` • Top-level `ios/` + `android/` dirs • Presence of `*.swift`, `*.kt`, `*.xcodeproj` • `pubspec.yaml` + `lib/` with Dart files | `mobile/` | `templates/optional/mobile/MOBILE.md.tmpl` |
+| `pnpm-workspace.yaml` • `turbo.json` • `nx.json` • `lerna.json` • `apps/` + `packages/` dirs with separate `package.json` in each | `workspace/` | `templates/optional/workspace/WORKSPACE.md.tmpl` |
+| Deps include one of: `torch`, `tensorflow`, `jax`, `scikit-learn`, `pandas`, `numpy` with training code • Presence of `notebooks/`, `models/`, `data/` directories • `.ipynb` files in tracked paths • `dvc.yaml` | `data/` | `templates/optional/data/DATA.md.tmpl` |
+| `*.tf` files • `terraform/` dir • `helm/` dir with `Chart.yaml` • `k8s/` or `kustomize/` dirs • `cdk.json` • `pulumi.yaml` • `cloudformation/` | `infra/` | `templates/optional/infra/INFRA.md.tmpl` |
+
+## Propose, don't impose
+
+After computing adds, present the full proposed set to the user with `AskUserQuestion`. The user may:
+
+- Accept as proposed
+- Drop optional categories they don't want
+- Rename any category (including core) — the internal directory name follows the user's choice
+- Add a custom category not in the table (skill must then ask for a short purpose statement and scaffold an empty L2 stub with no template content)
+
+The five canonical categories cannot be dropped. They are the minimum context envelope.
+
+## Agent-integration detection (separate from categories)
+
+Used for the symlink step, not for categories:
+
+| Present | Pointer file |
+| ------- | ------------ |
+| `.claude/` dir or `.claude.json` | `CLAUDE.md` |
+| `.cursor/` dir or existing `.cursorrules` | `.cursorrules` |
+| `.windsurfrules` | `.windsurfrules` |
+| `.github/copilot-instructions.md` | `.github/copilot-instructions.md` |
+
+If none detected, default: emit only `CLAUDE.md`. User can override via the symlink-step prompt.
+
+## Lint/test/typecheck detection
+
+Scan for commands — used to decide whether to insert the `lint-check.md` rule and to populate its placeholder.
+
+| File | Look for |
+| ---- | -------- |
+| `package.json` | Keys under `scripts` matching `/^(lint|test|type-?check|tsc|eslint|prettier|format)/` |
+| `pyproject.toml` | `[tool.poetry.scripts]`, `[tool.pdm.scripts]`, `[project.scripts]`; tools in `dependencies` like `ruff`, `mypy`, `pytest`, `black` |
+| `Gemfile` | `rubocop`, `rspec`, `minitest` entries; `Rakefile` task names |
+| `Makefile` | Top-level targets `lint`, `test`, `typecheck`, `check` |
+| `go.mod` + `Makefile` | `go test`, `go vet`, `staticcheck` targets |
+| `Cargo.toml` + Makefile/xtask | `cargo test`, `cargo clippy`, `cargo fmt --check` |
+
+If at least one is detected, insert `rules/conditional/lint-check.md` into the generated `AGENTS.md` and substitute the detected commands into the `{{LINT_COMMANDS}}` placeholder as a comma-separated list.

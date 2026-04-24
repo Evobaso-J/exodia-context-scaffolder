@@ -1,0 +1,1 @@
+- **Stop-hook failures are blockers.** The committed `Stop` hook in `.claude/settings.json` runs end-of-turn checks. If it fails, diagnose and fix the underlying issue in the same turn before handing back — never report the failure and stop. The output must be made green.

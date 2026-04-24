@@ -1,0 +1,38 @@
+# Architecture
+
+<!-- exodia:section:intro -->
+{{ONE_LINE_ARCHITECTURAL_THESIS}}
+
+## Entry Points & Routing
+
+<!-- exodia:section:routing -->
+{{HOW_ROUTES_RESOLVE — file-based, config-based, convention-based. Cite the router file(s).}}
+
+### Key Files
+
+- {{LIST_KEY_ROUTING_FILES}}
+
+## Modules & Boundaries
+
+<!-- exodia:section:modules -->
+{{WHAT_ARE_THE_MAJOR_MODULES — internal packages, domain boundaries, shared libs. One line per module.}}
+
+## State Management
+
+<!-- exodia:section:state -->
+{{WHICH_STATE_LIBRARY, where stores/reducers/contexts live, any notable conventions.}}
+
+## Build & Bundle
+
+<!-- exodia:section:build -->
+{{BUILD_TOOL, bundling strategy, manual chunks or code-splitting notes. Cite config.}}
+
+## Runtime Model
+
+<!-- exodia:section:runtime -->
+{{SSR_CSR_HYBRID, server runtime if any, how data flows from server to client.}}
+
+## L3 Data
+
+<!-- exodia:section:l3 -->
+- `decisions.jsonl` — Architecture Decision Records for non-obvious choices.

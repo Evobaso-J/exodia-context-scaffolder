@@ -1,0 +1,42 @@
+# AGENTS.md
+
+<!-- exodia:section:overview -->
+{{ONE_PARAGRAPH_PROJECT_OVERVIEW}}
+
+## Commands
+
+<!-- exodia:section:commands -->
+Check `{{MANIFEST_FILE}}` for scripts. {{LINT_COMMAND_POLICY}}
+
+## Context Router
+
+<!-- exodia:section:router -->
+Route by task type. Read the relevant L2 module, then load L3 data (`.jsonl` / `.yaml`) only when needed. **Max 2 hops.**
+
+| Task type | Load |
+| --------- | ---- |
+{{ROUTER_ROWS}}
+
+## Behavioral Rules
+
+<!-- exodia:section:rules -->
+{{RULES_LIST}}
+
+## Self-Update Rules
+
+<!-- exodia:section:self-update -->
+{{SELF_UPDATE_BLOCK}}
+
+## Quick Action Table
+
+<!-- exodia:section:quick-actions -->
+| Developer says | Action sequence |
+| -------------- | --------------- |
+{{QUICK_ACTION_ROWS}}
+
+## Context Structure
+
+<!-- exodia:section:structure -->
+```text
+{{CONTEXT_TREE}}
+```
