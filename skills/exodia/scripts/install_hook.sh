@@ -58,15 +58,43 @@ from pathlib import Path
 path = Path(sys.argv[1])
 data = json.loads(path.read_text(encoding="utf-8"))
 
+if not isinstance(data, dict):
+    print(
+        f"error: {path} top level is {type(data).__name__}, expected object. "
+        "Refusing to merge.",
+        file=sys.stderr,
+    )
+    sys.exit(65)
+
 hooks = data.setdefault("hooks", {})
-stop_entries = hooks.setdefault("Stop", [])
+if not isinstance(hooks, dict):
+    print(
+        f"error: {path} 'hooks' is {type(hooks).__name__}, expected object. "
+        "Refusing to merge — fix the settings shape manually.",
+        file=sys.stderr,
+    )
+    sys.exit(65)
+
+stop_entries = hooks.get("Stop")
+if stop_entries is None:
+    stop_entries = []
+    hooks["Stop"] = stop_entries
+elif not isinstance(stop_entries, list):
+    print(
+        f"error: {path} 'hooks.Stop' is {type(stop_entries).__name__}, "
+        "expected list. Refusing to merge — the Claude Code settings schema "
+        "requires an array here. Fix manually and re-run.",
+        file=sys.stderr,
+    )
+    sys.exit(65)
 
 command = ".claude/hooks/exodia-stop-reminder.sh"
 
-# Flatten and check for an existing entry referencing our command.
 def already_registered(entries):
     for entry in entries:
-        for h in entry.get("hooks", []) if isinstance(entry, dict) else []:
+        if not isinstance(entry, dict):
+            continue
+        for h in entry.get("hooks", []):
             if isinstance(h, dict) and h.get("command") == command:
                 return True
     return False
