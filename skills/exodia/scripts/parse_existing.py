@@ -14,8 +14,11 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
+
+H2_RE = re.compile(r"^##(?!#)\s+(.*)$")
 
 
 def split(text: str) -> list[dict[str, str]]:
@@ -25,12 +28,12 @@ def split(text: str) -> list[dict[str, str]]:
 
     for raw_line in text.splitlines():
         stripped = raw_line.lstrip()
-        if stripped.startswith("## ") and not stripped.startswith("### "):
-            # Flush previous section.
+        match = H2_RE.match(stripped)
+        if match:
             body = "\n".join(current_lines).strip()
             if body or current_heading != "__lede__":
                 sections.append({"heading": current_heading, "body": body})
-            current_heading = stripped[3:].strip()
+            current_heading = match.group(1).strip()
             current_lines = []
         else:
             current_lines.append(raw_line)

@@ -11,7 +11,7 @@
 set -euo pipefail
 
 cat >&2 <<'EOF'
-[exodia] Before ending: walk context/AGENTS.md §Self-Update Rules.
+[exodia] Before ending: walk AGENTS.md §Self-Update Rules.
 If the turn produced any of these signals, append an entry NOW:
   • new bug root cause        → context/debugging/playbooks.jsonl
   • new gotcha / footgun       → context/debugging/gotchas.jsonl
