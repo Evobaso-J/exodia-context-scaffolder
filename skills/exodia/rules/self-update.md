@@ -18,7 +18,7 @@ The context files must stay up to date with what the team learns. After completi
 1. **Read the target file first** — check for duplicates or entries that should be updated instead of duplicated.
 2. **Branch-scoped dedup.** Check the current branch (`git branch --show-current`). If an entry on the same topic was added on the **current branch** (check with `git diff <default-branch> -- <file>`), **replace it in-place** instead of appending. A branch is a unit of work — it should produce one entry per topic, not one per iteration or conversation. Once an entry is merged, it is settled and should not be overwritten — only superseded by a new entry on a new branch if the understanding changes.
 3. **Use the existing schema** — every `.jsonl` file has a `_schema` line. Match it exactly. Do not invent fields.
-4. **Generate the ID** — format: `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` using the current date/time. When replacing an entry per rule 2, keep the original ID.
+4. **Generate the ID** — format: `{type}_{YYYYMMDD}_{HHMMSS}_{8hex}` using the current date/time. The 8-hex suffix is random (e.g. via `openssl rand -hex 4` or `python3 -c 'import secrets; print(secrets.token_hex(4))'`). When replacing an entry per rule 2, keep the original ID.
 5. **Append, don't rewrite** — add new lines at the end of `.jsonl` files. For `.md` and `.yaml` files, edit the relevant section. Exception: see rule 2 — entries added on the current branch are mutable until merged.
 6. **Keep entries atomic** — one insight per entry. Don't bundle multiple gotchas into one.
 7. **Be concise** — write for a developer who will read this months later without the conversation context.

@@ -169,7 +169,7 @@ Ask the user whether to seed L3 files from the codebase:
 - `gotchas.jsonl`: scan for `TODO`, `FIXME`, `HACK`, `XXX`, `WARNING` comments. Group by directory/area. Present a trimmed candidate list and let the user approve a subset.
 - `decisions.jsonl`: look for `docs/adr/`, `docs/decisions/`, `ARCHITECTURE.md` headings with decision language. Present candidates.
 
-If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` where `{type}` is `gotcha`, `pb`, `adr`, or `rv`.
+If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{8hex}` where `{type}` is `gotcha`, `pb`, `adr`, or `rv`.
 
 ### Step 10 — Emit agent pointer files
 
