@@ -101,7 +101,18 @@ The emitted `AGENTS.md` ships with two layers of reinforcement so the context ke
 
 **Self-update rules** (always embedded)
 
-Every emitted `AGENTS.md` carries a signal → target-file table: bug root cause → `debugging/playbooks.jsonl`, footgun → `debugging/gotchas.jsonl`, design decision → `architecture/decisions.jsonl`, PR review lesson → `patterns/reviews.jsonl`, clarified term → `domain/glossary.yaml`, variant-specific behavior → `operations/variants.yaml`. Entries use the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` (sortable, collision-free). **Branch-scoped dedup**: a same-topic entry added on the current branch is replaced in-place rather than duplicated; once merged, entries are settled and only superseded by a new entry on a new branch. Agents don't ask permission; the user can always revert via git.
+Every emitted `AGENTS.md` carries a signal-to-target-file table so future sessions know where new knowledge goes:
+
+| Signal during a turn | Append to |
+| -------------------- | --------- |
+| Bug root cause | `debugging/playbooks.jsonl` |
+| Footgun / pitfall | `debugging/gotchas.jsonl` |
+| Architecture decision | `architecture/decisions.jsonl` |
+| PR review lesson | `patterns/reviews.jsonl` |
+| Clarified domain term | `domain/glossary.yaml` |
+| Variant-specific behavior | `operations/variants.yaml` |
+
+Entries use the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` (sortable, collision-free). **Branch-scoped dedup**: a same-topic entry added on the current branch is replaced in-place rather than duplicated; once merged, entries are settled and only superseded by a new entry on a new branch. Agents don't ask permission; the user can always revert via git.
 
 **Optional Stop hook** (Claude Code only)
 
