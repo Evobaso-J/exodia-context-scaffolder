@@ -1,23 +1,23 @@
-The context files must stay up to date with what the team learns. After completing a task, check whether anything you discovered or were told should be captured. **Do not ask the user for permission — just do it.** The user can always revert via git.
+The context files are **shared, living documentation** about the codebase — not personal memory. After completing a task, check whether any codebase fact, decision, or pattern — discovered or taught — should be logged for future sessions. Write in objective, third-person terms (the team decided X because Y), not first-person recollection (I learned X). **Do not ask the user for permission — just do it.** The user can always revert via git.
 
 ### When to update
 
 | Signal during conversation | Target file | What to write |
 | -------------------------- | ----------- | ------------- |
-| User corrects a wrong assumption about the codebase | L2 `.md` file for that area | Update the incorrect section |
-| You discover a non-obvious bug root cause | `debugging/playbooks.jsonl` | New playbook entry |
-| User warns "don't do X" or "watch out for Y" | `debugging/gotchas.jsonl` | New gotcha entry |
-| A new architecture/design decision is made | `architecture/decisions.jsonl` | New ADR entry |
-| A PR review surfaces a new check (broke in prod, near-miss) | `patterns/reviews.jsonl` | New review entry |
-| An API contract changes or is deprecated | `patterns/reviews.jsonl` | New entry tagged `migration` with `old_pattern` / `new_pattern` |
-| A new variant-specific behavior is discovered | `operations/variants.yaml` | New entry under the relevant variant |
-| A domain term is clarified or a new entity appears | `domain/glossary.yaml` | New or updated term |
+| Codebase assumption corrected by user or by evidence | L2 `.md` file for that area | Update the incorrect section |
+| Bug pattern identified with non-obvious root cause | `debugging/playbooks.jsonl` | New playbook entry |
+| Pitfall or footgun confirmed ("don't do X" / "watch out for Y") | `debugging/gotchas.jsonl` | New gotcha entry |
+| Architecture or design decision taken by the team | `architecture/decisions.jsonl` | New ADR entry |
+| PR review surfaces new check (prod break, near-miss) | `patterns/reviews.jsonl` | New review entry |
+| API contract changes or deprecated | `patterns/reviews.jsonl` | New entry tagged `migration` with `old_pattern` / `new_pattern` |
+| Variant-specific behavior confirmed | `operations/variants.yaml` | New entry under the relevant variant |
+| Domain term clarified or new entity appears | `domain/glossary.yaml` | New or updated term |
 
 ### How to update
 
 1. **Read the target file first** — check for duplicates or entries that should be updated instead of duplicated.
 2. **Branch-scoped dedup.** Check the current branch (`git branch --show-current`). If an entry on the same topic was added on the **current branch** (check with `git diff <default-branch> -- <file>`), **replace it in-place** instead of appending. A branch is a unit of work — it should produce one entry per topic, not one per iteration or conversation. Once an entry is merged, it is settled and should not be overwritten — only superseded by a new entry on a new branch if the understanding changes.
-3. **Use the existing schema** — every `.jsonl` file has a `_schema` line. Match it exactly. Do not invent fields.
+3. **Use the existing schema** — every `.jsonl` file starts with a `_schema` line (JSON object with `_schema`, `_version`, `_description`, `_fields`). Read `_fields` to know which keys an entry must carry. Match field names exactly. Do not invent fields. If the schema must evolve, bump `_version` in the first line before adding entries with the new shape.
 4. **Generate the ID** — format: `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` using the current date/time. When replacing an entry per rule 2, keep the original ID.
 5. **Append, don't rewrite** — add new lines at the end of `.jsonl` files. For `.md` and `.yaml` files, edit the relevant section. Exception: see rule 2 — entries added on the current branch are mutable until merged.
 6. **Keep entries atomic** — one insight per entry. Don't bundle multiple gotchas into one.
@@ -30,3 +30,14 @@ The context files must stay up to date with what the team learns. After completi
 - Ephemeral debugging steps that only apply to this session.
 - User preferences about agent behavior (those belong in `.claude/` or equivalent settings, not here).
 - Information that can be derived from reading the code or git history.
+
+### What NOT to capture (codebase-specific)
+
+These rot fast — pointer only, never hardcode:
+
+- Dependency versions, ports, env-var values, API endpoints, hostnames — reference the source file (`see package.json`, `defined in .env.example`).
+- Function signatures, type definitions, class hierarchies, DB schemas — derivable by reading code.
+- Git-derivable facts (commit author, date, PR number, blame line) — use `git log` / `git blame`.
+- Patterns already obvious from `package.json` / lockfile / `pyproject.toml` dependencies ("we use Redux" when `redux` is in deps).
+- Test names, file counts, directory listings — rerun the command.
+- One-session workarounds that will be gone next branch — unless the fix teaches a durable rule.
