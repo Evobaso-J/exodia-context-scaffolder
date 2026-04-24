@@ -23,10 +23,6 @@ After computing adds, present the full proposed set to the user with `AskUserQue
 
 The canonical five are a strong default, not an enforced minimum. Users may drop any that do not apply to the target (e.g. a pure library often has no `operations/`; a data pipeline may not need `patterns/`). `init_structure.sh` validates that each requested name matches `^[a-z][a-z0-9_-]*$`, so the name may be any path-safe lowercase segment.
 
-## Agent-integration detection (separate from categories)
-
-The Explore scan reports any agent-integration files present at the repo root (e.g. `.claude/`, `.cursor/`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`). These are surfaced in Step 10 as *hints* so the user knows what already exists — nothing is auto-emitted. The user supplies the final list of pointer paths (any repo-relative path) or skips the step entirely. The scaffolder does not assume a canonical agent-runtime registry; each target repo declares its own pointers.
-
 ## Lint/test/typecheck detection
 
 Scan for commands — used to decide whether to insert the `lint-check.md` rule and to populate its placeholder.
