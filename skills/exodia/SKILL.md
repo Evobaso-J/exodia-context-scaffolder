@@ -140,6 +140,14 @@ Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1
 
 Accept any value matching `^[a-z._-][a-z0-9._-]*$` (single safe filesystem segment, no slashes, no `..`, no `.` alone). Store as `$CONTEXT_DIR`. Default to `context` if the user accepts the default. Validate the answer before continuing.
 
+**Collision check.** A directory with a common name like `docs/`, `knowledge/`, or `ai/` may already exist in the target repo for reasons unrelated to exodia (user-authored docs, generated artifacts, unrelated tooling). After the user picks a name, check `$TARGET/$CONTEXT_DIR`:
+
+- If the directory does not exist, or exists and is empty: proceed.
+- If it exists with files that already carry `<!-- exodia:section:` markers: Step 1 misclassified the mode. Switch to Incremental treatment of that directory and skip the rest of Fresh/Merge scaffolding.
+- If it exists with files but none carry exodia markers (pre-existing non-exodia content): warn the user concretely — list a few of the existing top-level entries — and `AskUserQuestion`: *proceed (exodia will add `<category>/…` subdirectories alongside the existing content — templates are only written to fresh paths, existing files are left untouched)*, *pick a different name*, *abort*. On "different name", re-ask the Step 3a question; on "abort", stop the skill cleanly.
+
+The scaffolder never overwrites existing files (`init_structure.sh` skips any destination that already exists), but a shared top-level directory still entangles the exodia tree with unrelated content. The consent step makes that entanglement explicit.
+
 ### Step 4 — Existing-file merge (Merge mode only)
 
 If preflight classified as Merge (the user already granted permission in Step 1):
