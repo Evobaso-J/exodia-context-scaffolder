@@ -234,4 +234,4 @@ When preflight detects an existing exodia setup:
 
 ## Tone for drafts
 
-Match the donor style from the WeRoad repo (the original instance this system was extracted from): terse, factual, heavy use of tables and bullet lists, file citations inline, no marketing prose. Read `$SKILL_DIR/templates/*/*.tmpl` before drafting to lock the voice.
+Drafts must be terse, factual, table- and bullet-heavy, with inline file citations and no marketing prose. Read `$SKILL_DIR/templates/*/*.tmpl` before drafting to lock the voice.
