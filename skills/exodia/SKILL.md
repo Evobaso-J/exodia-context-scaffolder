@@ -93,7 +93,7 @@ Delegate the initial scan to an `Explore` subagent with **medium** thoroughness 
 >
 > 1. **Stack**: languages, frameworks, build tool, test tool, package manager. Cite files.
 > 2. **Architecture summary**: routing style, state management, module layout, SSR/CSR split, backend/frontend divide. One paragraph.
-> 3. **Domain signals**: top-level entities or models you can name (from `models/`, `entities/`, `schemas/`, `prisma/`, `openapi`, etc.).
+> 3. **Domain signals**: top-level entities or models you can name. Look wherever the repo keeps its domain objects — schema files, model classes, type definitions, or a dedicated directory.
 > 4. **Operations signals**: i18n tooling if any framework-specific lib is present (locale files, translation dirs), multi-env config (env files, `deploy/`, k8s, helm, terraform), multi-tenant patterns, feature-flag tools.
 > 5. **Category-tweak triggers** — report presence/absence of each:
 >    - i18n / multi-market
