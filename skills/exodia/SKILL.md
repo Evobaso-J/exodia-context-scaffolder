@@ -94,7 +94,7 @@ Delegate the initial scan to an `Explore` subagent with **medium** thoroughness 
 > 1. **Stack**: languages, frameworks, build tool, test tool, package manager. Cite files.
 > 2. **Architecture summary**: routing style, state management, module layout, SSR/CSR split, backend/frontend divide. One paragraph.
 > 3. **Domain signals**: top-level entities or models you can name (from `models/`, `entities/`, `schemas/`, `prisma/`, `openapi`, etc.).
-> 4. **Operations signals**: i18n presence (i18n dirs, vue-i18n / next-intl / react-i18next / i18next deps, locale files), multi-env config (env files, `deploy/`, k8s, helm, terraform), multi-tenant patterns, feature-flag tools.
+> 4. **Operations signals**: i18n tooling if any framework-specific lib is present (locale files, translation dirs), multi-env config (env files, `deploy/`, k8s, helm, terraform), multi-tenant patterns, feature-flag tools.
 > 5. **Category-tweak triggers** — report presence/absence of each:
 >    - i18n / multi-market
 >    - mobile (React Native, Expo, Flutter, iOS/Android dirs)
@@ -232,7 +232,7 @@ Flow:
 
 ### Step 11 — Optional Stop hook install
 
-If the user is on Claude Code (detect via `$TARGET/.claude/` presence or ask), offer:
+Skip this step entirely if the target repo is not on Claude Code — the Stop hook is a Claude-Code-specific lifecycle feature and has no counterpart on other runtimes. If the user is on Claude Code (detect via `$TARGET/.claude/` presence or ask), offer:
 
 > "Install a Claude Code `Stop` hook that reminds the agent to apply Self-Update Rules at turn end? It only augments the prose rules already in AGENTS.md."
 
