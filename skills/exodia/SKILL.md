@@ -142,6 +142,16 @@ Walk each L2 draft with the user. For each `##` section:
 
 Then `Write` the finalized L2 file to `$TARGET/context/<category>/<CATEGORY>.md`.
 
+### Step 7b — Record the baseline
+
+After **all** L2 files are written (i.e. after the last category's Write in Step 7), snapshot the section-level hashes so future incremental re-runs can detect user edits deterministically:
+
+```bash
+python3 "$SKILL_DIR/scripts/baseline.py" record "$TARGET/context"
+```
+
+This writes `$TARGET/.exodia/baselines.json` with `sha256(body)` per `<!-- exodia:section:<id> -->` marker. The file is small (one hash per section) and must be committed alongside the `context/` tree. Without it, the incremental re-run in Step 11/Incremental cannot tell exodia's draft from a user edit and will therefore leave everything alone.
+
 ### Step 8 — Emit the AGENTS.md router
 
 Compose `$TARGET/AGENTS.md` from:
@@ -215,11 +225,19 @@ Print a short summary:
 When preflight detects an existing exodia setup:
 
 1. Re-run Step 2 (scan).
-2. For each L2 file, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
-3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker — if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
+2. For each L2 file, run the baseline comparator:
+   ```bash
+   python3 "$SKILL_DIR/scripts/baseline.py" compare "$TARGET/context" <relative-l2-path>
+   ```
+   It returns, per `<!-- exodia:section:<id> -->` marker, a status of `unedited`, `edited`, or `no-baseline`. The comparison is `sha256(body) == stored_hash`.
+
+   **If `$TARGET/.exodia/baselines.json` does not exist** (repo was scaffolded by a pre-baseline version of exodia): fall back to asking the user per section, or offer to seed a fresh baseline from the current on-disk content with `baseline.py record` (acknowledge that this freezes any existing user edits as "baseline" — so only run it on an unmodified scaffold).
+
+3. Fresh-draft *new* facts from the scan for every section. Propose updates only to sections with `status == "unedited"`. Sections with `status == "edited"` or `"no-baseline"` are left alone unless the user explicitly opts in.
 4. Show the proposed diffs via `AskUserQuestion` (accept / skip per section).
 5. Append to L3 files from the scan using the same Step 9 logic.
 6. Never overwrite `AGENTS.md` — only add missing rule snippets if conditions now apply (e.g. a Stop hook was added after initial scaffold).
+7. **Re-record the baseline** at the end of the re-run (`baseline.py record`) so the next re-run sees the freshly-accepted drafts as the new baseline rather than flagging them as edited.
 
 ---
 
