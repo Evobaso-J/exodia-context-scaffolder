@@ -51,7 +51,7 @@ ls -d "$TARGET/context" 2>/dev/null
 Classify into one of three modes:
 
 - **Fresh** — none of the above exist. Go to Step 2.
-- **Merge** — `AGENTS.md` or `CLAUDE.md` exists, but no `context/`. Existing file will be parsed and distributed. Continue to Step 2 normally; Step 5 handles the merge.
+- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no `context/`. Existing file(s) will be parsed and distributed. Continue to Step 2 normally; Step 4 handles the merge. If both exist, `AGENTS.md` is the merge source of truth (`CLAUDE.md` is treated as a secondary pointer) — both are backed up, but only `AGENTS.md` is parsed for sections.
 - **Incremental** — `context/` already exists with exodia markers. Jump to the *Incremental re-run* section at the bottom.
 
 ### Step 2 — Scan the repo
@@ -103,14 +103,19 @@ Use `AskUserQuestion` with one question: "Here's the proposed category set: [lis
 
 If preflight classified as Merge:
 
-1. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<existing-file-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
-2. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
-3. Present the mapping table via `AskUserQuestion` (or a numbered prompt if too many rows for four options). Let the user reassign rows.
-4. Back up the existing file:
+1. Pick the merge source:
+   - If `AGENTS.md` exists (with or without `CLAUDE.md`), it is the source. Parse it.
+   - If only `CLAUDE.md` exists, parse that.
+2. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<source-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
+3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
+4. Present the mapping table via `AskUserQuestion` (or a numbered prompt if too many rows for four options). Let the user reassign rows.
+5. **Back up every pre-existing file that Step 8 or Step 10 will overwrite.** Both `AGENTS.md` and `CLAUDE.md` must be backed up if they exist, since Step 8 rewrites `AGENTS.md` and Step 10 may replace `CLAUDE.md` with a pointer file. For each existing file:
    ```bash
-   cp "$TARGET/CLAUDE.md" "$TARGET/CLAUDE.md.pre-exodia.bak"  # or AGENTS.md
+   cp "$TARGET/AGENTS.md"  "$TARGET/AGENTS.md.pre-exodia.bak"   # if present
+   cp "$TARGET/CLAUDE.md"  "$TARGET/CLAUDE.md.pre-exodia.bak"   # if present
    ```
-5. Carry the accepted mapping into Step 6 as **seed content** for each category draft.
+   Skip a `cp` only when the file does not exist. Do **not** skip a backup just because that file is not the parse source — Step 8/10 still touch it.
+6. Carry the accepted mapping into Step 6 as **seed content** for each category draft.
 
 ### Step 5 — Initialize structure
 
