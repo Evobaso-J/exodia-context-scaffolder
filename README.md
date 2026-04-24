@@ -1,5 +1,11 @@
 # exodia-scaffolder
 
+<p align="center">
+  <img src="assets/exodia.webp" alt="Exodia, the Forbidden One" width="420">
+</p>
+
+<p align="center"><em>5 pieces. 5 modules of progressive disclosure. All we need to <strong>OBLITERATE</strong> token consumption.</em></p>
+
 > One-shot scaffolder that bootstraps durable, self-maintaining agent context for any codebase.
 
 `exodia` generates an `AGENTS.md` router and a `context/` tree tailored to your repo. The output is **agent-agnostic** — compatible with Claude Code, Cursor, Codex, Windsurf, and any tool that respects the [agents.md](https://agents.md) convention.
@@ -83,6 +89,10 @@ exodia-scaffolder/
 - Claude Code plugin marketplace submission
 - `npx exodia` CLI wrapper for CI / zero-dep invocation
 - Auto-diff of context/ against code on PR
+
+## Credits
+
+Shoulders of giants. This project is directly inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering — digital-brain-skill](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill)**, which pioneered the progressive-disclosure approach to agent context. `exodia-scaffolder` adapts those ideas into a one-shot, agent-agnostic scaffolder centered on five canonical modules.
 
 ## License
 
