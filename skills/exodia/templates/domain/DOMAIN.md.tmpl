@@ -1,29 +1,25 @@
 # Domain
 
 <!-- exodia:section:intro -->
-Business language, entities, and how they relate. Read this when a task involves business logic, models, or user-facing concepts.
-
-## Entities
-
-<!-- exodia:section:entities -->
-{{LIST_CORE_ENTITIES with a one-line definition each. Cite where they are defined (schema, models dir, OpenAPI, etc.).}}
-
-## Relationships
-
-<!-- exodia:section:relationships -->
-{{DIAGRAM_OR_BULLET_LIST showing how entities connect (1:n, m:n, aggregation, parent/child).}}
+Business language, user journeys, and rules. Read this when a task involves business behavior or user-facing flows. For entity structure and type sources, see `../architecture/` (the data-model section and `entities.yaml`). For terminology, see `glossary.yaml`.
 
 ## User Journey
 
 <!-- exodia:section:journey -->
 {{MAIN_USER_FLOW from entry to conversion/completion. Numbered steps, 1 line each.}}
 
-## Type System
+## Business Rules
 
-<!-- exodia:section:types -->
-{{WHERE_TYPES_LIVE — generated from OpenAPI, Prisma, protobuf, hand-written. How to import an entity type.}}
+<!-- exodia:section:rules -->
+{{CORE_BUSINESS_INVARIANTS that must hold. One line per rule. Cite where enforced (middleware, validator, DB trigger, etc.).}}
+
+## Domain Events
+
+<!-- exodia:section:events -->
+{{NAMED_DOMAIN_EVENTS emitted during user flows. When produced, who listens, side effects.}}
 
 ## L3 Data
 
 <!-- exodia:section:l3 -->
-- `glossary.yaml` — extended terminology and synonyms.
+- `glossary.yaml` — terminology and shared vocabulary.
+- See also `../architecture/entities.yaml` for entity structure and type sources.

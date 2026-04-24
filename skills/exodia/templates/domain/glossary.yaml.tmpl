@@ -1,15 +1,18 @@
-# Extended domain terminology
-# Add entries as the team clarifies meanings or introduces new concepts.
-# Each entry: definition (required), plus optional relationship / synonyms / notes.
+# Shared vocabulary.
+# Domain terms and concepts used across the codebase. Terminology only —
+# entity structure lives in ../architecture/entities.yaml.
+#
+# Each entry: definition (required), plus optional synonyms / notes.
 
-entities: {}
-  # example:
-  # order:
-  #   definition: A confirmed purchase that has completed checkout.
-  #   relationship: "belongs_to user; has_many line_items"
-
-concepts: {}
+terms: {}
   # example:
   # idempotency_key:
   #   definition: Client-supplied token that guarantees a mutation executes at most once.
+  #   synonyms: [request_id]
   #   notes: Required on all POST endpoints under /v2/.
+
+concepts: {}
+  # example:
+  # eventual_consistency:
+  #   definition: Reads may reflect stale state until replication settles.
+  #   notes: Applies to the read-replica pool; writes are strongly consistent.

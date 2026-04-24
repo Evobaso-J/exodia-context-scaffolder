@@ -11,7 +11,8 @@ The context files are **shared, living documentation** about the codebase — no
 | PR review surfaces new check (prod break, near-miss) | `patterns/reviews.jsonl` | New review entry |
 | API contract changes or deprecated | `patterns/reviews.jsonl` | New entry tagged `migration` with `old_pattern` / `new_pattern` |
 | Variant-specific behavior confirmed | `operations/variants.yaml` | New entry under the relevant variant |
-| Domain term clarified or new entity appears | `domain/glossary.yaml` | New or updated term |
+| Domain term or concept clarified | `domain/glossary.yaml` | New or updated term / concept |
+| Entity added, renamed, or its type source changes | `architecture/entities.yaml` | New or updated entity entry |
 
 ### How to update
 

@@ -1,0 +1,22 @@
+# Business-entity reference.
+# Structural definitions for the entities that carry business meaning in this codebase.
+# One entry per entity. Update when models, schemas, or generated-type sources change.
+#
+# Per-entry fields:
+#   definition   (required)  One-line business definition.
+#   defined_in   (required)  Path to source of truth (Prisma schema, OpenAPI file, model class).
+#   type_source  (optional)  Where generated types come from (e.g. "@prisma/client exports Order").
+#   relationships (optional) List of one-line relationship descriptions.
+#   invariants   (optional)  Business rules that always hold for this entity.
+
+entities: {}
+  # example:
+  # order:
+  #   definition: A confirmed purchase that has completed checkout.
+  #   defined_in: packages/schema/prisma/schema.prisma
+  #   type_source: "@prisma/client exports Order"
+  #   relationships:
+  #     - "belongs_to user"
+  #     - "has_many line_items"
+  #   invariants:
+  #     - "status cannot regress from 'completed' to 'pending'"
