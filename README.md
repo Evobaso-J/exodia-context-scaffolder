@@ -26,6 +26,18 @@ context/
 
 Agents read the router, pick the right module, and optionally load one data file. Max two hops. The router carries **self-update rules** that nudge future sessions to capture new gotchas, ADRs, and review lessons as the team works, so the context grows with the codebase instead of against it.
 
+## Install
+
+```bash
+git clone https://github.com/Evobaso-J/exodia-scaffolder ~/projects/exodia-scaffolder
+mkdir -p ~/.claude/skills
+ln -s ~/projects/exodia-scaffolder/skills/exodia ~/.claude/skills/exodia
+```
+
+Run `/exodia` in any repo. The skill takes over from there.
+
+> Plugin-marketplace distribution is planned. For now, the symlink install is the supported path.
+
 ## What you get
 
 - **Interactive scaffolder**: `/exodia` scans your repo, proposes categories, drafts each module section-by-section, and walks you through accept / edit / reject on every `##` heading.
@@ -47,18 +59,6 @@ The emitted tree is organized around a **max two-hop** load rule: router → L2 
 - **Pointer, don't hardcode**: drafts reference source files (`see package.json engines.node`, `defined in .env.example`) rather than copying values. Duplicated data rots; pointers survive edits.
 
 Deep-divers can read `skills/exodia/SKILL.md` for the full protocol.
-
-## Install
-
-```bash
-git clone https://github.com/Evobaso-J/exodia-scaffolder ~/projects/exodia-scaffolder
-mkdir -p ~/.claude/skills
-ln -s ~/projects/exodia-scaffolder/skills/exodia ~/.claude/skills/exodia
-```
-
-Run `/exodia` in any repo. The skill takes over from there.
-
-> Plugin-marketplace distribution is planned. For now, the symlink install is the supported path.
 
 ## Usage
 
@@ -101,7 +101,18 @@ The emitted `AGENTS.md` ships with two layers of reinforcement so the context ke
 
 **Self-update rules** (always embedded)
 
-Every emitted `AGENTS.md` carries a signal → target-file table: bug root cause → `debugging/playbooks.jsonl`, footgun → `debugging/gotchas.jsonl`, design decision → `architecture/decisions.jsonl`, PR review lesson → `patterns/reviews.jsonl`, clarified term → `domain/glossary.yaml`, variant-specific behavior → `operations/variants.yaml`. Entries use the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` (sortable, collision-free). **Branch-scoped dedup**: a same-topic entry added on the current branch is replaced in-place rather than duplicated; once merged, entries are settled and only superseded by a new entry on a new branch. Agents don't ask permission; the user can always revert via git.
+Every emitted `AGENTS.md` carries a signal-to-target-file table so future sessions know where new knowledge goes:
+
+| Signal during a turn | Append to |
+| -------------------- | --------- |
+| Bug root cause | `debugging/playbooks.jsonl` |
+| Footgun / pitfall | `debugging/gotchas.jsonl` |
+| Architecture decision | `architecture/decisions.jsonl` |
+| PR review lesson | `patterns/reviews.jsonl` |
+| Clarified domain term | `domain/glossary.yaml` |
+| Variant-specific behavior | `operations/variants.yaml` |
+
+Entries use the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` (sortable, collision-free). **Branch-scoped dedup**: a same-topic entry added on the current branch is replaced in-place rather than duplicated; once merged, entries are settled and only superseded by a new entry on a new branch. Agents don't ask permission; the user can always revert via git.
 
 **Optional Stop hook** (Claude Code only)
 
