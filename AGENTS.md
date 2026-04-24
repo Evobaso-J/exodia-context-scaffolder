@@ -21,6 +21,7 @@ Max 2 hops to any piece of information. Context grows with the codebase, not aga
 
 ```bash
 git clone https://github.com/Evobaso-J/exodia-scaffolder ~/projects/exodia-scaffolder
+mkdir -p ~/.claude/skills
 ln -s ~/projects/exodia-scaffolder/skills/exodia ~/.claude/skills/exodia
 ```
 
