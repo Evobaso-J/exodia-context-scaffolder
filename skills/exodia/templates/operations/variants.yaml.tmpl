@@ -1,4 +1,4 @@
-# Per-variant behavioral differences (markets, tenants, feature-flag cohorts).
+# Per-variant behavioral differences (any per-variant deviation from default behavior).
 # Populate as variants are introduced. Each entry captures only what differs from the default.
 #
 # Suggested shape — adapt as needed:
@@ -7,8 +7,7 @@
 #   default:
 #     notes: "Baseline behavior."
 #   <variant_key>:
-#     locale: <e.g. en-US>
-#     currency: <e.g. USD>
+#     <override_key>: <value>
 #     notes: "<what differs from default>"
 
 variants: {}

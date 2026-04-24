@@ -4,10 +4,6 @@ How `/exodia` decides which optional categories to propose, beyond the fixed 5 (
 
 The Explore subagent reports which triggers fire. Apply this table verbatim.
 
-## Core category keeps
-
-`operations/` is **always kept**. Even a single-environment, single-tenant repo has config, scripts, and deploy concerns worth documenting. If nothing variant-specific exists yet, the file stays thin — that is fine.
-
 ## Optional adds
 
 | Trigger (any of) | Add category | Template |
@@ -25,20 +21,11 @@ After computing adds, present the full proposed set to the user with `AskUserQue
 - Drop optional categories they don't want
 - Add a custom category not in the table (skill must then ask for a short purpose statement and scaffold an empty L2 stub with no template content)
 
-The five canonical categories cannot be dropped or renamed. They are the minimum context envelope, and `init_structure.sh` validates their presence by literal name. A future version may add aliasing, but today the internal directory names must match exactly.
+The canonical five are a strong default, not an enforced minimum. Users may drop any that do not apply to the target (e.g. a pure library often has no `operations/`; a data pipeline may not need `patterns/`). `init_structure.sh` validates that each requested name matches `^[a-z][a-z0-9_-]*$`, so the name may be any path-safe lowercase segment.
 
 ## Agent-integration detection (separate from categories)
 
-Used for the symlink step, not for categories:
-
-| Present | Pointer file |
-| ------- | ------------ |
-| `.claude/` dir or `.claude.json` | `CLAUDE.md` |
-| `.cursor/` dir or existing `.cursorrules` | `.cursorrules` |
-| `.windsurfrules` | `.windsurfrules` |
-| `.github/copilot-instructions.md` | `.github/copilot-instructions.md` |
-
-If none detected, default: emit only `CLAUDE.md`. User can override via the symlink-step prompt.
+The Explore scan reports any agent-integration files present at the repo root (e.g. `.claude/`, `.cursor/`, `.cursorrules`, `.windsurfrules`, `.github/copilot-instructions.md`). These are surfaced in Step 10 as *hints* so the user knows what already exists — nothing is auto-emitted. The user supplies the final list of pointer paths (any repo-relative path) or skips the step entirely. The scaffolder does not assume a canonical agent-runtime registry; each target repo declares its own pointers.
 
 ## Lint/test/typecheck detection
 

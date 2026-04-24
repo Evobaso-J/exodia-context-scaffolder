@@ -13,12 +13,12 @@ set -euo pipefail
 cat >&2 <<'EOF'
 [exodia] Before ending: walk AGENTS.md §Self-Update Rules.
 If the turn produced any of these signals, append an entry NOW:
-  • new bug root cause        → context/debugging/playbooks.jsonl
-  • new gotcha / footgun       → context/debugging/gotchas.jsonl
-  • new architecture decision  → context/architecture/decisions.jsonl
-  • new PR review lesson       → context/patterns/reviews.jsonl
-  • clarified domain term      → context/domain/glossary.yaml
-  • new variant behavior       → context/operations/variants.yaml
+  • new bug root cause        → {{CONTEXT_DIR}}/debugging/playbooks.jsonl
+  • new gotcha / footgun       → {{CONTEXT_DIR}}/debugging/gotchas.jsonl
+  • new architecture decision  → {{CONTEXT_DIR}}/architecture/decisions.jsonl
+  • new PR review lesson       → {{CONTEXT_DIR}}/patterns/reviews.jsonl
+  • clarified domain term      → {{CONTEXT_DIR}}/domain/glossary.yaml
+  • new variant behavior       → {{CONTEXT_DIR}}/operations/variants.yaml
 Branch-scoped dedup: if an entry on the same topic was added on the current branch,
 replace in-place (same ID). Do not ask permission — the user can revert via git.
 If nothing qualifies: skip.
