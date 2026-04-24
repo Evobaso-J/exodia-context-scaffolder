@@ -89,7 +89,7 @@ Store the returned scan as your working `$SCAN`.
 
 ### Step 3 — Propose categories
 
-Always include the five canonical categories:
+The **default** starter set is the five canonical categories:
 
 - `architecture/`
 - `patterns/`
@@ -106,7 +106,9 @@ Then, based on `$SCAN` and `$SKILL_DIR/heuristics/detectors.md`, compute optiona
 | ML/data stack detected | `data/` |
 | Infra-as-code detected | `infra/` |
 
-Use `AskUserQuestion` with one question: "Here's the proposed category set: [list]. OK to proceed?" Offer options: *accept*, *drop non-core*, *add custom*. If the user wants changes, iterate until they confirm. The five canonical categories cannot be renamed or dropped — `init_structure.sh` validates their presence by literal name.
+Use `AskUserQuestion`: "Here's the proposed category set: [list]. OK to proceed?" Offer options: *accept*, *drop any (core or optional)*, *add custom*. If the user wants changes, iterate until they confirm.
+
+The target repo picks the shape. Users may drop any canonical category that does not apply: a pure library may have no `operations/`, a data pipeline may have no `patterns/`, a CLI tool may have no `domain/`. `init_structure.sh` accepts any subset of category names matching `^[a-z][a-z0-9_-]*$` — the core set is a default, not an enforced minimum.
 
 ### Step 4 — Existing-file merge (Merge mode only)
 
@@ -156,9 +158,9 @@ Then `Write` the finalized L2 file to `$TARGET/context/<category>/<CATEGORY>.md`
 Compose `$TARGET/AGENTS.md` from:
 
 - `$SKILL_DIR/rules/universal.md` (always included)
-- `$SKILL_DIR/rules/conditional/operations-awareness.md` (always — operations is always present)
+- `$SKILL_DIR/rules/conditional/operations-awareness.md` *only if `operations/` is in the final category set*
 - `$SKILL_DIR/rules/conditional/lint-check.md` if scan detected any lint/test/typecheck scripts — substitute the detected commands into the snippet
-- `$SKILL_DIR/rules/self-update.md` (always — near the top)
+- `$SKILL_DIR/rules/self-update.md` (always — near the top). When composing the Self-Update Rules block, drop table rows whose target path is not in the final category set (e.g. drop the `operations/variants.yaml` row if `operations/` was dropped, drop the `domain/glossary.yaml` row if `domain/` was dropped).
 
 Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
