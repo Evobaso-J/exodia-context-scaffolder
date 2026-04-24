@@ -129,6 +129,7 @@ For each confirmed category, in order (architecture, patterns, domain, operation
 1. Read `$SKILL_DIR/templates/<category>/<CATEGORY>.md.tmpl` to see the section skeleton.
 2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words.
 3. Preserve the `<!-- exodia:section:<id> -->` markers — they drive incremental re-runs.
+4. **Never duplicate data that already lives in the repo.** Versions, ports, env names, paths, commands, config values, dependency lists, script names — all must be *referenced*, not copied. Write `see \`package.json\` \`engines.node\`` or `defined in \`.env.example\``, never the literal value. Duplicated data rots; pointers survive edits.
 
 Do **not** write the file to disk yet. Hold the draft in memory.
 
