@@ -1,41 +1,13 @@
 ## [0.1.0] - 2026-04-25
 
-### 🚀 Features
+Initial release of the `/exodia` skill scaffolder for Claude Code.
 
-- Initial /exodia skill scaffolder
+### Added
 
-### 🐛 Bug Fixes
-
-- Low-risk review findings (#4)
-- Close TOCTOU in symlink probe (#5)
-- Reconcile rename affordance with init_structure validation (#10)
-- Validate settings.json shape before merging Stop hook (#6)
-- Drop over-scoped "stop-hook failures are blockers" rule (#9)
-
-### 🚜 Refactor
-
-- Merge-mode: ask consent up front, drop .bak files (#11)
-- De-opinionate scaffolder: drop WeRoad flavor, canon enforcement, hardcoded runtimes (#15)
-- Drop pointer-files feature (#16)
-- Ship as skill, drop dead plugin shell (#21)
-- Drop optional Stop hook, lean on prose self-update rules (#26)
-- Flatten skill layout for one-line install (#27)
-
-### 📚 Documentation
-
-- Add hero image, flavor tagline, and credits to README (#1)
-- Remove donor-repo reference from SKILL.md tone section (#2)
-- *(skill)* Forbid duplicating repo data in L2 drafts (#3)
-- *(skill)* Align with digital-brain-skill source material (#13)
-- Rewrite README to match current skill surface (#17)
-- Remove em-dashes from README (#18)
-- Reorder Install above the fold + table-ize self-update rules (#19)
-- Clarify what the optional Stop hook actually does (#20)
-- Tighten Credits: drop overstated claim, name the upstream pattern (#22)
-- Label Router as L1 in How it works (#23)
-- *(skill)* Use $CONTEXT_DIR in runtime path refs (#25)
-- Trim README, defer protocol detail to SKILL.md (#28)
-
-### ⚙️ Miscellaneous Tasks
-
-- Drop redundant root AGENTS.md (#24)
+- Interactive scaffolder: scans a target repo, proposes categories, drafts each module section-by-section, and embeds self-update rules.
+- Emits an `AGENTS.md` router plus a `context/` directory split into 5 narrative modules: architecture, patterns, domain, operations, debugging.
+- Append-only L3 data files in each module (`.jsonl` + `.yaml`) with a `_schema` header line.
+- Re-run support: incremental diff against existing content with interactive merge mode (consent up front, no `.bak` files).
+- One-shot install as a Claude Code skill (single `SKILL.md` at `~/.claude/skills/exodia`, no plugin wrapper).
+- Triggers: `/exodia`, "scaffold agent context", "initialize AGENTS.md", "bootstrap context tree".
+- Heuristics, templates, and runtime self-update rules bundled alongside `SKILL.md`.
