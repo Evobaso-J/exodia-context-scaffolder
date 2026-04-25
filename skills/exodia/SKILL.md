@@ -34,7 +34,7 @@ skills/exodia/
   scripts/         # mechanical helpers (bash + python)
 ```
 
-When this doc refers to `$SKILL_DIR`, it means the directory this `SKILL.md` sits in. Resolve it at the start of the run: the symlink target of `~/.claude/skills/exodia`, or — if invoked from the plugin cache — the directory of this file. The target repo is the current working directory (`$TARGET` in this doc).
+When this doc refers to `$SKILL_DIR`, it means the directory this `SKILL.md` sits in. Resolve it at the start of the run: the symlink target of `~/.claude/skills/exodia`, or the directory of this file as a fallback. The target repo is the current working directory (`$TARGET` in this doc).
 
 ---
 

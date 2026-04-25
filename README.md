@@ -28,6 +28,8 @@ Agents read the router, pick the right module, and optionally load one data file
 
 ## Install
 
+`exodia` is a single Claude Code skill. Symlink it into your personal skills dir:
+
 ```bash
 git clone https://github.com/Evobaso-J/exodia-scaffolder ~/projects/exodia-scaffolder
 mkdir -p ~/.claude/skills
@@ -35,8 +37,6 @@ ln -s ~/projects/exodia-scaffolder/skills/exodia ~/.claude/skills/exodia
 ```
 
 Run `/exodia` in any repo. The skill takes over from there.
-
-> Plugin-marketplace distribution is planned. For now, the symlink install is the supported path.
 
 ## What you get
 
