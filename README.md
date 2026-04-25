@@ -1,7 +1,7 @@
 # exodia-scaffolder
 
 <p align="center">
-  <img src="assets/exodia.webp" alt="Exodia, the Forbidden One" width="420">
+  <img src="assets/exodia.png" alt="Exodia, the Forbidden One" width="420">
 </p>
 
 <p align="center"><em>"I have assembled all 5 special modules, all 5 pieces of the puzzle! Exodia! <strong>OBLITERATE</strong> token consumption!"</em></p>
