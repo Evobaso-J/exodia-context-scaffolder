@@ -27,7 +27,7 @@ Apply rules top-to-bottom. First match wins. If no rule matches, route to `_unso
 
 ## User override
 
-Always show the computed mapping to the user before proceeding. The user may reassign any section to any category. Re-route silently — do not lecture.
+Always show the computed mapping to the user before proceeding. The user may reassign any section to any category. Re-route silently; do not lecture.
 
 ## `_unsorted.md` format
 

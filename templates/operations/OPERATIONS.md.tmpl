@@ -1,34 +1,34 @@
 # Operations
 
 <!-- exodia:section:intro -->
-Environments, configuration, deploys, and any per-variant behavior the codebase supports (environments, tenants, feature-flag cohorts, deployment targets — whatever applies). Read this when touching env vars, build config, or anything that differs between environments or variants.
+Environments, configuration, deploys, and any per-variant behavior the codebase supports (environments, tenants, feature-flag cohorts, deployment targets, whatever applies). Read this when touching env vars, build config, or anything that differs between environments or variants.
 
 ## Environments
 
 <!-- exodia:section:environments -->
-{{LIST_ENVIRONMENTS — e.g. development, qa, staging, production. Where env files live, how they are loaded.}}
+{{LIST_ENVIRONMENTS: e.g. development, qa, staging, production. Where env files live, how they are loaded.}}
 
 ## Variants
 
 <!-- exodia:section:variants -->
-{{VARIANT_MODEL_IF_ANY — what varies per variant vs per environment. Where the matrix lives. Skip if single-variant.}}
+{{VARIANT_MODEL_IF_ANY: what varies per variant vs per environment. Where the matrix lives. Skip if single-variant.}}
 
 ## Configuration System
 
 <!-- exodia:section:config -->
-{{HOW_CONFIG_IS_ACCESSED_IN_CODE — runtime config, env loader, feature flag provider.}}
+{{HOW_CONFIG_IS_ACCESSED_IN_CODE: runtime config, env loader, feature flag provider.}}
 
 ## Deploy
 
 <!-- exodia:section:deploy -->
-{{DEPLOY_PIPELINE — CI, build artifacts, where the app runs, release strategy.}}
+{{DEPLOY_PIPELINE: CI, build artifacts, where the app runs, release strategy.}}
 
 ## Localization / i18n (if applicable)
 
 <!-- exodia:section:i18n -->
-{{SKIP IF N/A — TRANSLATION_SYSTEM: where strings live, how to add a key, pluralization rules, translation service integration.}}
+{{SKIP IF N/A. TRANSLATION_SYSTEM: where strings live, how to add a key, pluralization rules, translation service integration.}}
 
 ## L3 Data
 
 <!-- exodia:section:l3 -->
-- `variants.yaml` — per-variant behavioral differences (any axis the codebase varies along).
+- `variants.yaml`: per-variant behavioral differences (any axis the codebase varies along).
