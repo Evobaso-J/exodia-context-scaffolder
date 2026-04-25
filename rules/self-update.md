@@ -14,6 +14,13 @@ All target-file paths below are relative to the context directory (`{{CONTEXT_DI
 | API contract changes or deprecated | `patterns/reviews.jsonl` | New entry tagged `migration` with `old_pattern` / `new_pattern` |
 | Variant-specific behavior confirmed | `operations/variants.yaml` | New entry under the relevant variant |
 | Domain term clarified or new entity appears | `domain/glossary.yaml` | New or updated term |
+| Infra ADR taken (cloud, IaC, network, observability) | `infra/decisions.jsonl` | New ADR entry |
+| Infra event response procedure defined (scale, failover, cert rotation) | `infra/runbooks.jsonl` | New runbook entry |
+| Workspace graph change (package move, scope rename, tooling swap) | `workspace/migrations.jsonl` | New migration entry |
+| ML experiment run with outcome | `data/experiments.jsonl` | New experiment entry |
+| New dataset registered or refresh cadence change | `data/datasets.yaml` | New or updated dataset |
+| Platform-specific mobile footgun confirmed | `mobile/gotchas.jsonl` | New gotcha entry tagged with `platform` |
+| Mobile store rollout (version, phase) | `mobile/releases.jsonl` | New rollout entry |
 
 ### How to update
 
@@ -43,3 +50,17 @@ These rot fast — pointer only, never hardcode:
 - Patterns already obvious from `package.json` / lockfile / `pyproject.toml` dependencies ("we use Redux" when `redux` is in deps).
 - Test names, file counts, directory listings — rerun the command.
 - One-session workarounds that will be gone next branch — unless the fix teaches a durable rule.
+
+### When adding a new L3 file
+
+If a recurring signal does not fit any target file in the table above, a new L3 file may be justified. Pick its format from the **File Format Strategy** table embedded above (or in `heuristics/format-strategy.md` at scaffolder time). Add a row to the signal-target table at the same time so future sessions route to it.
+
+### File Format Strategy
+
+| Format | Use when the data is | Examples |
+| ------ | -------------------- | -------- |
+| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, gotchas, playbooks, reviews, runbooks, migrations, experiments, releases |
+| `.yaml` | Named, structured tree describing the *shape* of something stable. Mutated by editing nodes in place. | glossary, variants, datasets registry |
+| `.md` | Long-form narrative — prose read top to bottom. The L2 module file is always `.md`; additional `.md` files at L3 are rare. | walkthroughs, calendars |
+
+If two formats fit, prefer `.jsonl` — agents handle line-delimited records more reliably than nested YAML, and append-only is safer for long-running context. JSONL files always start with a single-line schema header: `{"_schema": "<type>", "_version": "1.0", "_description": "...", "_fields": [...]}`.

@@ -19,7 +19,7 @@ After computing adds, present the full proposed set to the user with `AskUserQue
 
 - Accept as proposed
 - Drop optional categories they don't want
-- Add a custom category not in the table (skill must then ask for a short purpose statement and scaffold an empty L2 stub with no template content)
+- Add a custom category not in the table (skill must then ask for a short purpose statement and any L3 ledgers needed, picking formats per `heuristics/format-strategy.md`; `init_structure.sh` scaffolds an empty L2 stub for categories without a template dir, and Step 6 drafts the L3 stubs alongside)
 
 The canonical five are a strong default, not an enforced minimum. Users may drop any that do not apply to the target (e.g. a pure library often has no `operations/`; a data pipeline may not need `patterns/`). `init_structure.sh` validates that each requested name matches `^[a-z][a-z0-9_-]*$`, so the name may be any path-safe lowercase segment.
 

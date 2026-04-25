@@ -128,6 +128,8 @@ Then, based on `$SCAN` and `$SKILL_DIR/heuristics/detectors.md`, compute optiona
 
 Use `AskUserQuestion`: "Here's the proposed category set: [list]. OK to proceed?" Offer options: *accept*, *drop any (core or optional)*, *add custom*. If the user wants changes, iterate until they confirm.
 
+When the user adds a **custom category**, ask two follow-ups: (1) one-line purpose statement, (2) any L3 ledgers needed (append-only logs, structured taxonomies). Consult `$SKILL_DIR/heuristics/format-strategy.md` to pick the format for each proposed L3 file (`.jsonl` for append-only / id-keyed records, `.yaml` for named taxonomies). `init_structure.sh` will scaffold an empty L2 stub for any category without a template dir; if the user asked for L3, draft those stubs in Step 6 alongside the L2.
+
 The target repo picks the shape. Users may drop any canonical category that does not apply: a pure library may have no `operations/`, a data pipeline may have no `patterns/`, a CLI tool may have no `domain/`. `init_structure.sh` accepts any subset of category names matching `^[a-z][a-z0-9_-]*$` — the core set is a default, not an enforced minimum.
 
 ### Step 3a — Name the context directory
@@ -176,6 +178,7 @@ For each confirmed category, in order (architecture, patterns, domain, operation
 2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words.
 3. Preserve the `<!-- exodia:section:<id> -->` markers — they drive incremental re-runs.
 4. **Never duplicate data that already lives in the repo.** Versions, ports, env names, paths, commands, config values, dependency lists, script names — all must be *referenced*, not copied. Write `see \`package.json\` \`engines.node\`` or `defined in \`.env.example\``, never the literal value. Duplicated data rots; pointers survive edits.
+5. **`## L3 Data` section.** When the L2 template has a `<!-- exodia:section:l3 -->` block, list the L3 files that ship with the module. For custom categories with no template, draft this section from the L3 ledgers requested in Step 3, picking formats per `$SKILL_DIR/heuristics/format-strategy.md`. Each line: `` - `<file>` — <one-line purpose>. ``
 
 Do **not** write the file to disk yet. Hold the draft in memory.
 
@@ -196,7 +199,7 @@ Compose `$TARGET/AGENTS.md` from:
 - `$SKILL_DIR/rules/universal.md` (always included)
 - `$SKILL_DIR/rules/conditional/operations-awareness.md` *only if `operations/` is in the final category set*
 - `$SKILL_DIR/rules/conditional/lint-check.md` if scan detected any lint/test/typecheck scripts — substitute the detected commands into the snippet
-- `$SKILL_DIR/rules/self-update.md` (always — near the top). When composing the Self-Update Rules block, drop table rows whose target path is not in the final category set (e.g. drop the `operations/variants.yaml` row if `operations/` was dropped, drop the `domain/glossary.yaml` row if `domain/` was dropped).
+- `$SKILL_DIR/rules/self-update.md` (always — near the top). When composing the Self-Update Rules block, drop table rows whose target path is not in the final category set. This applies to both core and optional rows (e.g. drop the `operations/variants.yaml` row if `operations/` was dropped, drop the `domain/glossary.yaml` row if `domain/` was dropped, drop both `infra/*` rows if `infra/` was dropped). The `File Format Strategy` § at the bottom of `self-update.md` is always retained — it guides future agents adding new ledgers.
 
 Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
@@ -212,12 +215,15 @@ Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-upda
 
 ### Step 9 — L3 seeding prompt
 
-Ask the user whether to seed L3 files from the codebase:
+Ask the user whether to seed L3 files from the codebase. Tailor the prompt to the final category set:
 
-- `gotchas.jsonl`: scan for `TODO`, `FIXME`, `HACK`, `XXX`, `WARNING` comments. Group by directory/area. Present a trimmed candidate list and let the user approve a subset.
-- `decisions.jsonl`: look for `docs/adr/`, `docs/decisions/`, `ARCHITECTURE.md` headings with decision language. Present candidates.
+- `debugging/gotchas.jsonl`: scan for `TODO`, `FIXME`, `HACK`, `XXX`, `WARNING` comments. Group by directory/area. Present a trimmed candidate list and let the user approve a subset.
+- `architecture/decisions.jsonl`: look for `docs/adr/`, `docs/decisions/`, `ARCHITECTURE.md` headings with decision language. Present candidates.
+- `infra/decisions.jsonl` (if `infra/` present): scan `terraform/`, `helm/`, `k8s/` commit messages and any `infra/CHANGES.md` for infra-scoped decisions.
+- `data/experiments.jsonl` (if `data/` present): scan `experiments/`, `notebooks/`, `runs/` directories and any `RESULTS.md` for past run summaries.
+- `mobile/releases.jsonl` (if `mobile/` present): scan store-config files, `fastlane/` metadata, or git tags matching version patterns for prior rollouts.
 
-If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` where `{type}` is `gotcha`, `pb`, `adr`, or `rv`.
+If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. Existing prefixes: `gotcha`, `pb`, `adr`, `rv`, `rb`, `wsmig`, `exp`, `mgotcha`, `mrel`. See `$SKILL_DIR/heuristics/format-strategy.md` § ID format for the full list and rules for new prefixes.
 
 ### Step 10 — Wrap up
 
