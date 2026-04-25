@@ -1,0 +1,72 @@
+name: release-tag
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  tag:
+    if: startsWith(github.event.head_commit.message, 'chore(release): v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: ver
+        run: |
+          subject=$(echo "${{ github.event.head_commit.message }}" | head -1)
+          version=$(echo "$subject" | sed -nE 's/^chore\(release\): v([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+          if [ -z "$version" ]; then
+            echo "Could not parse version from: $subject" >&2
+            exit 1
+          fi
+          echo "v=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Abort if tag already exists
+        run: |
+          if git rev-parse "refs/tags/${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.ver.outputs.tag }} already exists. Skipping."
+            exit 0
+          fi
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.ver.outputs.tag }}" -m "Release ${{ steps.ver.outputs.tag }}"
+          git push origin "${{ steps.ver.outputs.tag }}"
+
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        run: |
+          version="${{ steps.ver.outputs.v }}"
+          awk -v ver="$version" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > /tmp/notes.md
+          if [ ! -s /tmp/notes.md ]; then
+            echo "No CHANGELOG section found for $version. Falling back to --generate-notes." >&2
+            echo "fallback=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "fallback=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ steps.notes.outputs.fallback }}" = "true" ]; then
+            gh release create "${{ steps.ver.outputs.tag }}" \
+              --title "${{ steps.ver.outputs.tag }}" \
+              --generate-notes
+          else
+            gh release create "${{ steps.ver.outputs.tag }}" \
+              --title "${{ steps.ver.outputs.tag }}" \
+              --notes-file /tmp/notes.md
+          fi
