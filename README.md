@@ -51,9 +51,9 @@ Run `/exodia` in any repo. The skill takes over from there.
 
 ## How it works
 
-The emitted tree is organized around a **max two-hop** load rule: router → L2 narrative → (optional) L3 data. Nothing is loaded eagerly.
+The emitted tree is organized around a **max two-hop** load rule: L1 router → L2 narrative → (optional) L3 data. Nothing is loaded eagerly.
 
-- **Router** (`AGENTS.md`): project overview, commands pointer, Context Router task-type table, behavioral rules, self-update rules, quick-action table, and a tree diagram. Small enough to stay in context every turn.
+- **L1 Router** (`AGENTS.md`): project overview, commands pointer, Context Router task-type table, behavioral rules, self-update rules, quick-action table, and a tree diagram. Small enough to stay in context every turn.
 - **L2 narratives** (`<CATEGORY>.md` per module): human-readable prose for each domain area. Every section carries a `<!-- exodia:section:<id> -->` marker. The markers drive incremental re-runs: auto-filled sections can be refreshed; user-edited sections are left alone.
 - **L3 data files** (`.jsonl` / `.yaml` per module): append-only logs. Each `.jsonl` opens with a `_schema` line declaring `_schema`, `_version`, `_fields`. Entries must match the declared shape.
 - **Pointer, don't hardcode**: drafts reference source files (`see package.json engines.node`, `defined in .env.example`) rather than copying values. Duplicated data rots; pointers survive edits.
