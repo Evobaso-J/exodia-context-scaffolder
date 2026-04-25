@@ -63,18 +63,9 @@ Preflight classifies the target repo and picks the flow:
 
 ## 📓 Self-update
 
-Every emitted `AGENTS.md` carries a signal-to-target-file table so future sessions know where new knowledge goes:
+Every emitted `AGENTS.md` ships with a routing table that tells future sessions where to log new knowledge (bug root causes, footguns, architecture decisions, PR review lessons, domain terms, variant behavior). Each entry gets an ID of the form `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. While a branch is in flight, a new insight on the same topic overwrites the earlier entry in place instead of stacking duplicates. Once the branch merges, the entry is settled: only a later branch can supersede it. Agents append without asking, and the user can always revert via git.
 
-| Signal during a turn | Append to |
-| -------------------- | --------- |
-| Bug root cause | `debugging/playbooks.jsonl` |
-| Footgun / pitfall | `debugging/gotchas.jsonl` |
-| Architecture decision | `architecture/decisions.jsonl` |
-| PR review lesson | `patterns/reviews.jsonl` |
-| Clarified domain term | `domain/glossary.yaml` |
-| Variant-specific behavior | `operations/variants.yaml` |
-
-Entries use ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. Branch-scoped dedup: same-topic entries on the current branch replace in-place rather than duplicate; once merged, only a new branch can supersede them. Agents append without asking; the user can revert via git.
+Full signal-to-file mapping and write rules: [`rules/self-update.md`](rules/self-update.md).
 
 ## 🙏 Credits
 
