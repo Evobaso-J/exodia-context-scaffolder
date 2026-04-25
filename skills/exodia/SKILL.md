@@ -19,7 +19,7 @@ You are running the `exodia` scaffolder. Your job is to generate an `AGENTS.md` 
 `/exodia` is a **scaffolder**, not a runtime context system. Two distinct roles:
 
 - **Scaffolder instructions** (this file + `$SKILL_DIR/` assets) — tell *you* how to interview the user, scan the repo, and emit files. Consumed once per run.
-- **Runtime instructions** (emitted into `$TARGET/AGENTS.md` + `$TARGET/context/`) — tell *future agent sessions* how to load context and self-update while working on the target repo. Consumed every session after scaffold.
+- **Runtime instructions** (emitted into `$TARGET/AGENTS.md` + `$TARGET/$CONTEXT_DIR/`) — tell *future agent sessions* how to load context and self-update while working on the target repo. Consumed every session after scaffold.
 
 The self-update rules in `$SKILL_DIR/rules/self-update.md` are **runtime rules for the target repo** — they get composed into the emitted `AGENTS.md`. They do not govern this scaffolder. Do not apply them to `$SKILL_DIR/` itself.
 
@@ -82,7 +82,7 @@ fi
 Classify into one of three modes:
 
 - **Fresh** — no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
-- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it by `##` sections, and move each section into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
+- **Merge** — `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference — the whole file is dumped into context on every task. exodia will parse the existing content, split it into sections and move each one into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here — do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
 - **Incremental** — `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom — do not ask the dir-name question again.
 
 ### Step 2 — Scan the repo
@@ -157,7 +157,7 @@ If preflight classified as Merge (the user already granted permission in Step 1)
 2. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<source-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
 3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
 4. Present the mapping table via `AskUserQuestion` (or a numbered prompt if too many rows for four options). Let the user reassign rows.
-5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied — the original file is replaced by Step 8 (router). No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `context/`) rather than destroyed.
+5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied — the original file is replaced by Step 8 (router). No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `$CONTEXT_DIR/`) rather than destroyed.
 
 ### Step 5 — Initialize structure
 
