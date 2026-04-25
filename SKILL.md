@@ -81,7 +81,7 @@ fi
 Classify into one of three modes:
 
 - **Fresh**: no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
-- **Merge**: `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference; the whole file is dumped into context on every task. exodia will parse the existing content, split it into sections and move each one into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Proceed?"* Options: *proceed*, *abort*. On abort, stop the skill here; do not scaffold anything. On proceed, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
+- **Merge**: `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference, because the whole file is loaded into context on every task. exodia will parse the existing content, split it into sections, and move each section into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Would you like exodia to go ahead and split the existing file into per-module sections?"* Options: *Yes, split the existing file*, *No, stop without changes*. If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
 - **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom; do not ask the dir-name question again.
 
 ### Step 2: Scan the repo
@@ -126,7 +126,7 @@ Then, based on `$SCAN` and `$SKILL_DIR/heuristics/detectors.md`, compute optiona
 | ML/data stack detected | `data/` |
 | Infra-as-code detected | `infra/` |
 
-Use `AskUserQuestion`: "Here's the proposed category set: [list]. OK to proceed?" Offer options: *accept*, *drop any (core or optional)*, *add custom*. If the user wants changes, iterate until they confirm.
+Use `AskUserQuestion`: "Here is the proposed category set: [list]. Does this look right, or would you like to adjust it?" Offer options: *Accept the proposed set*, *Drop one or more categories*, *Add a custom category*. If the user wants changes, iterate until they confirm.
 
 When the user adds a **custom category**, ask two follow-ups: (1) one-line purpose statement, (2) any L3 ledgers needed (append-only logs, structured taxonomies). Consult `$SKILL_DIR/heuristics/format-strategy.md` to pick the format for each proposed L3 file (`.jsonl` for append-only / id-keyed records, `.yaml` for named taxonomies). `init_structure.sh` will scaffold an empty L2 stub for any category without a template dir; if the user asked for L3, draft those stubs in Step 6 alongside the L2.
 
@@ -144,7 +144,7 @@ Accept any value matching `^[a-z._-][a-z0-9._-]*$` (single safe filesystem segme
 
 - If the directory does not exist, or exists and is empty: proceed.
 - If it exists with files that already carry `<!-- exodia:section:` markers: Step 1 misclassified the mode. Switch to Incremental treatment of that directory and skip the rest of Fresh/Merge scaffolding.
-- If it exists with files but none carry exodia markers (pre-existing non-exodia content): warn the user concretely (list a few of the existing top-level entries) and `AskUserQuestion`: *proceed (exodia will add `<category>/…` subdirectories alongside the existing content; templates are only written to fresh paths, existing files are left untouched)*, *pick a different name*, *abort*. On "different name", re-ask the Step 3a question; on "abort", stop the skill cleanly.
+- If it exists with files but none carry exodia markers (pre-existing non-exodia content): warn the user concretely (list a few of the existing top-level entries) and `AskUserQuestion`: *Proceed and share the directory (exodia will add `<category>/…` subdirectories alongside the existing content; templates are only written to fresh paths, existing files are left untouched)*, *Pick a different directory name*, *Abort the scaffold*. If they pick a different name, re-ask the Step 3a question; if they abort, stop the skill cleanly.
 
 The scaffolder never overwrites existing files (`init_structure.sh` skips any destination that already exists), but a shared top-level directory still entangles the exodia tree with unrelated content. The consent step makes that entanglement explicit.
 
@@ -187,7 +187,7 @@ Do **not** write the file to disk yet. Hold the draft in memory.
 Walk each L2 draft with the user. For each `##` section:
 
 - Show the drafted prose.
-- `AskUserQuestion` with options: *accept*, *edit*, *reject (leave empty for later)*.
+- `AskUserQuestion` with options: *Accept this section*, *Edit before saving*, *Skip and leave empty for later*.
 - If edit: let the user dictate changes, re-draft, loop until accepted.
 
 Then `Write` the finalized L2 file to `$TARGET/$CONTEXT_DIR/<category>/<CATEGORY>.md`.
