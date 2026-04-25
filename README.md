@@ -28,15 +28,15 @@ Agents read the router, pick the right module, and optionally load one data file
 
 ## Install
 
-`exodia` is a single Claude Code skill. Symlink it into your personal skills dir:
+`exodia` is a single Claude Code skill. Clone it directly into your personal skills dir:
 
 ```bash
-git clone https://github.com/Evobaso-J/exodia-scaffolder ~/projects/exodia-scaffolder
-mkdir -p ~/.claude/skills
-ln -s ~/projects/exodia-scaffolder/skills/exodia ~/.claude/skills/exodia
+git clone https://github.com/Evobaso-J/exodia-scaffolder ~/.claude/skills/exodia
 ```
 
-Run `/exodia` in any repo. The skill takes over from there.
+Restart Claude Code (or open a new session). Run `/exodia` in any repo.
+
+The destination dir name (`exodia`) matches the skill name in `SKILL.md` frontmatter; do not rename it.
 
 ## What you get
 
@@ -57,7 +57,7 @@ The emitted tree is organized around a **max two-hop** load rule: L1 router → 
 - **L3 data files** (`.jsonl` / `.yaml` per module): append-only logs. Each `.jsonl` opens with a `_schema` line declaring `_schema`, `_version`, `_fields`. Entries must match the declared shape.
 - **Pointer, don't hardcode**: drafts reference source files (`see package.json engines.node`, `defined in .env.example`) rather than copying values. Duplicated data rots; pointers survive edits.
 
-Deep-divers can read `skills/exodia/SKILL.md` for the full protocol.
+Deep-divers can read `SKILL.md` for the full protocol.
 
 ## Usage
 
@@ -91,7 +91,7 @@ Preflight classifies the target repo and picks the right flow.
 - **Context-dir name**: default `context/`, but any single safe segment matching `^[a-z._-][a-z0-9._-]*$` works (`docs`, `knowledge`, `.agents`, `ai`, or whatever fits your repo's conventions). Enforced by `scripts/init_structure.sh`.
 - **Drop canonical modules**: the core five are a default, not a minimum. A pure library may have no `operations/`; a CLI tool may have no `domain/`; a data pipeline may skip `patterns/`. Keep only what fits.
 - **Custom categories**: add any lowercase name matching `^[a-z][a-z0-9_-]*$`. exodia scaffolds an empty L2 stub; you describe what the module covers.
-- **Optional auto-adds**: the scanner proposes `mobile/` (React Native, Expo, iOS/Android dirs), `workspace/` (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`), `data/` (`torch` / `tensorflow` / `jax` / notebooks / `dvc.yaml`), and `infra/` (`terraform/`, `helm/`, `k8s/`, `cdk.json`, `pulumi.yaml`) when the relevant signals fire. Full trigger list lives in `skills/exodia/heuristics/detectors.md`.
+- **Optional auto-adds**: the scanner proposes `mobile/` (React Native, Expo, iOS/Android dirs), `workspace/` (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`), `data/` (`torch` / `tensorflow` / `jax` / notebooks / `dvc.yaml`), and `infra/` (`terraform/`, `helm/`, `k8s/`, `cdk.json`, `pulumi.yaml`) when the relevant signals fire. Full trigger list lives in `heuristics/detectors.md`.
 
 ## Self-update
 
