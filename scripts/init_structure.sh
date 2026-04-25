@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# init_structure.sh — create context tree and copy templates into the target repo.
+# init_structure.sh: create context tree and copy templates into the target repo.
 #
 # Usage:
 #   init_structure.sh <target-dir> <context-dir> <category1> [category2 ...]

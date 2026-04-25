@@ -25,7 +25,7 @@ The canonical five are a strong default, not an enforced minimum. Users may drop
 
 ## Lint/test/typecheck detection
 
-Scan for commands — used to decide whether to insert the `lint-check.md` rule and to populate its placeholder.
+Scan for commands. Used to decide whether to insert the `lint-check.md` rule and to populate its placeholder.
 
 | File | Look for |
 | ---- | -------- |

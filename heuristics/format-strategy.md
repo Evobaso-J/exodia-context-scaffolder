@@ -1,6 +1,6 @@
 # L3 file format strategy
 
-When scaffolding L3 data files for any module — canonical, optional, or user-defined — pick the format from this table. The rule comes from the original digital-brain-skill source ([github.com/muratcankoylan/Agent-Skills-for-Context-Engineering, examples/digital-brain-skill/SKILL.md](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/blob/main/examples/digital-brain-skill/SKILL.md) § "File Format Strategy").
+When scaffolding L3 data files for any module (canonical, optional, or user-defined), pick the format from this table. The rule comes from the original digital-brain-skill source ([github.com/muratcankoylan/Agent-Skills-for-Context-Engineering, examples/digital-brain-skill/SKILL.md](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/blob/main/examples/digital-brain-skill/SKILL.md) § "File Format Strategy").
 
 | Format | Use when the data is | Examples |
 |--------|----------------------|----------|
@@ -32,4 +32,4 @@ Top-level key + a comment block showing one example entry. Mirror `templates/ope
 
 ## ID format
 
-JSONL entry IDs follow `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. Pick a short, readable `{type}` prefix consistent within a file. Existing prefixes: `adr`, `gotcha`, `pb`, `rv`, `rb`, `wsmig`, `exp`, `mgotcha`, `mrel`. Add new prefixes as new schemas appear; keep them unique across the tree.
+JSONL entry IDs follow `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the file's `_schema` value, verbatim. Each schema's prefix lives only in its `.jsonl` template; keep them unique across the tree.
