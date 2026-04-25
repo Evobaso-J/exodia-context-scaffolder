@@ -30,7 +30,6 @@ skills/exodia/
   templates/       # L2/L3 stubs you copy into target
   rules/           # snippets composed into final AGENTS.md
   heuristics/      # detector + section-map tables you follow
-  hooks/           # optional Claude Code Stop hook
   scripts/         # mechanical helpers (bash + python)
 ```
 
@@ -220,57 +219,11 @@ Ask the user whether to seed L3 files from the codebase:
 
 If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` where `{type}` is `gotcha`, `pb`, `adr`, or `rv`.
 
-### Step 10 — Optional Stop hook install
-
-Skip this step entirely if the target repo is not on Claude Code — the Stop hook is a Claude-Code-specific lifecycle feature and has no counterpart on other runtimes. If the user is on Claude Code (detect via `$TARGET/.claude/` presence or ask), explain the hook in full **before** asking for consent, so the user knows exactly what gets installed and how to back out.
-
-Present this briefing verbatim (adjust wording only if the user has already asked clarifying questions):
-
-> **What the Stop hook does**
->
-> exodia ships an optional Claude Code `Stop` hook — a short shell script that runs **at the end of every agent turn** in this repo. The hook's only effect is to print an advisory reminder to stderr: *"walk AGENTS.md §Self-Update Rules; if this turn produced a gotcha / playbook / ADR / review / glossary / variant signal, append an entry now"*. Claude Code surfaces that stderr message to the agent as context for the stop event.
->
-> **Concrete effects**
->
-> - On every turn end (every time the agent yields back to the user), the reminder fires.
-> - The agent is nudged to append entries to the `.jsonl` / `.yaml` files under `$CONTEXT_DIR/` when something worth capturing was learned. More frequent, smaller appends — this is the point.
-> - The hook is **non-blocking** (`exit 0`, no gate on the turn). It cannot fail a turn and does not cancel work in progress.
-> - The hook writes only to stderr. It does not edit files, call out over the network, or interact with tools.
->
-> **What gets written to disk**
->
-> - `$TARGET/.claude/hooks/exodia-stop-reminder.sh` — the hook script itself (~25 lines, with `{{CONTEXT_DIR}}` substituted to the chosen name).
-> - `$TARGET/.claude/settings.json` — the hook is registered under `"hooks.Stop"`. If the file already exists, exodia merges rather than replaces, and refuses to touch a malformed settings file.
->
-> **How to disable later**
->
-> - Delete `$TARGET/.claude/hooks/exodia-stop-reminder.sh`.
-> - Remove the matching entry from `$TARGET/.claude/settings.json` under `"hooks.Stop"`.
-> - Or just comment out the whole `"hooks"` block in settings.
->
-> **When to skip**
->
-> - You dislike automatic per-turn reminders and prefer to remember self-updates manually.
-> - Your team already has a richer Stop-hook setup and does not want a second one competing.
-> - The target repo is not yours to configure that deeply.
->
-> The prose Self-Update Rules in `AGENTS.md` already work without this hook. The hook only makes the reminder more insistent.
-
-Then `AskUserQuestion`: *"Install the Claude Code Stop hook described above? options: install, skip."*
-
-If yes:
-
-```bash
-bash "$SKILL_DIR/scripts/install_hook.sh" "$TARGET" "$CONTEXT_DIR"
-```
-
-`$CONTEXT_DIR` is the second argument — the installer copies the hook into `$TARGET/.claude/hooks/exodia-stop-reminder.sh`, substitutes `{{CONTEXT_DIR}}` in the copied file with the actual value, and registers the hook in `$TARGET/.claude/settings.json` under `"hooks.Stop"`. The installer is idempotent.
-
-### Step 11 — Wrap up
+### Step 10 — Wrap up
 
 Print a short summary:
 
-- What was created (counts: L2 files, L3 files, hook yes/no)
+- What was created (counts: L2 files, L3 files)
 - Next steps for the user (how to iterate: just edit the files; the self-update rules handle growth)
 - Reminder: running `/exodia` again triggers incremental re-run, not a fresh scaffold
 
@@ -280,13 +233,13 @@ Print a short summary:
 
 When preflight detects an existing exodia setup:
 
-0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it — preserving the existing directory name is required so hook substitutions and router paths stay consistent.
+0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it — preserving the existing directory name keeps router paths consistent.
 1. Re-run Step 2 (scan).
 2. For each L2 file under `$TARGET/$CONTEXT_DIR/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
 3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker — if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
 4. Show the proposed diffs via `AskUserQuestion` (accept / skip per section).
 5. Append to L3 files from the scan using the same Step 9 logic.
-6. Never overwrite `AGENTS.md` — only add missing rule snippets if conditions now apply (e.g. a Stop hook was added after initial scaffold).
+6. Never overwrite `AGENTS.md` — only add missing rule snippets if conditions now apply (e.g. an `operations/` category added after initial scaffold).
 
 ---
 

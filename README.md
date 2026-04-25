@@ -45,7 +45,6 @@ Run `/exodia` in any repo. The skill takes over from there.
 - **Agent-agnostic output**: canonical `AGENTS.md` that any [agents.md](https://agents.md)-aware tool can consume.
 - **Configurable shape**: custom context-dir name, custom categories, drop any canonical module that doesn't fit.
 - **Self-update rules baked in**: emitted `AGENTS.md` carries a signal → target-file table so future sessions append entries automatically.
-- **Optional Claude Code `Stop` hook**: per-turn reminder that reinforces the self-update rules without blocking work.
 - **Safe re-runs**: running `/exodia` again on a scaffolded repo diffs incrementally and never overwrites user-edited prose.
 - **Existing-file merge**: pre-existing `CLAUDE.md` / `AGENTS.md` is parsed, split by `##`, and routed into the right modules; the original file becomes a thin router.
 
@@ -76,7 +75,6 @@ The interview walks you through:
 4. **Existing-file mapping** (Merge only): review which `##` section lands in which module.
 5. **Per-section drafts**: accept / edit / reject every `##` heading across the L2 files.
 6. **L3 seeding**: optionally seed `gotchas.jsonl` from `TODO`/`FIXME` comments and `decisions.jsonl` from any detected ADRs.
-7. **Stop hook** (Claude Code only): optional per-turn reminder install.
 
 Re-running `/exodia` on an already-scaffolded repo automatically enters incremental mode. No flag needed.
 
@@ -95,11 +93,7 @@ Preflight classifies the target repo and picks the right flow.
 - **Custom categories**: add any lowercase name matching `^[a-z][a-z0-9_-]*$`. exodia scaffolds an empty L2 stub; you describe what the module covers.
 - **Optional auto-adds**: the scanner proposes `mobile/` (React Native, Expo, iOS/Android dirs), `workspace/` (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`), `data/` (`torch` / `tensorflow` / `jax` / notebooks / `dvc.yaml`), and `infra/` (`terraform/`, `helm/`, `k8s/`, `cdk.json`, `pulumi.yaml`) when the relevant signals fire. Full trigger list lives in `skills/exodia/heuristics/detectors.md`.
 
-## Self-update + Stop hook
-
-The emitted `AGENTS.md` ships with two layers of reinforcement so the context keeps growing without per-change prompting.
-
-**Self-update rules** (always embedded)
+## Self-update
 
 Every emitted `AGENTS.md` carries a signal-to-target-file table so future sessions know where new knowledge goes:
 
@@ -114,23 +108,7 @@ Every emitted `AGENTS.md` carries a signal-to-target-file table so future sessio
 
 Entries use the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` (sortable, collision-free). **Branch-scoped dedup**: a same-topic entry added on the current branch is replaced in-place rather than duplicated; once merged, entries are settled and only superseded by a new entry on a new branch. Agents don't ask permission; the user can always revert via git.
 
-**Optional Stop hook** (Claude Code only)
-
-The prose self-update rules above work on their own. The hook exists because prose rules are easy to forget mid-task: agents finish a bug fix, hand back to the user, and the gotcha never gets logged. A `Stop` hook fires on every turn end and gives the agent one last nudge before it yields.
-
-What happens when the hook is installed:
-
-1. **Trigger**: Claude Code runs the hook every time the agent finishes a turn (stops and returns control to the user).
-2. **Action**: the hook script writes a short reminder to stderr listing each self-update signal and its target file (gotcha, playbook, ADR, review, glossary, variant).
-3. **Effect on the agent**: Claude Code forwards that stderr text back to the agent as stop-event context. The agent re-reads §Self-Update Rules in `AGENTS.md` and, if the turn actually produced a signal, appends the corresponding entry before yielding.
-4. **Guarantees**: the hook `exit 0`s unconditionally. It cannot fail a turn, cancel in-flight work, edit files, or make network calls. Its only side effect is the stderr message.
-
-Installed files:
-
-- `.claude/hooks/exodia-stop-reminder.sh`: the 25-line reminder script, with `{{CONTEXT_DIR}}` substituted to your chosen directory name.
-- `.claude/settings.json`: the hook is registered under `hooks.Stop`. exodia merges into an existing file rather than replacing, and refuses to touch a malformed settings shape.
-
-To disable: delete the hook script and remove the matching entry from `settings.json`.
+The cadence is enforced by behavioral rule "Context update as final task" in the emitted `AGENTS.md`: when an agent plans work as a todo list, the final step is always to walk the Self-Update table and capture anything qualifying. Skip when nothing qualifies, never invent entries to fill the step.
 
 ## Credits
 
