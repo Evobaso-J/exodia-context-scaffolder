@@ -134,7 +134,7 @@ To disable: delete the hook script and remove the matching entry from `settings.
 
 ## Credits
 
-Shoulders of giants. This project is directly inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering / digital-brain-skill](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill)**, which pioneered the progressive-disclosure approach to agent context. `exodia-scaffolder` adapts those ideas into a one-shot, agent-agnostic scaffolder centered on five canonical modules.
+Inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering: digital-brain-skill](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill)**, which applies progressive disclosure (Anthropic's Agent Skills loading pattern) to personal-knowledge context. `exodia-scaffolder` ports the same L1/L2/L3 lazy-load idea to per-repo agent context, packaged as a one-shot scaffolder centered on five canonical modules.
 
 ## License
 
