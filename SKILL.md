@@ -26,14 +26,14 @@ The self-update rules in `$SKILL_DIR/rules/self-update.md` are **runtime rules f
 All assets you need live next to this file:
 
 ```
-skills/exodia/
+./
   templates/       # L2/L3 stubs you copy into target
   rules/           # snippets composed into final AGENTS.md
   heuristics/      # detector + section-map tables you follow
   scripts/         # mechanical helpers (bash + python)
 ```
 
-When this doc refers to `$SKILL_DIR`, it means the directory this `SKILL.md` sits in. Resolve it at the start of the run: the symlink target of `~/.claude/skills/exodia`, or the directory of this file as a fallback. The target repo is the current working directory (`$TARGET` in this doc).
+When this doc refers to `$SKILL_DIR`, it means the directory this `SKILL.md` sits in. Resolve it at the start of the run: typically `~/.claude/skills/exodia` for an installed skill, or the directory of this file as a fallback. The target repo is the current working directory (`$TARGET` in this doc).
 
 ---
 
