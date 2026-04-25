@@ -81,7 +81,13 @@ fi
 Classify into one of three modes:
 
 - **Fresh**: no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
-- **Merge**: `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion` with the rationale: *"A monolithic `AGENTS.md` / `CLAUDE.md` hurts agent inference, because the whole file is loaded into context on every task. exodia will parse the existing content, split it into sections, and move each section into the appropriate module under a new context directory. The original file at the repo root will be replaced by a thin router that points agents to the right module per task. Would you like exodia to go ahead and split the existing file into per-module sections?"* Options: *Yes, split the existing file*, *No, stop without changes*. If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
+- **Merge**: `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion`:
+  - **Question**: "Split existing `AGENTS.md` / `CLAUDE.md` into per-module sections?"
+  - **Options**:
+    - "Yes, split now": parse the existing file, route each section into the right module, replace the root file with a thin router. Original content is preserved across modules, not destroyed. A monolithic root file is reloaded on every task; splitting is the long-term fix.
+    - "No, stop": exit without changes. You can revisit later by re-running `/exodia`.
+
+  If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
 - **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom; do not ask the dir-name question again.
 
 ### Step 2: Scan the repo
@@ -126,7 +132,15 @@ Then, based on `$SCAN` and `$SKILL_DIR/heuristics/detectors.md`, compute optiona
 | ML/data stack detected | `data/` |
 | Infra-as-code detected | `infra/` |
 
-Use `AskUserQuestion`: "Here is the proposed category set: [list]. Does this look right, or would you like to adjust it?" Offer options: *Accept the proposed set*, *Drop one or more categories*, *Add a custom category*. If the user wants changes, iterate until they confirm.
+First render the proposed set as a markdown bulleted list (one category per line, with the one-line purpose) so the user can scan it. Then use `AskUserQuestion`:
+
+- **Question**: "Use this category set?"
+- **Options**:
+  - "Accept set"
+  - "Drop categories": list which to drop in the follow-up.
+  - "Add custom": provide name + one-line purpose in the follow-up.
+
+Iterate until the user confirms.
 
 When the user adds a **custom category**, ask two follow-ups: (1) one-line purpose statement, (2) any L3 ledgers needed (append-only logs, structured taxonomies). Consult `$SKILL_DIR/heuristics/format-strategy.md` to pick the format for each proposed L3 file (`.jsonl` for append-only / id-keyed records, `.yaml` for named taxonomies). `init_structure.sh` will scaffold an empty L2 stub for any category without a template dir; if the user asked for L3, draft those stubs in Step 6 alongside the L2.
 
@@ -136,7 +150,10 @@ The target repo picks the shape. Users may drop any canonical category that does
 
 Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1).
 
-`AskUserQuestion`: *"Where should the context tree live? Default: `context/`. You may pick any path-safe single-segment name: `docs`, `knowledge`, `.agents`, `ai`, whatever fits your repo's conventions."*
+`AskUserQuestion`:
+
+- **Question**: "Context directory name? (default: `context/`)"
+- **Description**: "Pick any path-safe single-segment name: `context`, `docs`, `knowledge`, `.agents`, `ai`, whatever matches the repo's conventions."
 
 Accept any value matching `^[a-z._-][a-z0-9._-]*$` (single safe filesystem segment, no slashes, no `..`, no `.` alone). Store as `$CONTEXT_DIR`. Default to `context` if the user accepts the default. Validate the answer before continuing.
 
@@ -144,7 +161,12 @@ Accept any value matching `^[a-z._-][a-z0-9._-]*$` (single safe filesystem segme
 
 - If the directory does not exist, or exists and is empty: proceed.
 - If it exists with files that already carry `<!-- exodia:section:` markers: Step 1 misclassified the mode. Switch to Incremental treatment of that directory and skip the rest of Fresh/Merge scaffolding.
-- If it exists with files but none carry exodia markers (pre-existing non-exodia content): warn the user concretely (list a few of the existing top-level entries) and `AskUserQuestion`: *Proceed and share the directory (exodia will add `<category>/…` subdirectories alongside the existing content; templates are only written to fresh paths, existing files are left untouched)*, *Pick a different directory name*, *Abort the scaffold*. If they pick a different name, re-ask the Step 3a question; if they abort, stop the skill cleanly.
+- If it exists with files but none carry exodia markers (pre-existing non-exodia content): list the first 5 to 10 existing top-level entries as a markdown bulleted list, then `AskUserQuestion`:
+  - **Question**: "`$CONTEXT_DIR/` already has unrelated content. How to proceed?"
+  - **Options**:
+    - "Share directory": exodia adds `<category>/...` subdirectories alongside existing content; templates only land on fresh paths, existing files are left untouched.
+    - "Pick different name": re-ask the Step 3a question.
+    - "Abort scaffold": stop the skill cleanly.
 
 The scaffolder never overwrites existing files (`init_structure.sh` skips any destination that already exists), but a shared top-level directory still entangles the exodia tree with unrelated content. The consent step makes that entanglement explicit.
 
@@ -157,7 +179,20 @@ If preflight classified as Merge (the user already granted permission in Step 1)
    - If only `CLAUDE.md` exists, parse that.
 2. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<source-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
 3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
-4. Present the mapping table via `AskUserQuestion` (or a numbered prompt if too many rows for four options). Let the user reassign rows.
+4. Render the mapping as a markdown table:
+
+   ```
+   | # | Heading           | →  | Proposed category |
+   |---|-------------------|----|-------------------|
+   | 1 | Architecture      | →  | architecture      |
+   | 2 | Local dev         | →  | operations        |
+   ```
+
+   Then `AskUserQuestion`:
+   - **Question**: "Mapping look right?"
+   - **Options**: "Accept all", "Reassign rows", "Drop rows", "Edit table".
+
+   If the table is too long for the four-option bound, fall back to a numbered prompt: ask the user to type row reassignments (`3→domain, 5→drop`).
 5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied; the original file is replaced by Step 8 (router). No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `$CONTEXT_DIR/`) rather than destroyed.
 
 ### Step 5: Initialize structure
@@ -174,7 +209,7 @@ bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" "$CONTEXT_DIR" <space-sepa
 
 For each confirmed category, in order (architecture, patterns, domain, operations, debugging, then optional extras):
 
-1. Read `$SKILL_DIR/templates/<category>/<CATEGORY>.md.tmpl` to see the section skeleton.
+1. Read `$SKILL_DIR/templates/<category>/<CATEGORY>.md.tmpl` to see the section skeleton and lock the voice (terse, factual, table- and bullet-heavy, inline file citations, no marketing prose).
 2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words.
 3. Preserve the `<!-- exodia:section:<id> -->` markers; they drive incremental re-runs.
 4. **Never duplicate data that already lives in the repo.** Versions, ports, env names, paths, commands, config values, dependency lists, script names; all must be *referenced*, not copied. Write `see \`package.json\` \`engines.node\`` or `defined in \`.env.example\``, never the literal value. Duplicated data rots; pointers survive edits.
@@ -187,8 +222,11 @@ Do **not** write the file to disk yet. Hold the draft in memory.
 Walk each L2 draft with the user. For each `##` section:
 
 - Show the drafted prose.
-- `AskUserQuestion` with options: *Accept this section*, *Edit before saving*, *Skip and leave empty for later*.
-- If edit: let the user dictate changes, re-draft, loop until accepted.
+- Render the draft inside a fenced markdown block, prefaced by an H3 anchor: `### \`<category>/<CATEGORY>.md\` § <section-id>`.
+- Then `AskUserQuestion`:
+  - **Question**: "Accept this section?"
+  - **Options**: "Accept", "Edit", "Skip" (leave empty for later).
+- If edit: let the user dictate changes, re-draft (still inside the fenced block), loop until accepted.
 
 Then `Write` the finalized L2 file to `$TARGET/$CONTEXT_DIR/<category>/<CATEGORY>.md`.
 
@@ -243,7 +281,9 @@ When preflight detects an existing exodia setup:
 1. Re-run Step 2 (scan).
 2. For each L2 file under `$TARGET/$CONTEXT_DIR/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
 3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker; if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
-4. Show the proposed diffs via `AskUserQuestion` (accept / skip per section).
+4. Render each proposed diff as a fenced ` ```diff ` code block, prefaced by `### \`<file>\` § <section-id>`. Then per section, `AskUserQuestion`:
+   - **Question**: "Apply this update?"
+   - **Options**: "Accept", "Skip".
 5. Append to L3 files from the scan using the same Step 9 logic.
 6. Never overwrite `AGENTS.md`; only add missing rule snippets if conditions now apply (e.g. an `operations/` category added after initial scaffold).
 
@@ -251,13 +291,34 @@ When preflight detects an existing exodia setup:
 
 ## Failure modes to watch
 
-- **User aborts mid-interview**: leave the repo in whatever partial state exists. No need to roll back. Running `/exodia` again resumes from preflight.
-- **Explore scan times out / returns garbage**: fall back to asking the user to confirm the stack and architecture directly, then continue.
-- **Target repo has committed secrets or `.env` with real values**: never echo these in drafts. If you must reference env vars, name them only.
-- **No git, no agent integration, no lint scripts**: skill still works; just emits the minimal universal rules.
+See `$SKILL_DIR/TROUBLESHOOTING.md` for handling: user aborts mid-interview, Explore scan timeouts, secrets in the target repo, missing git/agent/lint toolchain.
 
 ---
 
-## Tone for drafts
+## User-facing prompt format
 
-Drafts must be terse, factual, table- and bullet-heavy, with inline file citations and no marketing prose. Read `$SKILL_DIR/templates/*/*.tmpl` before drafting to lock the voice.
+Every prompt the user sees during the run should be scannable. Apply these rules to every `AskUserQuestion` call site, every Step 7 draft review, every Step 4 mapping table, and every Step 9 candidate list.
+
+**Question text**
+
+- One sentence, ≤120 characters.
+- No hedging openers (`Would you like...`, `Could you...`, `Do you want me to...`). State the choice directly: `Split now?`, `Use this category set?`, `Accept this section?`.
+- Inline `code` for file paths, directory names, and identifiers.
+
+**Option labels**
+
+- ≤5 words. Action-verb start: `Accept set`, `Drop categories`, `Add custom`, `Pick different name`, `Abort scaffold`.
+- Cap 4 options per call. If you need more, fall back to a numbered free-text prompt (`Type row reassignments: 3→domain, 5→drop`).
+- Long rationale lives in the option `description` field, never in the question body.
+
+**Lists, tables, and candidate sets**
+
+- Render as actual markdown (bulleted lists, real `|` tables, fenced code blocks). Not prose paragraphs.
+- Group long lists by directory, category, or file. Cap visible items at ~20; offer a "show more" branch if longer.
+- Truncate long paths mid-segment with `...` (e.g. `apps/web/.../routes/foo.ts`).
+
+**Multi-section drafts (Step 7, Step 4 mapping, incremental diffs)**
+
+- Preface each block with an H3 anchor: `### \`<file>\` § <section-id>`. Lets the user scan a long review.
+- Put draft prose inside a fenced markdown block. Put diffs inside a ` ```diff ` block.
+- One H3 + one fenced block + one `AskUserQuestion` per section. Do not stack multiple sections under one question.
