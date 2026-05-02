@@ -142,7 +142,7 @@ First render the proposed set as a markdown bulleted list (one category per line
 
 Iterate until the user confirms.
 
-When the user adds a **custom category**, ask two follow-ups: (1) one-line purpose statement, (2) any L3 ledgers needed (append-only logs, structured taxonomies). Consult `$SKILL_DIR/heuristics/format-strategy.md` to pick the format for each proposed L3 file (`.jsonl` for append-only / id-keyed records, `.yaml` for named taxonomies). `init_structure.sh` will scaffold an empty L2 stub for any category without a template dir; if the user asked for L3, draft those stubs in Step 6 alongside the L2.
+When the user adds a **custom category**, ask three follow-ups: (1) one-line purpose statement, (2) any L3 ledgers needed (append-only logs, structured taxonomies), (3) for each declared L3 ledger, a one-line **scan hint** that Step 9 will use to seed it (e.g. "scan TODO comments under `src/jobs/`", "parse `docs/playbooks/`", "git log matching `^perf:`"). Accept "none" to skip seeding for that ledger. Consult `$SKILL_DIR/heuristics/format-strategy.md` to pick the format for each proposed L3 file (`.jsonl` for append-only / id-keyed records, `.yaml` for named taxonomies). `init_structure.sh` will scaffold an empty L2 stub for any category without a template dir; if the user asked for L3, draft those stubs in Step 6 alongside the L2 and carry the scan hints into Step 9.
 
 The target repo picks the shape. Users may drop any canonical category that does not apply: a pure library may have no `operations/`, a data pipeline may have no `patterns/`, a CLI tool may have no `domain/`. `init_structure.sh` accepts any subset of category names matching `^[a-z][a-z0-9_-]*$`; the core set is a default, not an enforced minimum.
 
@@ -253,15 +253,43 @@ Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-upda
 
 ### Step 9: L3 seeding prompt
 
-Ask the user whether to seed L3 files from the codebase. Tailor the prompt to the final category set:
+For each L3 file in the final category set, apply the matching seed clause below. Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
 
-- `debugging/gotchas.jsonl`: scan for `TODO`, `FIXME`, `HACK`, `XXX`, `WARNING` comments. Group by directory/area. Present a trimmed candidate list and let the user approve a subset.
-- `architecture/decisions.jsonl`: look for `docs/adr/`, `docs/decisions/`, `ARCHITECTURE.md` headings with decision language. Present candidates.
-- `infra/decisions.jsonl` (if `infra/` present): scan `terraform/`, `helm/`, `k8s/` commit messages and any `infra/CHANGES.md` for infra-scoped decisions.
-- `data/experiments.jsonl` (if `data/` present): scan `experiments/`, `notebooks/`, `runs/` directories and any `RESULTS.md` for past run summaries.
-- `mobile/releases.jsonl` (if `mobile/` present): scan store-config files, `fastlane/` metadata, or git tags matching version patterns for prior rollouts.
+Append JSONL entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the target file's `_schema` value, verbatim (read the first line of the `.jsonl`). See `$SKILL_DIR/heuristics/format-strategy.md` § ID format.
 
-If yes, append entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the target file's `_schema` value, verbatim (read the first line of the `.jsonl`). See `$SKILL_DIR/heuristics/format-strategy.md` § ID format.
+**JSONL clauses.** One row per shipped `.jsonl`. Run only if the file exists.
+
+| File | `_schema` | Scan source |
+|---|---|---|
+| `architecture/decisions.jsonl` | `adr` | `docs/adr/`, `docs/decisions/`, `ARCHITECTURE.md` headings with decision language |
+| `patterns/reviews.jsonl` | `rv` | ESLint/Biome custom rules, `@deprecated` JSDoc / Python `DeprecationWarning`, CHANGELOG sections matching `BREAKING` / `Deprecated` |
+| `debugging/gotchas.jsonl` | `gotcha` | `TODO`, `FIXME`, `HACK`, `XXX`, `WARNING` comments grouped by directory/area |
+| `debugging/playbooks.jsonl` | `pb` | `docs/postmortems/`, `POSTMORTEM*.md`, rich `^fix:` commits (commit body longer than ~200 chars) |
+| `infra/decisions.jsonl` | `adr` | infra-scoped commits in `terraform/`, `helm/`, `k8s/`; `infra/CHANGES.md` |
+| `infra/runbooks.jsonl` | `rb` | `RUNBOOK*.md`, `docs/runbooks/`, `ops/`, `runbooks/` |
+| `data/experiments.jsonl` | `exp` | `experiments/`, `notebooks/`, `runs/` directories; `RESULTS.md` |
+| `mobile/gotchas.jsonl` | `mgotcha` | TODO/FIXME inside `ios/`, `android/`, `*.swift`, `*.kt`; tag each entry `platform: ios | android | both` |
+| `mobile/releases.jsonl` | `mrel` | store-config files, `fastlane/` metadata, git tags matching version patterns |
+| `workspace/migrations.jsonl` | `wsmig` | git log touching `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, root `package.json` `workspaces` field |
+
+For each JSONL clause: run the scan, render the candidate list per `$SKILL_DIR/heuristics/prompt-format.md`, then `AskUserQuestion` to approve a subset. Append approved entries with canonical IDs.
+
+**YAML clauses (skeleton-from-scan).** Run only if the file exists.
+
+| File | Skeleton source | Skeleton shape |
+|---|---|---|
+| `domain/glossary.yaml` | `$SCAN` §3 (top-level entities / models named in the repo) | `entities:` map, one key per entity, body `definition: ""` and `relationship: "see <file>"` |
+| `operations/variants.yaml` | i18n locales, env files, feature-flag tool from `$SCAN` §4 | `variants:` map with a `default:` key and one key per detected variant, each body `notes: ""` |
+| `data/datasets.yaml` | DB migrations, schema files, contents of `data/` | `datasets:` map, one key per dataset, body `source: "<file>"`, `schema: ""`, `refresh: ""`, `notes: ""` |
+
+For each YAML clause: render the proposed skeleton inside a fenced ` ```yaml ` block prefaced by `### \`<file>\` § skeleton`, then `AskUserQuestion`:
+
+- **Question**: "Accept this skeleton?"
+- **Options**: "Accept", "Edit", "Skip" (leave the existing empty stub).
+
+On accept or after edit, overwrite the YAML stub with the populated skeleton.
+
+**Custom L3 clause.** For each user-declared custom ledger from Step 3, look up the scan hint captured at declaration time. If the hint is non-empty, run it as a Bash/Explore query, present candidates the same way as built-in JSONL clauses, and append approved entries (using the ledger's own `_schema` prefix). If the hint is "none", skip.
 
 ### Step 10: Wrap up
 
