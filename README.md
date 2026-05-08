@@ -45,7 +45,65 @@ Customization knobs (custom context-dir name, dropping canonical modules, custom
 
 ## 🛠 Customizing the layout (config-driven)
 
-For richer layouts (canonical set under `docs/project/`, plus a sibling category at `docs/domain/glossary/`, etc.), drop an opt-in `exodia.config.yaml` at the repo root **before** running `/exodia` for the first time. Categories can be relocated, dropped, or added with arbitrary repo-rooted paths:
+For richer layouts (canonical set under `docs/project/`, plus a sibling category at `docs/domain/glossary/`, etc.), drop an opt-in `exodia.config.yaml` at the repo root **before** running `/exodia` for the first time. Categories can be relocated, dropped, or added with arbitrary repo-rooted paths.
+
+- **Opt-in.** Absent → the interactive flow runs unchanged.
+- **One-shot.** Consumed exactly once at the first scaffold run (Fresh or Merge mode). Incremental re-runs ignore it.
+- **Throwaway.** After the first run, the AGENTS.md router table (wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->`) is the sole persistent source of truth. Delete or `.gitignore` the file once the scaffolded tree is committed.
+- **Sparse + defaults.** Encode only the diff from the canonical layout. Anything not declared keeps its default.
+
+### Schema
+
+```yaml
+context_dir: docs/project          # default root for canonical categories without explicit path
+categories:
+  domain:    { drop: true }        # remove canonical category
+  operations: { drop: true }
+  glossary:                        # custom category (name not in canonical set)
+    path: docs/domain/glossary     # repo-rooted, may escape context_dir
+    custom: true
+    l3: [glossary.yaml]            # optional; filenames only, schema inferred from name
+```
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `context_dir` | string | `context` | Default prefix for canonical categories that omit `path`. |
+| `categories` | map | `{}` | Map keyed by category name. |
+| `categories.<name>.path` | string | `<context_dir>/<name>` | Repo-rooted path. Required for custom categories outside `context_dir`. |
+| `categories.<name>.drop` | bool | `false` | Exclude a canonical category. Mutually exclusive with `path` / `custom` / `l3`. |
+| `categories.<name>.custom` | bool | `false` | Required for non-canonical names. Signals "model drafts L2 + infers L3 if `l3:` absent". |
+| `categories.<name>.l3` | list[string] | absent | Override model's L3 inference. Each entry is a filename matching `^[a-z][a-z0-9_-]*\.(yaml\|jsonl)$`. Schema inferred via canonical-name lookup when the filename matches a known ledger; otherwise model writes the schema. |
+
+### Canonical category names
+
+Recognized as canonical (no `custom: true` required):
+
+`architecture`, `patterns`, `domain`, `operations`, `debugging`, `mobile`, `workspace`, `data`, `infra`.
+
+Any other name in `categories` requires `custom: true` or it is rejected at parse time.
+
+### Path semantics
+
+- Repo-rooted absolute (relative to `$TARGET`).
+- Regex: `^[a-z._-][a-z0-9._/-]*$`.
+- No `..` segments, no leading `/`, no trailing `/`.
+- Two categories may not share a path.
+- One category's path may not be a strict prefix of another's.
+
+### Validation rules
+
+`scripts/parse_config.py` rejects (with line-numbered errors on stderr, exit 65):
+
+1. Path violates the regex above or contains `..` / leading `/` / trailing `/`.
+2. Two categories share `path`.
+3. One category's `path` is a prefix of another's.
+4. Non-canonical name without `custom: true`.
+5. `drop: true` combined with any other field.
+6. `l3` filename with an extension other than `.yaml` or `.jsonl`.
+
+### Worked example: weroad case
+
+A repo that wants the canonical set under `docs/project/` *and* a `glossary` category at `docs/domain/glossary/`, while preserving sibling user-owned dirs like `docs/domain/handbook/` and `docs/domain/tech/`:
 
 ```yaml
 context_dir: docs/project
@@ -58,7 +116,16 @@ categories:
     l3: [glossary.yaml]
 ```
 
-The config is throwaway: consumed once, then the AGENTS.md router table (wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->`) becomes the sole source of truth. Re-runs ignore the config. Full schema, validation rules, and worked examples in [`docs/config-schema.md`](docs/config-schema.md).
+Resolved layout:
+
+| Category | Path | Kind |
+| --- | --- | --- |
+| `architecture` | `docs/project/architecture` | canonical |
+| `patterns` | `docs/project/patterns` | canonical |
+| `debugging` | `docs/project/debugging` | canonical |
+| `glossary` | `docs/domain/glossary` | custom |
+
+`docs/domain/handbook/` and `docs/domain/tech/` are untouched. The wrap-up step prints a sibling notice naming them so the user sees they are not managed.
 
 ## 🎯 Usage
 

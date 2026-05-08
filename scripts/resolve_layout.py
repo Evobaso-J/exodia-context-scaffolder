@@ -45,20 +45,6 @@ import json
 import sys
 from pathlib import Path
 
-# Map canonical category name -> source dir under templates/.
-# Categories not in templates/<name> fall back to templates/optional/<name>.
-CANONICAL_TEMPLATE_DIRS = {
-    "architecture": "architecture",
-    "patterns": "patterns",
-    "domain": "domain",
-    "operations": "operations",
-    "debugging": "debugging",
-    "mobile": "optional/mobile",
-    "workspace": "optional/workspace",
-    "data": "optional/data",
-    "infra": "optional/infra",
-}
-
 # Canonical filename -> ordered list of (category-name, schema-name).
 # Tiebreaker for shared filenames (decisions.jsonl, gotchas.jsonl): prefer
 # the category whose name matches the L2 the ledger lives next to; else
@@ -78,19 +64,24 @@ CANONICAL_LEDGERS: dict[str, list[tuple[str, str]]] = {
 }
 
 
+def _category_template_dir(skill_dir: Path, name: str) -> Path | None:
+    candidate = skill_dir / "templates" / name
+    return candidate if candidate.is_dir() else None
+
+
 def _l2_template_path(skill_dir: Path, name: str) -> Path | None:
-    rel = CANONICAL_TEMPLATE_DIRS.get(name)
-    if not rel:
+    src = _category_template_dir(skill_dir, name)
+    if src is None:
         return None
-    candidate = skill_dir / "templates" / rel / f"{name.upper()}.md.tmpl"
+    candidate = src / f"{name.upper()}.md.tmpl"
     return candidate if candidate.is_file() else None
 
 
 def _l3_template_path(skill_dir: Path, category: str, filename: str) -> Path | None:
-    rel = CANONICAL_TEMPLATE_DIRS.get(category)
-    if not rel:
+    src = _category_template_dir(skill_dir, category)
+    if src is None:
         return None
-    candidate = skill_dir / "templates" / rel / f"{filename}.tmpl"
+    candidate = src / f"{filename}.tmpl"
     return candidate if candidate.is_file() else None
 
 
@@ -116,11 +107,8 @@ def _default_l3_specs(skill_dir: Path, category: str) -> list[dict] | None:
     Mirrors today's `init_structure.sh` behavior of copying every `.tmpl` in
     the category's template dir.
     """
-    rel = CANONICAL_TEMPLATE_DIRS.get(category)
-    if not rel:
-        return None
-    src = skill_dir / "templates" / rel
-    if not src.is_dir():
+    src = _category_template_dir(skill_dir, category)
+    if src is None:
         return None
     specs: list[dict] = []
     for tmpl in sorted(src.glob("*.tmpl")):

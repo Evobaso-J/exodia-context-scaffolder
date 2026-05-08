@@ -6,7 +6,7 @@ Reads the throwaway opt-in config that drives layout customization for the
 shape; emits line-numbered errors on stderr and exits non-zero on validation
 failure.
 
-Schema (locked design, see docs/plan-config-driven-layout.md):
+Schema (see README "Customizing the layout" section for the full reference):
 
     context_dir: docs/project          # default root for canonical categories
     categories:

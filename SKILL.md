@@ -47,7 +47,7 @@ Execute steps in order. **Do not skip steps**. Use `AskUserQuestion` for user in
 - Confirm `$SKILL_DIR` = directory of this SKILL.md. If you cannot resolve it, fall back to `~/.claude/skills/exodia`.
 - Check `git rev-parse --is-inside-work-tree` in `$TARGET`. If not a git repo, continue but warn the user ("branch-scoped dedup in self-update rules will be ineffective without git").
 - Hold a variable `$CONTEXT_DIR` throughout the run. It names the directory that will hold the context tree inside `$TARGET`. Default is `context`; the user may pick another name in Step 3a (Fresh / Merge) or it is auto-detected in Step 1 (Incremental).
-- Resolve `$CONFIG_PATH = $TARGET/exodia.config.yaml`. If the file exists, the run is **config-driven**: layout comes from the config rather than from interactive prompts. If absent, the interactive flow runs unchanged. Config is throwaway and only consumed at first scaffold (Fresh or Merge); incremental re-runs ignore it. See `$SKILL_DIR/docs/config-schema.md` for the schema.
+- Resolve `$CONFIG_PATH = $TARGET/exodia.config.yaml`. If the file exists, the run is **config-driven**: layout comes from the config rather than from interactive prompts. If absent, the interactive flow runs unchanged. Config is throwaway and only consumed at first scaffold (Fresh or Merge); incremental re-runs ignore it. Schema reference: see the "Customizing the layout" section in `$SKILL_DIR/README.md`.
 
 ### Step 1: Preflight
 
@@ -235,7 +235,7 @@ bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" --pairs \
   glossary=docs/domain/glossary
 ```
 
-In both shapes the helper creates the destination dirs with `mkdir -p`, copies `.tmpl` files from `$SKILL_DIR/templates/<canonical-name>/` (or `$SKILL_DIR/templates/optional/<name>/`) when the category name matches a template dir, and writes a default L2 stub (`## Purpose`, `## Key Files`, `## L3 Data`) for custom categories with no template. Existing destination files are never overwritten. L3 files declared via `l3:` in the config but not auto-copied by `init_structure.sh` (because the host category has no template dir) are written by Step 6 from the schema template resolved in `$LAYOUT_MAP[*].l3_specs`.
+In both shapes the helper creates the destination dirs with `mkdir -p`, copies `.tmpl` files from `$SKILL_DIR/templates/<canonical-name>/` when the category name matches a template dir, and writes a default L2 stub (`## Purpose`, `## Key Files`, `## L3 Data`) for custom categories with no template. Existing destination files are never overwritten. L3 files declared via `l3:` in the config but not auto-copied by `init_structure.sh` (because the host category has no template dir) are written by Step 6 from the schema template resolved in `$LAYOUT_MAP[*].l3_specs`.
 
 ### Step 6: Draft L2 content
 

@@ -10,10 +10,10 @@
 #        init_structure.sh <target-dir> --pairs <name1>=<path1> [<name2>=<path2> ...]
 #
 #      <pathN> is repo-rooted relative to <target-dir>. Each path is created
-#      with `mkdir -p`. Templates from $SKILL_DIR/templates/<name>/ (or
-#      $SKILL_DIR/templates/optional/<name>/) are copied in by canonical name.
-#      Names not matching any canonical template dir produce an empty L2 stub
-#      with the default skeleton (## Purpose, ## Key Files, ## L3 Data).
+#      with `mkdir -p`. Templates from $SKILL_DIR/templates/<name>/ are copied
+#      in by canonical name. Names not matching any canonical template dir
+#      produce an empty L2 stub with the default skeleton (## Purpose, ## Key
+#      Files, ## L3 Data).
 #
 # In both shapes, existing destination files are left untouched.
 #
@@ -69,10 +69,6 @@ template_dir_for () {
   local cat="$1"
   if [[ -d "$TEMPLATES/$cat" ]]; then
     printf '%s' "$TEMPLATES/$cat"
-    return
-  fi
-  if [[ -d "$TEMPLATES/optional/$cat" ]]; then
-    printf '%s' "$TEMPLATES/optional/$cat"
     return
   fi
   printf ''

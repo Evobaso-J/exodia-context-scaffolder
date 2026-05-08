@@ -8,10 +8,10 @@ The Explore subagent reports which triggers fire. Apply this table verbatim.
 
 | Trigger (any of) | Add category | Template |
 | ---------------- | ------------ | -------- |
-| `package.json` deps include one of: `react-native`, `expo`, `@react-native-*` • Top-level `ios/` + `android/` dirs • Presence of `*.swift`, `*.kt`, `*.xcodeproj` • `pubspec.yaml` + `lib/` with Dart files | `mobile/` | `templates/optional/mobile/MOBILE.md.tmpl` |
-| `pnpm-workspace.yaml` • `turbo.json` • `nx.json` • `lerna.json` • `apps/` + `packages/` dirs with separate `package.json` in each | `workspace/` | `templates/optional/workspace/WORKSPACE.md.tmpl` |
-| Deps include one of: `torch`, `tensorflow`, `jax`, `scikit-learn`, `pandas`, `numpy` with training code • Presence of `notebooks/`, `models/`, `data/` directories • `.ipynb` files in tracked paths • `dvc.yaml` | `data/` | `templates/optional/data/DATA.md.tmpl` |
-| `*.tf` files • `terraform/` dir • `helm/` dir with `Chart.yaml` • `k8s/` or `kustomize/` dirs • `cdk.json` • `pulumi.yaml` • `cloudformation/` | `infra/` | `templates/optional/infra/INFRA.md.tmpl` |
+| `package.json` deps include one of: `react-native`, `expo`, `@react-native-*` • Top-level `ios/` + `android/` dirs • Presence of `*.swift`, `*.kt`, `*.xcodeproj` • `pubspec.yaml` + `lib/` with Dart files | `mobile/` | `templates/mobile/MOBILE.md.tmpl` |
+| `pnpm-workspace.yaml` • `turbo.json` • `nx.json` • `lerna.json` • `apps/` + `packages/` dirs with separate `package.json` in each | `workspace/` | `templates/workspace/WORKSPACE.md.tmpl` |
+| Deps include one of: `torch`, `tensorflow`, `jax`, `scikit-learn`, `pandas`, `numpy` with training code • Presence of `notebooks/`, `models/`, `data/` directories • `.ipynb` files in tracked paths • `dvc.yaml` | `data/` | `templates/data/DATA.md.tmpl` |
+| `*.tf` files • `terraform/` dir • `helm/` dir with `Chart.yaml` • `k8s/` or `kustomize/` dirs • `cdk.json` • `pulumi.yaml` • `cloudformation/` | `infra/` | `templates/infra/INFRA.md.tmpl` |
 
 ## Propose, don't impose
 
