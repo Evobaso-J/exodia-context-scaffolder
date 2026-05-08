@@ -1,8 +1,0 @@
-context_dir: docs/project
-categories:
-  domain:     { drop: true }
-  operations: { drop: true }
-  glossary:
-    path: docs/domain/glossary
-    custom: true
-    l3: [glossary.yaml]

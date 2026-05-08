@@ -1,3 +1,0 @@
-categories:
-  parent: { path: a/b, custom: true }
-  child:  { path: a/b/c, custom: true }
