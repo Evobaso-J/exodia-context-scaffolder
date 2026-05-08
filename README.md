@@ -43,6 +43,23 @@ Restart Claude Code (or open a new session). Run `/exodia` in any repo. The dire
 
 Customization knobs (custom context-dir name, dropping canonical modules, custom categories, optional auto-add detectors): see [`SKILL.md`](SKILL.md).
 
+## 🛠 Customizing the layout (config-driven)
+
+For richer layouts (canonical set under `docs/project/`, plus a sibling category at `docs/domain/glossary/`, etc.), drop an opt-in `exodia.config.yaml` at the repo root **before** running `/exodia` for the first time. Categories can be relocated, dropped, or added with arbitrary repo-rooted paths:
+
+```yaml
+context_dir: docs/project
+categories:
+  domain:     { drop: true }
+  operations: { drop: true }
+  glossary:
+    path: docs/domain/glossary
+    custom: true
+    l3: [glossary.yaml]
+```
+
+The config is throwaway: consumed once, then the AGENTS.md router table (wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->`) becomes the sole source of truth. Re-runs ignore the config. Full schema, validation rules, and worked examples in [`docs/config-schema.md`](docs/config-schema.md).
+
 ## 🎯 Usage
 
 ```

@@ -47,8 +47,24 @@ Execute steps in order. **Do not skip steps**. Use `AskUserQuestion` for user in
 - Confirm `$SKILL_DIR` = directory of this SKILL.md. If you cannot resolve it, fall back to `~/.claude/skills/exodia`.
 - Check `git rev-parse --is-inside-work-tree` in `$TARGET`. If not a git repo, continue but warn the user ("branch-scoped dedup in self-update rules will be ineffective without git").
 - Hold a variable `$CONTEXT_DIR` throughout the run. It names the directory that will hold the context tree inside `$TARGET`. Default is `context`; the user may pick another name in Step 3a (Fresh / Merge) or it is auto-detected in Step 1 (Incremental).
+- Resolve `$CONFIG_PATH = $TARGET/exodia.config.yaml`. If the file exists, the run is **config-driven**: layout comes from the config rather than from interactive prompts. If absent, the interactive flow runs unchanged. Config is throwaway and only consumed at first scaffold (Fresh or Merge); incremental re-runs ignore it. See `$SKILL_DIR/docs/config-schema.md` for the schema.
 
 ### Step 1: Preflight
+
+If `$CONFIG_PATH` is present, parse and validate it **before** mode classification:
+
+```bash
+python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH"
+```
+
+On non-zero exit, abort the run and surface the line-numbered errors from stderr verbatim. Do not attempt to proceed without the config; the user must fix it. On success, pipe the JSON output through `resolve_layout.py` and store the result as `$LAYOUT_MAP`:
+
+```bash
+python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH" \
+  | python3 "$SKILL_DIR/scripts/resolve_layout.py" --skill-dir "$SKILL_DIR"
+```
+
+`$LAYOUT_MAP` is the single source of truth for `name → path`, kind, L2 template, and L3 specs that every later step consumes.
 
 Detect what already exists:
 
@@ -88,7 +104,9 @@ Classify into one of three modes:
     - "No, stop": exit without changes. You can revisit later by re-running `/exodia`.
 
   If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
-- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom; do not ask the dir-name question again.
+- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom; do not ask the dir-name question again. If `$CONFIG_PATH` is also present, ignore it and print one warning line: `Config detected but tree exists; ignoring. Delete \`exodia.config.yaml\` to silence this warning.`
+
+When entering the *Incremental re-run* section, parse the **router region** of `$TARGET/AGENTS.md` for the canonical category → path map. The region is wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers around the `## Context Router` table. If the markers are absent (the scaffold pre-dates this feature), fall back to a plain `<!-- exodia:section:` grep across `$TARGET/$EXISTING_CONTEXT_DIR/`, then lazily inject the markers around the router table on the next emit and note the migration in the wrap-up summary.
 
 ### Step 2: Scan the repo
 
@@ -115,7 +133,9 @@ Store the returned scan as your working `$SCAN`.
 
 ### Step 3: Propose categories
 
-The **default** starter set is the five canonical categories:
+**Config-driven branch.** If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirely. Use the resolved categories from `$LAYOUT_MAP` as the confirmed set. Still run the detector heuristics in `$SKILL_DIR/heuristics/detectors.md`: for each detected optional canonical (`mobile`, `workspace`, `data`, `infra`) **not already in `$LAYOUT_MAP`** and not declared with `drop: true`, present one focused `AskUserQuestion` per detected category to add it under `<context_dir>/<name>/` (using `context_dir` from the config). Accepted additions are merged into `$LAYOUT_MAP`. Then jump to Step 4. The custom-category interview below does not run; custom categories come exclusively from the config.
+
+**Interactive branch.** When no config is present, the **default** starter set is the five canonical categories:
 
 - `architecture/`
 - `patterns/`
@@ -148,7 +168,7 @@ The target repo picks the shape. Users may drop any canonical category that does
 
 ### Step 3a: Name the context directory
 
-Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1).
+Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1). Skip entirely when `$LAYOUT_MAP` is set: paths come from the config, and `context_dir` is the default prefix already baked into each canonical category's resolved path.
 
 `AskUserQuestion`:
 
@@ -178,7 +198,7 @@ If preflight classified as Merge (the user already granted permission in Step 1)
    - If `AGENTS.md` exists (with or without `CLAUDE.md`), it is the source.
    - If only `CLAUDE.md` exists, parse that.
 2. Run `python3 "$SKILL_DIR/scripts/parse_existing.py" "<source-path>"`. It returns JSON of `[{heading, body}]` split by `##`.
-3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Unmappable headings → `_unsorted` bucket.
+3. For each heading, apply `$SKILL_DIR/heuristics/section-map.md` keyword rules to pick a target category. Restrict the candidate set to the categories present in `$LAYOUT_MAP` when config-driven (canonical + custom); otherwise use the interactively confirmed set from Step 3. Unmappable headings → `_unsorted` bucket.
 4. Render the mapping as a markdown table:
 
    ```
@@ -197,23 +217,35 @@ If preflight classified as Merge (the user already granted permission in Step 1)
 
 ### Step 5: Initialize structure
 
-Run the scaffolder helper:
+Run the scaffolder helper.
+
+**Interactive (no config):**
 
 ```bash
 bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" "$CONTEXT_DIR" <space-separated-category-names>
 ```
 
-`$CONTEXT_DIR` is the second positional argument. This creates `$TARGET/$CONTEXT_DIR/<category>/` for each requested category, copies `.tmpl` files from `$SKILL_DIR/templates/`, and writes the `_schema` line into each `.jsonl`. YAML stubs ship with their top-level key + a comment block.
+**Config-driven (`$LAYOUT_MAP` set):** pass each category's resolved path via the `--pairs` form, one `name=path` per category in `$LAYOUT_MAP`:
+
+```bash
+bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" --pairs \
+  architecture=docs/project/architecture \
+  patterns=docs/project/patterns \
+  debugging=docs/project/debugging \
+  glossary=docs/domain/glossary
+```
+
+In both shapes the helper creates the destination dirs with `mkdir -p`, copies `.tmpl` files from `$SKILL_DIR/templates/<canonical-name>/` (or `$SKILL_DIR/templates/optional/<name>/`) when the category name matches a template dir, and writes a default L2 stub (`## Purpose`, `## Key Files`, `## L3 Data`) for custom categories with no template. Existing destination files are never overwritten. L3 files declared via `l3:` in the config but not auto-copied by `init_structure.sh` (because the host category has no template dir) are written by Step 6 from the schema template resolved in `$LAYOUT_MAP[*].l3_specs`.
 
 ### Step 6: Draft L2 content
 
-For each confirmed category, in order (architecture, patterns, domain, operations, debugging, then optional extras):
+For each confirmed category, in order (architecture, patterns, domain, operations, debugging, then optional extras and custom categories):
 
-1. Read `$SKILL_DIR/templates/<category>/<CATEGORY>.md.tmpl` to see the section skeleton and lock the voice (terse, factual, table- and bullet-heavy, inline file citations, no marketing prose).
+1. **Choose the section skeleton.** If the category has an `l2_template_path` (canonical with template), read it and lock the voice (terse, factual, table- and bullet-heavy, inline file citations, no marketing prose). For custom categories with no template (`l2_template_path: null`), use the default skeleton already written by `init_structure.sh` (`## Purpose`, `## Key Files`, `## L3 Data`) plus any extra `##` sections you deem useful from the scan.
 2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words.
 3. Preserve the `<!-- exodia:section:<id> -->` markers; they drive incremental re-runs.
 4. **Never duplicate data that already lives in the repo.** Versions, ports, env names, paths, commands, config values, dependency lists, script names; all must be *referenced*, not copied. Write `see \`package.json\` \`engines.node\`` or `defined in \`.env.example\``, never the literal value. Duplicated data rots; pointers survive edits.
-5. **`## L3 Data` section.** When the L2 template has a `<!-- exodia:section:l3 -->` block, list the L3 files that ship with the module. For custom categories with no template, draft this section from the L3 ledgers requested in Step 3, picking formats per `$SKILL_DIR/heuristics/format-strategy.md`. Each line: `` - `<file>`: <one-line purpose>. ``
+5. **`## L3 Data` section.** Drive this section from `l3_specs` in `$LAYOUT_MAP` when config-driven. When the L2 template has a `<!-- exodia:section:l3 -->` block, list the L3 files that ship with the module. For custom categories whose `l3_specs` are populated by the config, list those files (each entry a `{filename, schema_name, schema_template_path}`); copy the schema template to the destination if `schema_template_path` is non-null and the destination does not yet exist; otherwise propose the schema body inline. For custom categories where `l3_specs` is `null`, propose filenames + schemas yourself (Q13-B), picking formats per `$SKILL_DIR/heuristics/format-strategy.md`. Each line in the L3 section reads `` - `<file>`: <one-line purpose>. ``
 
 Do **not** write the file to disk yet. Hold the draft in memory.
 
@@ -237,23 +269,50 @@ Compose `$TARGET/AGENTS.md` from:
 - `$SKILL_DIR/rules/universal.md` (always included)
 - `$SKILL_DIR/rules/conditional/operations-awareness.md` *only if `operations/` is in the final category set*
 - `$SKILL_DIR/rules/conditional/lint-check.md` if scan detected any lint/test/typecheck scripts; substitute the detected commands into the snippet
-- `$SKILL_DIR/rules/self-update.md` (always, near the top). When composing the Self-Update Rules block, drop table rows whose target path is not in the final category set. This applies to both core and optional rows (e.g. drop the `operations/variants.yaml` row if `operations/` was dropped, drop the `domain/glossary.yaml` row if `domain/` was dropped, drop both `infra/*` rows if `infra/` was dropped). The `File Format Strategy` § at the bottom of `self-update.md` is always retained; it guides future agents adding new ledgers.
+- `$SKILL_DIR/rules/self-update.md` (always, near the top).
+
+**Path placeholder resolution.** `self-update.md` uses `{{path:<ledger-key>}}` placeholders instead of literal paths so the rules adapt to per-category paths. Build a map `ledger-key → resolved full path` from `$LAYOUT_MAP` (interactive runs construct the same map by joining `$CONTEXT_DIR` with each canonical category):
+
+| Ledger key | Resolved path source |
+| --- | --- |
+| `decisions` | `<architecture-path>/decisions.jsonl` |
+| `infra-decisions` | `<infra-path>/decisions.jsonl` |
+| `reviews` | `<patterns-path>/reviews.jsonl` |
+| `glossary` | `<domain-path>/glossary.yaml` |
+| `variants` | `<operations-path>/variants.yaml` |
+| `gotchas` | `<debugging-path>/gotchas.jsonl` |
+| `mobile-gotchas` | `<mobile-path>/gotchas.jsonl` |
+| `playbooks` | `<debugging-path>/playbooks.jsonl` |
+| `runbooks` | `<infra-path>/runbooks.jsonl` |
+| `experiments` | `<data-path>/experiments.jsonl` |
+| `datasets` | `<data-path>/datasets.yaml` |
+| `releases` | `<mobile-path>/releases.jsonl` |
+| `migrations` | `<workspace-path>/migrations.jsonl` |
+
+For each table row in the rendered self-update block:
+
+1. Substitute `{{path:<key>}}` against the map. **Drop the entire row** if the key is unresolved (the host category is dropped or absent from the final set, or the L3 file in the host category's `l3_specs` is missing). This generalizes today's drop-row behavior.
+2. Append generated rows for **custom-category ledgers** (categories with `kind: custom` in `$LAYOUT_MAP` whose `l3_specs` is non-empty). For each `(category, ledger)` pair: if the ledger's `schema_name` is a known canonical name (e.g. `glossary`, `gotcha`, `adr`), reuse the prose from the corresponding canonical row; otherwise write a one-line "When to update" hint from the category's purpose statement.
+
+The `File Format Strategy` § at the bottom of `self-update.md` is always retained; it guides future agents adding new ledgers.
 
 Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
 1. Project overview (one paragraph from scan)
 2. Commands (point to the detected package manifest file)
-3. Context Router table (one row per confirmed category, linking to `$CONTEXT_DIR/<category>/<CATEGORY>.md`)
+3. Context Router table (one row per confirmed category, linking to the resolved `<path>/<CATEGORY>.md`). Wrap the table in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers (the template already does this); incremental re-runs parse this region for the category → path map, so do not move the markers or add prose between them and the table.
 4. Behavioral Rules (universal + conditional)
-5. Self-Update Rules (full block)
+5. Self-Update Rules (full block, after placeholder substitution + custom-row append)
 6. Quick Action Table (common dev phrases → file to read)
-7. Context Structure (tree diagram, rooted at `$CONTEXT_DIR/`)
+7. Context Structure (tree diagram). Group resolved paths by their longest common prefix and render one tree per group, so multi-root layouts (e.g. `docs/project/...` and `docs/domain/...`) read cleanly.
 
-Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-update.md`, and the `{{CONTEXT_TREE}}` diagram) contain `{{CONTEXT_DIR}}` placeholders. Substitute all occurrences with the actual value of `$CONTEXT_DIR` before writing the emitted `AGENTS.md`.
+Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-update.md`, and the `{{CONTEXT_TREE}}` diagram) contain `{{CONTEXT_DIR}}` placeholders. Substitute every `{{CONTEXT_DIR}}` with `$CONTEXT_DIR` for interactive runs. For config-driven runs, `{{CONTEXT_DIR}}` is replaced by `context_dir` from the config (the default prefix), and `{{path:<key>}}` placeholders carry the per-category specifics.
 
 ### Step 9: L3 seeding prompt
 
-For each L3 file in the final category set, apply the matching seed clause below. Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
+For each L3 file in the final category set, apply the matching seed clause below. The "target file" is now resolved against `$LAYOUT_MAP` (config-driven) or `$TARGET/$CONTEXT_DIR/<category>/<file>` (interactive). Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
+
+For **custom-category ledgers** declared in the config, extend this step with one extra clause per `(category, ledger)` pair from `$LAYOUT_MAP`. If the ledger's `schema_name` is a known canonical (e.g. `glossary`, `gotcha`, `adr`), reuse that schema's scan source from the table below. Otherwise use the scan source the model proposed alongside the schema in Step 6 (carry it through the layout map). Append entries the same way as built-in clauses, using the ledger's own `_schema` prefix (canonical or model-invented).
 
 Append JSONL entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the target file's `_schema` value, verbatim (read the first line of the `.jsonl`). See `$SKILL_DIR/heuristics/format-strategy.md` § ID format.
 
@@ -295,9 +354,12 @@ On accept or after edit, overwrite the YAML stub with the populated skeleton.
 
 Print a short summary:
 
-- What was created (counts: L2 files, L3 files)
-- Next steps for the user (how to iterate: just edit the files; the self-update rules handle growth)
-- Reminder: running `/exodia` again triggers incremental re-run, not a fresh scaffold
+- What was created (counts: L2 files, L3 files).
+- **Sibling notice (config-driven only).** For each parent directory shared by two or more managed paths (e.g. `docs/domain/` is parent to a managed `glossary/` plus user-owned `handbook/` and `tech/`), list the unmanaged sibling dirs grouped per parent: `Note: docs/domain/ has 2 unmanaged sibling dirs (handbook/, tech/) — left untouched.`. Use `:` or `;` instead of `—` if the surrounding doc style avoids em-dashes.
+- **Throwaway-config reminder (config-driven only).** "Delete or gitignore `exodia.config.yaml`. Re-runs read AGENTS.md, not config."
+- **Lazy-migration note (Incremental, pre-feature scaffold).** When Step 1 had to inject the router brackets because they were missing, mention it in one line: "Injected `<!-- exodia:router:start/end -->` markers around the router table for future incremental discovery."
+- Next steps for the user (how to iterate: just edit the files; the self-update rules handle growth).
+- Reminder: running `/exodia` again triggers incremental re-run, not a fresh scaffold.
 
 ---
 

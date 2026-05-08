@@ -1,0 +1,14 @@
+context_dir: ai
+categories:
+  architecture: { drop: true }
+  patterns:     { drop: true }
+  domain:       { drop: true }
+  operations:   { drop: true }
+  debugging:    { drop: true }
+  vibes:
+    path: ai/vibes
+    custom: true
+  taxonomy:
+    path: ai/taxonomy
+    custom: true
+    l3: [glossary.yaml]
