@@ -1,0 +1,6 @@
+structure:
+  - architecture
+  - patterns
+  - domain
+  - operations
+  - debugging

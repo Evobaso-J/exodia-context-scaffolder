@@ -1,0 +1,3 @@
+fail
+rule: 3 (group-name set and category-leaf set must be disjoint)
+detail: 'architecture' appears as both a group and a leaf.

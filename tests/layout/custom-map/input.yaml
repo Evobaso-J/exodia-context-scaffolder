@@ -1,0 +1,14 @@
+structure:
+  engineering:
+    - architecture
+    - patterns
+    - perf:
+        purpose: "Performance work and benchmarks"
+        ledgers:
+          - file: bench.jsonl
+            schema: bench
+            scan_hint: "TODO comments under src/jobs/"
+          - file: profiles.yaml
+            schema: prof
+  product:
+    - domain

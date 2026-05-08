@@ -1,0 +1,9 @@
+context_dir: context
+structure:
+  engineering:
+    - architecture
+    - patterns
+    - debugging
+    - operations
+  product:
+    - domain

@@ -1,0 +1,10 @@
+pass
+context_dir: context (explicit)
+$LAYOUT:
+  architecture -> engineering/architecture
+  patterns     -> engineering/patterns
+  debugging    -> engineering/debugging
+  operations   -> engineering/operations
+  domain       -> product/domain
+$CATEGORIES: [architecture, patterns, debugging, operations, domain]
+$CUSTOM_LEDGERS: []

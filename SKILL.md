@@ -48,6 +48,53 @@ Execute steps in order. **Do not skip steps**. Use `AskUserQuestion` for user in
 - Check `git rev-parse --is-inside-work-tree` in `$TARGET`. If not a git repo, continue but warn the user ("branch-scoped dedup in self-update rules will be ineffective without git").
 - Hold a variable `$CONTEXT_DIR` throughout the run. It names the directory that will hold the context tree inside `$TARGET`. Default is `context`; the user may pick another name in Step 3a (Fresh / Merge) or it is auto-detected in Step 1 (Incremental).
 
+### Step 0a: Load `.exodia.yaml`
+
+If `$TARGET/.exodia.yaml` exists, parse it via `Read` and validate. The file is **authoritative when present**: a populated `structure:` defines the final category set and their on-disk grouping. Absent file = today's flat behavior.
+
+**Schema** (see also `$SKILL_DIR/heuristics/format-strategy.md` § "Layout file"):
+
+```yaml
+context_dir: context        # optional; default "context"
+structure:
+  engineering:
+    - architecture
+    - patterns
+    - debugging
+    - operations
+    - perf:                 # custom category (map form)
+        purpose: "Performance work and benchmarks"
+        ledgers:
+          - file: bench.jsonl
+            schema: bench
+            scan_hint: "TODO comments under src/jobs/"
+  product:
+    - domain
+```
+
+Convention: under any key, a list value holds **leaves** (categories), a map value holds **subgroups**. List items are either bare strings (canonical category names) or single-key maps with a custom-category body (`purpose` + optional `ledgers`).
+
+**Validation rules** (all errors fatal at file load; cite the offending rule and stop):
+
+1. `context_dir` (if present) matches `^[a-z._-][a-z0-9._-]*$` and is not `.` or `..`.
+2. Every group name and category name (canonical or custom) matches `^[a-z][a-z0-9_-]*$`.
+3. The set of group names and the set of category leaf names are disjoint (no name appears as both a group and a leaf).
+4. Every leaf appears at most once anywhere in the tree (a category cannot be mirrored across paths).
+5. Custom-category map: `purpose` is a non-empty string. `ledgers` is optional; each ledger entry needs `file` and `schema`, `scan_hint` is optional.
+6. Tree depth has no hard cap (arbitrary nesting allowed).
+
+**Derived structures** (hold for the rest of the run):
+
+- `$LAYOUT`: ordered map `<leaf-category-name> → <relative-path-under-$CONTEXT_DIR>`. Examples: flat layout maps `architecture → architecture`; nested layout maps `architecture → engineering/architecture`. In flat mode (no file), `$LAYOUT` is empty (sentinel for downstream gates).
+- `$CATEGORIES`: ordered list of leaf names from `structure:` (the final category set).
+- `$CUSTOM_LEDGERS`: for each custom-category map, capture `(category, file, schema, scan_hint)` tuples. Used in Step 9.
+- If `context_dir:` is present in the file, set `$CONTEXT_DIR` to that value and skip Step 3a (collision check still runs).
+
+**Behavior gating** in subsequent steps:
+
+- `$LAYOUT` non-empty: Step 3 set-prompt is skipped; Step 5 passes full relative paths; Step 6 destinations follow `$LAYOUT`; Step 7 H3 anchors use the resolved path; Step 8 path-rewrites rule snippets and table rows; Step 9 resolves canonical keys via `$LAYOUT`; Incremental re-run runs the drift-reconciliation flow.
+- `$LAYOUT` empty: every step behaves exactly as before (flat tree, full prompts).
+
 ### Step 1: Preflight
 
 Detect what already exists:
@@ -88,7 +135,7 @@ Classify into one of three modes:
     - "No, stop": exit without changes. You can revisit later by re-running `/exodia`.
 
   If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
-- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom; do not ask the dir-name question again.
+- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to the *Incremental re-run* section at the bottom; do not ask the dir-name question again. If `.exodia.yaml` was loaded in Step 0a and a context tree exists, this is also Incremental: the file may have moved categories since the previous run, and the re-run flow reconciles file vs. on-disk tree.
 
 ### Step 2: Scan the repo
 
@@ -115,7 +162,23 @@ Store the returned scan as your working `$SCAN`.
 
 ### Step 3: Propose categories
 
-The **default** starter set is the five canonical categories:
+**`.exodia.yaml` shortcut.** If `$LAYOUT` is non-empty (Step 0a loaded a file), skip the proposal flow entirely. The file is authoritative; the leaves of `structure:` are the final category set. Render the resolved set as a confirmation block (no question), shaped like:
+
+```
+Layout from .exodia.yaml:
+  engineering/
+    architecture/
+    patterns/
+    debugging/
+    operations/
+    perf/         (custom: "Performance work and benchmarks")
+  product/
+    domain/
+```
+
+Then proceed to Step 3a. Custom categories declared in the file do **not** retrigger the per-category L3 follow-ups below; their `purpose` and `ledgers` are taken verbatim from the file.
+
+The **default** starter set (used only when `$LAYOUT` is empty) is the five canonical categories:
 
 - `architecture/`
 - `patterns/`
@@ -148,7 +211,7 @@ The target repo picks the shape. Users may drop any canonical category that does
 
 ### Step 3a: Name the context directory
 
-Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1).
+Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1). Also skip the question when `.exodia.yaml` declared `context_dir:` (Step 0a already set `$CONTEXT_DIR`); the collision check below still runs against that value.
 
 `AskUserQuestion`:
 
@@ -197,23 +260,27 @@ If preflight classified as Merge (the user already granted permission in Step 1)
 
 ### Step 5: Initialize structure
 
-Run the scaffolder helper:
+Run the scaffolder helper. Pass **full relative paths** (under `$CONTEXT_DIR`), not bare category names:
 
 ```bash
-bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" "$CONTEXT_DIR" <space-separated-category-names>
+bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" "$CONTEXT_DIR" <space-separated-paths>
 ```
 
-`$CONTEXT_DIR` is the second positional argument. This creates `$TARGET/$CONTEXT_DIR/<category>/` for each requested category, copies `.tmpl` files from `$SKILL_DIR/templates/`, and writes the `_schema` line into each `.jsonl`. YAML stubs ship with their top-level key + a comment block.
+- `$LAYOUT` empty (flat mode): paths are bare category names, e.g. `architecture patterns domain operations debugging`. Backwards-compatible with previous behavior.
+- `$LAYOUT` non-empty: paths are `$LAYOUT[<category>]` for every leaf in `$CATEGORIES`, e.g. `engineering/architecture engineering/patterns engineering/debugging engineering/operations product/domain`.
+
+For each path, `init_structure.sh` creates `$TARGET/$CONTEXT_DIR/<path>/`, looks up the template by the **last segment** (so `engineering/architecture` resolves to `templates/architecture/`), copies `.tmpl` files (writing the `_schema` line into each `.jsonl`), and writes a stub L2 for unknown leaves. YAML stubs ship with their top-level key + a comment block.
 
 ### Step 6: Draft L2 content
 
 For each confirmed category, in order (architecture, patterns, domain, operations, debugging, then optional extras):
 
-1. Read `$SKILL_DIR/templates/<category>/<CATEGORY>.md.tmpl` to see the section skeleton and lock the voice (terse, factual, table- and bullet-heavy, inline file citations, no marketing prose).
-2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words.
+1. Read `$SKILL_DIR/templates/<category>/<CATEGORY>.md.tmpl` to see the section skeleton and lock the voice (terse, factual, table- and bullet-heavy, inline file citations, no marketing prose). Lookup uses the bare category name (the leaf), independent of where it sits in `$LAYOUT`.
+2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words. For custom categories declared in `.exodia.yaml` with a `purpose:` field, use that string as the seed for section-1 (intro) before any scan-driven prose.
 3. Preserve the `<!-- exodia:section:<id> -->` markers; they drive incremental re-runs.
 4. **Never duplicate data that already lives in the repo.** Versions, ports, env names, paths, commands, config values, dependency lists, script names; all must be *referenced*, not copied. Write `see \`package.json\` \`engines.node\`` or `defined in \`.env.example\``, never the literal value. Duplicated data rots; pointers survive edits.
-5. **`## L3 Data` section.** When the L2 template has a `<!-- exodia:section:l3 -->` block, list the L3 files that ship with the module. For custom categories with no template, draft this section from the L3 ledgers requested in Step 3, picking formats per `$SKILL_DIR/heuristics/format-strategy.md`. Each line: `` - `<file>`: <one-line purpose>. ``
+5. **`## L3 Data` section.** When the L2 template has a `<!-- exodia:section:l3 -->` block, list the L3 files that ship with the module. For custom categories with no template, draft this section from the L3 ledgers requested in Step 3 (or declared in `.exodia.yaml` for layout-mode customs), picking formats per `$SKILL_DIR/heuristics/format-strategy.md`. Each line: `` - `<file>`: <one-line purpose>. ``
+6. **Destination path.** The file is written to `$TARGET/$CONTEXT_DIR/<destination>/<CATEGORY>.md` where `<destination>` = `$LAYOUT[<category>]` if `$LAYOUT` is non-empty, else the bare category name (flat mode).
 
 Do **not** write the file to disk yet. Hold the draft in memory.
 
@@ -222,13 +289,13 @@ Do **not** write the file to disk yet. Hold the draft in memory.
 Walk each L2 draft with the user. For each `##` section:
 
 - Show the drafted prose.
-- Render the draft inside a fenced markdown block, prefaced by an H3 anchor: `### \`<category>/<CATEGORY>.md\` § <section-id>`.
+- Render the draft inside a fenced markdown block, prefaced by an H3 anchor: `### \`<destination>/<CATEGORY>.md\` § <section-id>`, where `<destination>` is the resolved path (`$LAYOUT[<category>]` if non-empty, else the bare category name). Example: `### \`engineering/architecture/ARCHITECTURE.md\` § overview`.
 - Then `AskUserQuestion`:
   - **Question**: "Accept this section?"
   - **Options**: "Accept", "Edit", "Skip" (leave empty for later).
 - If edit: let the user dictate changes, re-draft (still inside the fenced block), loop until accepted.
 
-Then `Write` the finalized L2 file to `$TARGET/$CONTEXT_DIR/<category>/<CATEGORY>.md`.
+Then `Write` the finalized L2 file to `$TARGET/$CONTEXT_DIR/<destination>/<CATEGORY>.md` (see Step 6 § 6 for destination resolution).
 
 ### Step 8: Emit the AGENTS.md router
 
@@ -243,17 +310,25 @@ Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
 1. Project overview (one paragraph from scan)
 2. Commands (point to the detected package manifest file)
-3. Context Router table (one row per confirmed category, linking to `$CONTEXT_DIR/<category>/<CATEGORY>.md`)
+3. Context Router table (one row per confirmed category, linking to `$CONTEXT_DIR/<destination>/<CATEGORY>.md` where `<destination>` is the path resolved via `$LAYOUT`)
 4. Behavioral Rules (universal + conditional)
 5. Self-Update Rules (full block)
-6. Quick Action Table (common dev phrases → file to read)
-7. Context Structure (tree diagram, rooted at `$CONTEXT_DIR/`)
+6. Quick Action Table (common dev phrases → file to read, using resolved paths)
+7. Context Structure (tree diagram, rooted at `$CONTEXT_DIR/`, rendered dynamically from `$LAYOUT`)
 
-Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-update.md`, and the `{{CONTEXT_TREE}}` diagram) contain `{{CONTEXT_DIR}}` placeholders. Substitute all occurrences with the actual value of `$CONTEXT_DIR` before writing the emitted `AGENTS.md`.
+**Substitution order.** Apply these passes in order before writing the emitted `AGENTS.md`. Each pass operates on the already-composed text from the previous pass:
+
+1. **Path-rewrite pass on self-update table.** After dropping rows whose category is not in the final set, walk each retained row and rewrite the **target-file** column. The retained-row target cell starts with `<category>/...`; if `$LAYOUT` is non-empty, replace the leading `<category>/` with `$LAYOUT[<category>]/`. In flat mode (`$LAYOUT` empty), leave the cell unchanged. The phrase "All target-file paths below are relative to the context directory (`{{CONTEXT_DIR}}/`)" in `self-update.md` stays accurate either way.
+2. **`{{PATH_OF_<CATEGORY>}}` substitution.** For each leaf in `$CATEGORIES`, compose `{{PATH_OF_<UPPER>}}` where `<UPPER>` is the category name uppercased and dashes/underscores stripped (e.g. `patterns → PATTERNS`, `operations → OPERATIONS`, `mobile → MOBILE`). Replace each occurrence with `{{CONTEXT_DIR}}/<resolved-path>` where `<resolved-path>` = `$LAYOUT[<category>]` if non-empty, else the bare category name. This generalizes any future rule snippet that uses the convention.
+3. **`{{CONTEXT_TREE}}` rendering.** Render the tree from `$LAYOUT` rather than from a baked literal. Walk the nested `structure:` (or the flat list in flat mode); for each leaf, list every L3 file shipped by the matching template directory (read `templates/<leaf>/` or `templates/optional/<leaf>/`, plus any custom-category ledgers from `$CUSTOM_LEDGERS`). Indent groups two spaces per level.
+4. **`{{ROUTER_ROWS}}` and `{{QUICK_ACTION_ROWS}}`.** Each row's `Load` cell uses the resolved path: `Read \`<resolved-path>/<CATEGORY>.md\``. Quick-action rows get the same treatment for any cell pointing at a category file.
+5. **`{{CONTEXT_DIR}}` substitution.** Last pass: replace every remaining `{{CONTEXT_DIR}}` token with the actual value of `$CONTEXT_DIR`.
 
 ### Step 9: L3 seeding prompt
 
-For each L3 file in the final category set, apply the matching seed clause below. Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
+For each L3 file in the final category set, apply the matching seed clause below. Skip any clause whose target file does not exist (the user may have dropped that category in Step 3, or the file may live under a nested layout path). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
+
+The lookup tables below use **canonical** keys (e.g. `architecture/decisions.jsonl`). Resolve each key via `$LAYOUT` before reading or writing: the on-disk path is `$TARGET/$CONTEXT_DIR/<resolved-path>/<file>` where `<resolved-path>` = `$LAYOUT[<category>]` if non-empty, else the bare category name. In flat mode the canonical key is the on-disk path verbatim.
 
 Append JSONL entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the target file's `_schema` value, verbatim (read the first line of the `.jsonl`). See `$SKILL_DIR/heuristics/format-strategy.md` § ID format.
 
@@ -289,7 +364,7 @@ For each YAML clause: render the proposed skeleton inside a fenced ` ```yaml ` b
 
 On accept or after edit, overwrite the YAML stub with the populated skeleton.
 
-**Custom L3 clause.** For each user-declared custom ledger from Step 3, look up the scan hint captured at declaration time. If the hint is non-empty, run it as a Bash/Explore query, present candidates the same way as built-in JSONL clauses, and append approved entries (using the ledger's own `_schema` prefix). If the hint is "none", skip.
+**Custom L3 clause.** Iterate every user-declared custom ledger from either source: (a) Step 3 interactive declarations (flat mode), (b) `$CUSTOM_LEDGERS` parsed from `.exodia.yaml` in Step 0a. Each ledger carries `(category, file, schema, scan_hint)`. Resolve the on-disk path via `$LAYOUT`: `$TARGET/$CONTEXT_DIR/$LAYOUT[<category>]/<file>` (or `<category>/<file>` in flat mode). If `scan_hint` is non-empty, run it as a Bash/Explore query, present candidates the same way as built-in JSONL clauses, and append approved entries using the ledger's own `schema` value as the ID prefix. If the hint is "none" or absent, skip seeding for that ledger.
 
 ### Step 10: Wrap up
 
@@ -305,15 +380,30 @@ Print a short summary:
 
 When preflight detects an existing exodia setup:
 
-0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it; preserving the existing directory name keeps router paths consistent.
+0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it; preserving the existing directory name keeps router paths consistent. If `.exodia.yaml` declared a different `context_dir:`, the file wins for the *target* layout but the existing tree is reconciled against it (see step 2 below).
 1. Re-run Step 2 (scan).
-2. For each L2 file under `$TARGET/$CONTEXT_DIR/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
-3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker; if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
-4. Render each proposed diff as a fenced ` ```diff ` code block, prefaced by `### \`<file>\` § <section-id>`. Then per section, `AskUserQuestion`:
+2. **Layout reconciliation** (`.exodia.yaml` present + tree exists). The file wins; the on-disk tree is migrated to match. Walk it as follows:
+   1. Step 0a already loaded and validated the file.
+   2. Walk `$TARGET/$CONTEXT_DIR/`. For each L2 file matching `<UPPER>.md` carrying `<!-- exodia:section:` markers, record `<lowercase-leaf> → <found-relative-path>` into `$ON_DISK`.
+   3. Compute three sets:
+      - **Moves**: leaves present in both `$LAYOUT` and `$ON_DISK` with different paths. For each: render a fenced ` ```diff ` block showing old → new path, then `AskUserQuestion`:
+        - **Question**: "Apply this move?"
+        - **Options**: "Apply move", "Skip".
+        - On accept, run `git mv "$TARGET/$CONTEXT_DIR/<old>" "$TARGET/$CONTEXT_DIR/<new>"` if `$TARGET` is a git repo; otherwise `mv -n` (no overwrite). Create parent dirs first if needed.
+      - **New**: leaves in `$LAYOUT` but not in `$ON_DISK`. Scaffold each by invoking `init_structure.sh` with **just the new path(s)** — existing paths are left untouched (the script skips destinations that already exist).
+      - **Orphans**: leaves on disk not in `$LAYOUT` (or directories with `<!-- exodia:section:` markers under no recognized leaf). For each, `AskUserQuestion`:
+        - **Question**: "Orphan `<path>` not in `.exodia.yaml`. How to proceed?"
+        - **Options**: "Keep in place", "Move to root", "Delete".
+        - "Move to root": `git mv "$TARGET/$CONTEXT_DIR/<path>" "$TARGET/$CONTEXT_DIR/<leaf>"` (or `mv -n`).
+        - "Delete": **second-step confirmation required** before destructive action. Render the path and contained file count, then a second `AskUserQuestion` with options "Confirm delete", "Cancel". Only on "Confirm delete" run `rm -rf` on the directory.
+   4. After path reconciliation, refresh `$ON_DISK` (paths may have moved) and continue.
+3. For each L2 file under `$TARGET/$CONTEXT_DIR/<resolved-path>/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
+4. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker; if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
+5. Render each proposed diff as a fenced ` ```diff ` code block, prefaced by `### \`<resolved-path>/<file>\` § <section-id>`. Then per section, `AskUserQuestion`:
    - **Question**: "Apply this update?"
    - **Options**: "Accept", "Skip".
-5. Append to L3 files from the scan using the same Step 9 logic.
-6. Never overwrite `AGENTS.md`; only add missing rule snippets if conditions now apply (e.g. an `operations/` category added after initial scaffold).
+6. Append to L3 files from the scan using the same Step 9 logic (canonical keys resolved via `$LAYOUT`).
+7. **Re-emit `AGENTS.md`** if `$LAYOUT` differs from the previous on-disk tree (paths moved, leaves added/removed, or `context_dir` changed). The router-path columns must reflect the current layout. In flat mode with no layout change, retain the previous behavior: do not overwrite `AGENTS.md`; only add missing rule snippets if conditions now apply (e.g. an `operations/` category added after initial scaffold).
 
 ---
 

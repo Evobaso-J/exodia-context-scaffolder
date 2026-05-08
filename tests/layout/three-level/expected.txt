@@ -1,0 +1,10 @@
+pass
+context_dir: context (default)
+$LAYOUT:
+  architecture -> engineering/backend/services/architecture
+  patterns     -> engineering/backend/services/patterns
+  debugging    -> engineering/frontend/debugging
+  domain       -> product/domain
+$CATEGORIES: [architecture, patterns, debugging, domain]
+$CUSTOM_LEDGERS: []
+note: rule 6 has no depth cap; arbitrary nesting is valid.

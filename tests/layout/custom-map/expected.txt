@@ -1,0 +1,12 @@
+pass
+context_dir: context (default)
+$LAYOUT:
+  architecture -> engineering/architecture
+  patterns     -> engineering/patterns
+  perf         -> engineering/perf
+  domain       -> product/domain
+$CATEGORIES: [architecture, patterns, perf, domain]
+$CUSTOM_LEDGERS:
+  - category: perf, file: bench.jsonl, schema: bench, scan_hint: "TODO comments under src/jobs/"
+  - category: perf, file: profiles.yaml, schema: prof, scan_hint: (none)
+note: 'perf' is custom; purpose seeds the L2 intro section in Step 6.

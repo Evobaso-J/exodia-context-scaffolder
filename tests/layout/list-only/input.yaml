@@ -1,0 +1,4 @@
+context_dir: docs
+structure:
+  - architecture
+  - patterns

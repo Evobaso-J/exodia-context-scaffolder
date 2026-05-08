@@ -1,0 +1,8 @@
+pass
+context_dir: docs (explicit)
+$LAYOUT:
+  architecture -> architecture
+  patterns     -> patterns
+$CATEGORIES: [architecture, patterns]
+$CUSTOM_LEDGERS: []
+note: list-only is valid; identical resolution to flat mode but with explicit context_dir override.

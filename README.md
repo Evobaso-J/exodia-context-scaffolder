@@ -43,6 +43,24 @@ Restart Claude Code (or open a new session). Run `/exodia` in any repo. The dire
 
 Customization knobs (custom context-dir name, dropping canonical modules, custom categories, optional auto-add detectors): see [`SKILL.md`](SKILL.md).
 
+### Custom layout (`.exodia.yaml`)
+
+For repos that want to nest categories under user-named parent groups, drop a `.exodia.yaml` at the repo root before running `/exodia`:
+
+```yaml
+context_dir: context
+structure:
+  engineering:
+    - architecture
+    - patterns
+    - debugging
+    - operations
+  product:
+    - domain
+```
+
+The file is opt-in and **authoritative when present**: leaves of `structure:` are the final category set, and the on-disk tree mirrors the nesting (`context/engineering/architecture/...`, `context/product/domain/...`). Custom categories may appear inline as single-key maps with `purpose:` and optional `ledgers:`. Validation runs at file load (regex on names, group/leaf disjointness, no leaf duplicated across paths). Re-running `/exodia` after editing the file reconciles file-vs-disk drift with per-move and per-orphan prompts. Absent file = the flat layout that previous releases shipped. Schema details in [`heuristics/format-strategy.md`](heuristics/format-strategy.md) § Layout file.
+
 ## 🎯 Usage
 
 ```

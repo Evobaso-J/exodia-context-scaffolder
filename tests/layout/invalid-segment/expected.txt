@@ -1,0 +1,3 @@
+fail
+rule: 2 (every group/category name must match ^[a-z][a-z0-9_-]*$)
+detail: 'Foo' starts with an uppercase letter.

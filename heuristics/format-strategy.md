@@ -33,3 +33,40 @@ Top-level key + a comment block showing one example entry. Mirror `templates/ope
 ## ID format
 
 JSONL entry IDs follow `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the file's `_schema` value, verbatim. Each schema's prefix lives only in its `.jsonl` template; keep them unique across the tree.
+
+## Layout file
+
+The opt-in `.exodia.yaml` at the target repo root nests canonical and custom categories under user-named parent groups. The file is authoritative when present; absent file = today's flat tree.
+
+Schema (full example):
+
+```yaml
+context_dir: context        # optional; default "context"
+structure:
+  engineering:
+    - architecture
+    - patterns
+    - debugging
+    - operations
+    - perf:                 # custom category
+        purpose: "Performance work and benchmarks"
+        ledgers:
+          - file: bench.jsonl
+            schema: bench
+            scan_hint: "TODO comments under src/jobs/"
+  product:
+    - domain
+```
+
+Convention: under any key, a **list value** holds leaves (categories), a **map value** holds subgroups. List items are either bare strings (canonical category names) or single-key maps with a custom-category body (`purpose` + optional `ledgers`).
+
+Validation rules (all errors fatal at file load):
+
+1. `context_dir` matches `^[a-z._-][a-z0-9._-]*$` and is not `.` or `..`.
+2. Every group name and category name (canonical or custom) matches `^[a-z][a-z0-9_-]*$`.
+3. Group-name set and category-leaf set are disjoint.
+4. Each leaf appears at most once anywhere in the tree.
+5. Custom-category map: `purpose` is a non-empty string. `ledgers` optional; each ledger entry needs `file` + `schema`, `scan_hint` optional.
+6. Tree depth has no hard cap.
+
+Adding a new ledger to a custom category later: append to the `ledgers:` list with `file`, `schema`, optional `scan_hint`. Pick the file format from the table above; ID prefix conventions apply.

@@ -1,0 +1,10 @@
+structure:
+  engineering:
+    backend:
+      services:
+        - architecture
+        - patterns
+    frontend:
+      - debugging
+  product:
+    - domain
