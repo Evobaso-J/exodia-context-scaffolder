@@ -45,7 +45,6 @@ Execute steps in order. **Do not skip steps**. Use `AskUserQuestion` for user in
 
 - Confirm `$TARGET` = current working directory.
 - Confirm `$SKILL_DIR` = directory of this SKILL.md. If you cannot resolve it, fall back to `~/.claude/skills/exodia`.
-- Check `git rev-parse --is-inside-work-tree` in `$TARGET`. If not a git repo, continue but warn the user ("branch-scoped dedup in self-update rules will be ineffective without git").
 - Hold a variable `$CONTEXT_DIR` throughout the run. It names the directory that will hold the context tree inside `$TARGET`. Default is `context`; the user may pick another name in Step 3a (Fresh / Merge) or it is auto-detected in Step 1 (Incremental).
 - Resolve `$CONFIG_PATH = $TARGET/exodia.config.yaml`. If the file exists, the run is **config-driven**: layout comes from the config rather than from interactive prompts. If absent, the interactive flow runs unchanged. Config is throwaway and only consumed at first scaffold (Fresh or Merge); incremental re-runs ignore it. Schema reference: see the "Customizing the layout" section in `$SKILL_DIR/README.md`.
 
@@ -351,7 +350,7 @@ When preflight detects an existing exodia setup:
 
 ## Failure modes to watch
 
-See `$SKILL_DIR/TROUBLESHOOTING.md` for handling: user aborts mid-interview, Explore scan timeouts, secrets in the target repo, missing git/agent/lint toolchain.
+See `$SKILL_DIR/TROUBLESHOOTING.md` for handling: user aborts mid-interview, Explore scan timeouts, secrets in the target repo, missing agent/lint toolchain.
 
 ---
 
