@@ -45,23 +45,30 @@ import json
 import sys
 from pathlib import Path
 
-# Canonical filename -> ordered list of (category-name, schema-name).
-# Tiebreaker for shared filenames (decisions.jsonl, gotchas.jsonl): prefer
-# the category whose name matches the L2 the ledger lives next to; else
-# first-match. The values below are listed in canonical-first-match order.
-CANONICAL_LEDGERS: dict[str, list[tuple[str, str]]] = {
-    "decisions.jsonl": [("architecture", "adr"), ("infra", "adr")],
-    "reviews.jsonl": [("patterns", "rv")],
-    "glossary.yaml": [("domain", "glossary")],
-    "variants.yaml": [("operations", "variants")],
-    "gotchas.jsonl": [("debugging", "gotcha"), ("mobile", "mgotcha")],
-    "playbooks.jsonl": [("debugging", "pb")],
-    "runbooks.jsonl": [("infra", "rb")],
-    "experiments.jsonl": [("data", "exp")],
-    "datasets.yaml": [("data", "datasets")],
-    "releases.jsonl": [("mobile", "mrel")],
-    "migrations.jsonl": [("workspace", "wsmig")],
-}
+# Canonical-ledger registry is loaded from heuristics/ledgers.yaml. That file
+# is the single source of truth for filename -> (host, schema) and is also
+# consumed by SKILL.md (Step 8 path-resolution, Step 9 seed scans) and by
+# rules/self-update.md row generation. Do not duplicate ledger data here.
+
+
+def _load_canonical_ledgers(skill_dir: Path) -> dict[str, list[tuple[str, str]]]:
+    """Build filename -> ordered [(host, schema)] map from the registry.
+
+    Tiebreaker for shared filenames (e.g. `decisions.jsonl` lives in both
+    architecture/ and infra/): preserve registry insertion order so callers
+    that pass a matching `host_category` win, else first-match.
+    """
+    here = Path(__file__).resolve().parent
+    if str(here) not in sys.path:
+        sys.path.insert(0, str(here))
+    from parse_config import parse_yaml_subset
+
+    registry_path = skill_dir / "heuristics" / "ledgers.yaml"
+    parsed = parse_yaml_subset(registry_path.read_text(encoding="utf-8"))
+    out: dict[str, list[tuple[str, str]]] = {}
+    for row in parsed["ledgers"].values():
+        out.setdefault(row["filename"], []).append((row["host"], row["schema"]))
+    return out
 
 
 def _category_template_dir(skill_dir: Path, name: str) -> Path | None:
@@ -85,13 +92,17 @@ def _l3_template_path(skill_dir: Path, category: str, filename: str) -> Path | N
     return candidate if candidate.is_file() else None
 
 
-def _lookup_canonical_ledger(filename: str, host_category: str) -> tuple[str | None, str | None]:
+def _lookup_canonical_ledger(
+    ledgers: dict[str, list[tuple[str, str]]],
+    filename: str,
+    host_category: str,
+) -> tuple[str | None, str | None]:
     """Return (schema_name, source_category) for a known L3 filename.
 
     Tiebreaker: prefer the category whose name matches `host_category`; else
     first-match. Returns (None, None) for unknown filenames.
     """
-    candidates = CANONICAL_LEDGERS.get(filename)
+    candidates = ledgers.get(filename)
     if not candidates:
         return None, None
     for cat, schema in candidates:
@@ -101,7 +112,11 @@ def _lookup_canonical_ledger(filename: str, host_category: str) -> tuple[str | N
     return schema, cat
 
 
-def _default_l3_specs(skill_dir: Path, category: str) -> list[dict] | None:
+def _default_l3_specs(
+    skill_dir: Path,
+    ledgers: dict[str, list[tuple[str, str]]],
+    category: str,
+) -> list[dict] | None:
     """Default L3 specs for a canonical category: every `.tmpl` next to the L2.
 
     Mirrors today's `init_structure.sh` behavior of copying every `.tmpl` in
@@ -117,7 +132,7 @@ def _default_l3_specs(skill_dir: Path, category: str) -> list[dict] | None:
             continue
         if not (base.endswith(".jsonl") or base.endswith(".yaml")):
             continue
-        schema_name, _src_cat = _lookup_canonical_ledger(base, category)
+        schema_name, _src_cat = _lookup_canonical_ledger(ledgers, base, category)
         specs.append(
             {
                 "filename": base,
@@ -129,6 +144,7 @@ def _default_l3_specs(skill_dir: Path, category: str) -> list[dict] | None:
 
 
 def resolve(parsed: dict, skill_dir: Path) -> list[dict]:
+    ledgers = _load_canonical_ledgers(skill_dir)
     out: list[dict] = []
     for cat in parsed["categories"]:
         if cat["drop"]:
@@ -142,7 +158,7 @@ def resolve(parsed: dict, skill_dir: Path) -> list[dict]:
         if l3_override is not None:
             l3_specs: list[dict] | None = []
             for fname in l3_override:
-                schema_name, src_cat = _lookup_canonical_ledger(fname, name)
+                schema_name, src_cat = _lookup_canonical_ledger(ledgers, fname, name)
                 tmpl_path: str | None = None
                 if src_cat is not None:
                     p = _l3_template_path(skill_dir, src_cat, fname)
@@ -155,7 +171,7 @@ def resolve(parsed: dict, skill_dir: Path) -> list[dict]:
                     }
                 )
         elif kind == "canonical":
-            l3_specs = _default_l3_specs(skill_dir, name)
+            l3_specs = _default_l3_specs(skill_dir, ledgers, name)
         else:
             l3_specs = None  # custom + no override -> Step 6 model infers
 

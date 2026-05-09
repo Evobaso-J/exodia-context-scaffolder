@@ -271,28 +271,17 @@ Compose `$TARGET/AGENTS.md` from:
 - `$SKILL_DIR/rules/conditional/lint-check.md` if scan detected any lint/test/typecheck scripts; substitute the detected commands into the snippet
 - `$SKILL_DIR/rules/self-update.md` (always, near the top).
 
-**Path placeholder resolution.** `self-update.md` uses `{{path:<ledger-key>}}` placeholders instead of literal paths so the rules adapt to per-category paths. Build a map `ledger-key → resolved full path` from `$LAYOUT_MAP` (interactive runs construct the same map by joining `$CONTEXT_DIR` with each canonical category):
+**Ledger row generation.** `self-update.md` ships with a `<!-- exodia:self-update:rows:start -->` / `<!-- exodia:self-update:rows:end -->` marker pair around a `{{LEDGER_ROWS}}` token. Render rows from the canonical ledger registry at `$SKILL_DIR/heuristics/ledgers.yaml`; that file is the single source of truth for filename, host, schema, signal, action, and scan source. Do not duplicate ledger data in this step.
 
-| Ledger key | Resolved path source |
-| --- | --- |
-| `decisions` | `<architecture-path>/decisions.jsonl` |
-| `infra-decisions` | `<infra-path>/decisions.jsonl` |
-| `reviews` | `<patterns-path>/reviews.jsonl` |
-| `glossary` | `<domain-path>/glossary.yaml` |
-| `variants` | `<operations-path>/variants.yaml` |
-| `gotchas` | `<debugging-path>/gotchas.jsonl` |
-| `mobile-gotchas` | `<mobile-path>/gotchas.jsonl` |
-| `playbooks` | `<debugging-path>/playbooks.jsonl` |
-| `runbooks` | `<infra-path>/runbooks.jsonl` |
-| `experiments` | `<data-path>/experiments.jsonl` |
-| `datasets` | `<data-path>/datasets.yaml` |
-| `releases` | `<mobile-path>/releases.jsonl` |
-| `migrations` | `<workspace-path>/migrations.jsonl` |
+For each ledger entry in `ledgers.yaml`:
 
-For each table row in the rendered self-update block:
+1. Resolve the host's path from `$LAYOUT_MAP` (interactive runs construct the equivalent map by joining `$CONTEXT_DIR` with each canonical category name).
+2. **Drop the ledger** if the host category is dropped or absent from the final set, or the ledger's `filename` is not in the host category's `l3_specs`.
+3. Otherwise emit one Markdown table row **per `signals` entry** (some ledgers, e.g. `reviews`, declare multiple signals): `\| <signal> \| \`<host_path>/<filename>\` \| <action> \|`.
 
-1. Substitute `{{path:<key>}}` against the map. **Drop the entire row** if the key is unresolved (the host category is dropped or absent from the final set, or the L3 file in the host category's `l3_specs` is missing). This generalizes today's drop-row behavior.
-2. Append generated rows for **custom-category ledgers** (categories with `kind: custom` in `$LAYOUT_MAP` whose `l3_specs` is non-empty). For each `(category, ledger)` pair: if the ledger's `schema_name` is a known canonical name (e.g. `glossary`, `gotcha`, `adr`), reuse the prose from the corresponding canonical row; otherwise write a one-line "When to update" hint from the category's purpose statement.
+Then append generated rows for **custom-category ledgers** (categories with `kind: custom` in `$LAYOUT_MAP` whose `l3_specs` is non-empty). For each `(category, ledger)` pair: if the ledger's `schema_name` matches a row in `ledgers.yaml`, reuse that row's signals/actions with the custom category's resolved path. Otherwise write a one-line "When to update" hint from the category's purpose statement.
+
+Substitute `{{LEDGER_ROWS}}` with the rendered rows joined by newlines.
 
 The `File Format Strategy` § at the bottom of `self-update.md` is always retained; it guides future agents adding new ledgers.
 
@@ -312,36 +301,17 @@ Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-upda
 
 For each L3 file in the final category set, apply the matching seed clause below. The "target file" is now resolved against `$LAYOUT_MAP` (config-driven) or `$TARGET/$CONTEXT_DIR/<category>/<file>` (interactive). Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
 
-For **custom-category ledgers** declared in the config, extend this step with one extra clause per `(category, ledger)` pair from `$LAYOUT_MAP`. If the ledger's `schema_name` is a known canonical (e.g. `glossary`, `gotcha`, `adr`), reuse that schema's scan source from the table below. Otherwise use the scan source the model proposed alongside the schema in Step 6 (carry it through the layout map). Append entries the same way as built-in clauses, using the ledger's own `_schema` prefix (canonical or model-invented).
+**Driven by `$SKILL_DIR/heuristics/ledgers.yaml`.** That file is the single source for `format` (jsonl vs yaml), `scan_source` (jsonl), and `skeleton_source` / `skeleton_shape` (yaml) for every ledger the scaffolder ships. Do not duplicate this data in this step.
+
+For each entry in `ledgers.yaml`: locate the host category in `$LAYOUT_MAP` and resolve the target file `<host_path>/<filename>`. Skip if the host category is dropped, or the filename is absent from the host's `l3_specs`, or the target file does not exist on disk.
+
+For **custom-category ledgers** declared in the config, extend this step with one extra clause per `(category, ledger)` pair from `$LAYOUT_MAP`. If the ledger's `schema_name` matches a row in `ledgers.yaml`, reuse that row's `scan_source` (jsonl) or `skeleton_source` / `skeleton_shape` (yaml) verbatim. Otherwise use the scan source the model proposed alongside the schema in Step 6 (carry it through the layout map). Append entries the same way as built-in clauses, using the ledger's own `_schema` prefix (canonical or model-invented).
 
 Append JSONL entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the target file's `_schema` value, verbatim (read the first line of the `.jsonl`). See `$SKILL_DIR/heuristics/format-strategy.md` § ID format.
 
-**JSONL clauses.** One row per shipped `.jsonl`. Run only if the file exists.
+**JSONL clauses.** Iterate `ledgers.yaml` rows where `format: jsonl`. For each row: run the registry-declared `scan_source`, render the candidate list per `$SKILL_DIR/heuristics/prompt-format.md`, then `AskUserQuestion` to approve a subset. Append approved entries with canonical IDs.
 
-| File | `_schema` | Scan source |
-|---|---|---|
-| `architecture/decisions.jsonl` | `adr` | `docs/adr/`, `docs/decisions/`, `ARCHITECTURE.md` headings with decision language |
-| `patterns/reviews.jsonl` | `rv` | ESLint/Biome custom rules, `@deprecated` JSDoc / Python `DeprecationWarning`, CHANGELOG sections matching `BREAKING` / `Deprecated` |
-| `debugging/gotchas.jsonl` | `gotcha` | `TODO`, `FIXME`, `HACK`, `XXX`, `WARNING` comments grouped by directory/area |
-| `debugging/playbooks.jsonl` | `pb` | `docs/postmortems/`, `POSTMORTEM*.md`, rich `^fix:` commits (commit body longer than ~200 chars) |
-| `infra/decisions.jsonl` | `adr` | infra-scoped commits in `terraform/`, `helm/`, `k8s/`; `infra/CHANGES.md` |
-| `infra/runbooks.jsonl` | `rb` | `RUNBOOK*.md`, `docs/runbooks/`, `ops/`, `runbooks/` |
-| `data/experiments.jsonl` | `exp` | `experiments/`, `notebooks/`, `runs/` directories; `RESULTS.md` |
-| `mobile/gotchas.jsonl` | `mgotcha` | TODO/FIXME inside `ios/`, `android/`, `*.swift`, `*.kt`; tag each entry `platform: ios | android | both` |
-| `mobile/releases.jsonl` | `mrel` | store-config files, `fastlane/` metadata, git tags matching version patterns |
-| `workspace/migrations.jsonl` | `wsmig` | git log touching `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, root `package.json` `workspaces` field |
-
-For each JSONL clause: run the scan, render the candidate list per `$SKILL_DIR/heuristics/prompt-format.md`, then `AskUserQuestion` to approve a subset. Append approved entries with canonical IDs.
-
-**YAML clauses (skeleton-from-scan).** Run only if the file exists.
-
-| File | Skeleton source | Skeleton shape |
-|---|---|---|
-| `domain/glossary.yaml` | `$SCAN` §3 (top-level entities / models named in the repo) | `entities:` map, one key per entity, body `definition: ""` and `relationship: "see <file>"` |
-| `operations/variants.yaml` | i18n locales, env files, feature-flag tool from `$SCAN` §4 | `variants:` map with a `default:` key and one key per detected variant, each body `notes: ""` |
-| `data/datasets.yaml` | DB migrations, schema files, contents of `data/` | `datasets:` map, one key per dataset, body `source: "<file>"`, `schema: ""`, `refresh: ""`, `notes: ""` |
-
-For each YAML clause: render the proposed skeleton inside a fenced ` ```yaml ` block prefaced by `### \`<file>\` § skeleton`, then `AskUserQuestion`:
+**YAML clauses (skeleton-from-scan).** Iterate `ledgers.yaml` rows where `format: yaml`. For each row: render the proposed skeleton (per `skeleton_shape`, sourced from `skeleton_source`) inside a fenced ` ```yaml ` block prefaced by `### \`<file>\` § skeleton`, then `AskUserQuestion`:
 
 - **Question**: "Accept this skeleton?"
 - **Options**: "Accept", "Edit", "Skip" (leave the existing empty stub).

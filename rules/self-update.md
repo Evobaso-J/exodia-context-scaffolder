@@ -7,20 +7,9 @@ Target-file paths below are absolute, repo-rooted: a config-driven scaffold may 
 | Signal during conversation | Target file | What to write |
 | -------------------------- | ----------- | ------------- |
 | Codebase assumption corrected by user or by evidence | L2 `.md` file for that area | Update the incorrect section |
-| Bug pattern identified with non-obvious root cause | `{{path:playbooks}}` | New playbook entry |
-| Pitfall or footgun confirmed ("don't do X" / "watch out for Y") | `{{path:gotchas}}` | New gotcha entry |
-| Architecture or design decision taken by the team | `{{path:decisions}}` | New ADR entry |
-| PR review surfaces new check (prod break, near-miss) | `{{path:reviews}}` | New review entry |
-| API contract changes or deprecated | `{{path:reviews}}` | New entry tagged `migration` with `old_pattern` / `new_pattern` |
-| Variant-specific behavior confirmed | `{{path:variants}}` | New entry under the relevant variant |
-| Domain term clarified or new entity appears | `{{path:glossary}}` | New or updated term |
-| Infra ADR taken (cloud, IaC, network, observability) | `{{path:infra-decisions}}` | New ADR entry |
-| Infra event response procedure defined (scale, failover, cert rotation) | `{{path:runbooks}}` | New runbook entry |
-| Workspace graph change (package move, scope rename, tooling swap) | `{{path:migrations}}` | New migration entry |
-| ML experiment run with outcome | `{{path:experiments}}` | New experiment entry |
-| New dataset registered or refresh cadence change | `{{path:datasets}}` | New or updated dataset |
-| Platform-specific mobile footgun confirmed | `{{path:mobile-gotchas}}` | New gotcha entry tagged with `platform` |
-| Mobile store rollout (version, phase) | `{{path:releases}}` | New rollout entry |
+<!-- exodia:self-update:rows:start -->
+{{LEDGER_ROWS}}
+<!-- exodia:self-update:rows:end -->
 
 ### How to update
 
