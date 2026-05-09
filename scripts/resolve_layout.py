@@ -45,6 +45,8 @@ import json
 import sys
 from pathlib import Path
 
+from yaml_subset import parse_yaml_subset
+
 # Canonical-ledger registry is loaded from heuristics/ledgers.yaml. That file
 # is the single source of truth for filename -> (host, schema) and is also
 # consumed by SKILL.md (Step 8 path-resolution, Step 9 seed scans) and by
@@ -58,11 +60,6 @@ def _load_canonical_ledgers(skill_dir: Path) -> dict[str, list[tuple[str, str]]]
     architecture/ and infra/): preserve registry insertion order so callers
     that pass a matching `host_category` win, else first-match.
     """
-    here = Path(__file__).resolve().parent
-    if str(here) not in sys.path:
-        sys.path.insert(0, str(here))
-    from parse_config import parse_yaml_subset
-
     registry_path = skill_dir / "heuristics" / "ledgers.yaml"
     parsed = parse_yaml_subset(registry_path.read_text(encoding="utf-8"))
     out: dict[str, list[tuple[str, str]]] = {}
