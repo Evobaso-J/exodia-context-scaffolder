@@ -3,10 +3,16 @@
 #
 # Two invocation shapes:
 #
-#   1. Legacy (no config): all categories live under a single context dir.
+#   1. Legacy (no config): public, hand-invokable. All categories live under
+#      a single context dir.
 #        init_structure.sh <target-dir> <context-dir> <category1> [category2 ...]
 #
-#   2. Config-driven: arbitrary per-category paths, signalled by `--pairs`.
+#   2. Config-driven: scaffolder-internal, signalled by `--pairs`. Intended
+#      to be invoked by the /exodia scaffolder pipeline, not by hand. The
+#      scaffolder always runs `parse_config.py` first, which is the single
+#      source of truth for path-shape rules (regex, no "..", no leading or
+#      trailing "/", no shared paths, no prefix nesting). This mode trusts
+#      its caller and performs only the structural `name=path` check.
 #        init_structure.sh <target-dir> --pairs <name1>=<path1> [<name2>=<path2> ...]
 #
 #      <pathN> is repo-rooted relative to <target-dir>. Each path is created
@@ -20,9 +26,9 @@
 # Validation:
 #   - context-dir name (legacy): ^[a-z._-][a-z0-9._-]*$, not "." or "..".
 #   - category name (legacy):    ^[a-z][a-z0-9_-]*$.
-#   - pair name (config-driven): ^[a-z][a-z0-9_-]*$.
-#   - pair path (config-driven): ^[a-z._-][a-z0-9._/-]*$, no "..", no leading
-#     or trailing "/". The same regex enforced by parse_config.py.
+#   - --pairs (config-driven):   delegated to `parse_config.py`. See that
+#                                file for path/name/L3 regexes and the
+#                                shared-path / prefix-nesting invariants.
 
 set -euo pipefail
 
@@ -42,26 +48,6 @@ if [[ ! -d "$TARGET" ]]; then
   echo "error: target dir does not exist: $TARGET" >&2
   exit 66
 fi
-
-# Validate a name=path pair.
-pair_name_re='^[a-z][a-z0-9_-]*$'
-pair_path_re='^[a-z._-][a-z0-9._/-]*$'
-validate_pair () {
-  local name="$1" path="$2"
-  if [[ ! "$name" =~ $pair_name_re ]]; then
-    echo "error: invalid category name: '$name' (must match $pair_name_re)" >&2
-    exit 65
-  fi
-  if [[ -z "$path" || "$path" == /* || "$path" == */ ]]; then
-    echo "error: invalid path for '$name': '$path' (no leading or trailing '/')" >&2
-    exit 65
-  fi
-  case "/$path/" in *"/../"*) echo "error: path for '$name' contains '..': '$path'" >&2; exit 65 ;; esac
-  if [[ ! "$path" =~ $pair_path_re ]]; then
-    echo "error: invalid path for '$name': '$path' (must match $pair_path_re)" >&2
-    exit 65
-  fi
-}
 
 # Locate the source template dir for a canonical category. Returns empty
 # string for custom categories (no templates).
@@ -137,6 +123,10 @@ if [[ "${1:-}" == "--pairs" ]]; then
     echo "error: --pairs requires at least one <name>=<path> pair" >&2
     exit 64
   fi
+  # Path/name shape (regex, "..", leading/trailing "/", shared paths,
+  # prefix nesting) is enforced upstream by parse_config.py. This mode
+  # is scaffolder-internal; trust the caller and do only the structural
+  # `name=path` parse check.
   for pair in "$@"; do
     if [[ "$pair" != *=* ]]; then
       echo "error: malformed pair (expected name=path): '$pair'" >&2
@@ -144,7 +134,10 @@ if [[ "${1:-}" == "--pairs" ]]; then
     fi
     name="${pair%%=*}"
     path="${pair#*=}"
-    validate_pair "$name" "$path"
+    if [[ -z "$name" || -z "$path" ]]; then
+      echo "error: malformed pair (empty name or path): '$pair'" >&2
+      exit 65
+    fi
     copy_category_to "$name" "$TARGET/$path"
   done
   echo "done. $# categor$([[ $# -eq 1 ]] && echo y || echo ies) materialized at config-declared paths"
