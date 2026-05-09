@@ -10,7 +10,7 @@ bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" "$CONTEXT_DIR" <space-sepa
 
 ## Config-driven (`$LAYOUT_MAP` set)
 
-Pass each category's resolved path via the `--pairs` form, one `name=path` per category in `$LAYOUT_MAP`:
+Pass each category's resolved path via the `--pairs` form, one `name=path` per category in `$LAYOUT_MAP`. `--pairs` is scaffolder-internal: it trusts paths already validated by `parse_config.py` (regex, no `..`, no leading or trailing `/`, no shared paths, no prefix nesting) and skips re-validation. Hand-invocation should use the legacy positional shape instead.
 
 ```bash
 bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" --pairs \
