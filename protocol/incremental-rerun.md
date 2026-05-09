@@ -1,0 +1,13 @@
+# Incremental re-run
+
+Replaces Steps 3 through 8 when preflight (Step 1) detects an existing exodia setup. Step 0, Step 1, and Step 2 still run; Step 9 logic is reused for L3 seeding; Step 10 prints the wrap-up.
+
+0. Trust the `$CONTEXT_DIR` already detected in Step 1. Do not ask the user to rename it; preserving the existing directory name keeps router paths consistent.
+1. Re-run Step 2 (scan).
+2. For each L2 file under `$TARGET/$CONTEXT_DIR/`, read it and locate `<!-- exodia:section:<id> -->` markers. Fresh-draft *new* facts from the scan. Diff against existing auto-filled content.
+3. Propose updates only to sections where the auto-filled block has not been user-edited (detect with the section-id marker; if the content after the marker differs from a reconstructible baseline, treat it as user-edited and do not touch).
+4. Render each proposed diff as a fenced ` ```diff ` code block, prefaced by `### \`<file>\` § <section-id>`. Then per section, `AskUserQuestion`:
+   - **Question**: "Apply this update?"
+   - **Options**: "Accept", "Skip".
+5. Append to L3 files from the scan using the same Step 9 logic.
+6. Never overwrite `AGENTS.md`; only add missing rule snippets if conditions now apply (e.g. an `operations/` category added after initial scaffold).

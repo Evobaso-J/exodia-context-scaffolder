@@ -1,0 +1,64 @@
+# Step 1: Preflight
+
+Mode classification. Applies in all modes.
+
+## Config validation (when `$CONFIG_PATH` is present)
+
+If `$CONFIG_PATH` is present, parse and validate it **before** mode classification:
+
+```bash
+python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH"
+```
+
+On non-zero exit, abort the run and surface the line-numbered errors from stderr verbatim. Do not attempt to proceed without the config; the user must fix it. On success, pipe the JSON output through `resolve_layout.py` and store the result as `$LAYOUT_MAP`:
+
+```bash
+python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH" \
+  | python3 "$SKILL_DIR/scripts/resolve_layout.py" --skill-dir "$SKILL_DIR"
+```
+
+`$LAYOUT_MAP` is the single source of truth for `name → path`, kind, L2 template, and L3 specs that every later step consumes.
+
+## Detect what already exists
+
+```bash
+ls -la "$TARGET/AGENTS.md" "$TARGET/CLAUDE.md" 2>/dev/null
+```
+
+Probe for an existing exodia context tree. The directory name is no longer hardcoded; any top-level dir whose markdown files contain `<!-- exodia:section:` markers is an exodia context tree. Cheap probe first, fallback scan second:
+
+```bash
+# Cheap: try common names.
+EXISTING_CONTEXT_DIR=""
+for candidate in context docs knowledge .agents ai; do
+  if [[ -d "$TARGET/$candidate" ]] && grep -lr 'exodia:section:' "$TARGET/$candidate" --include='*.md' 2>/dev/null | head -1 >/dev/null; then
+    EXISTING_CONTEXT_DIR="$candidate"
+    break
+  fi
+done
+# Fallback: any top-level dir at all.
+if [[ -z "$EXISTING_CONTEXT_DIR" ]]; then
+  for d in "$TARGET"/*/; do
+    if grep -lr 'exodia:section:' "$d" --include='*.md' 2>/dev/null | head -1 >/dev/null; then
+      EXISTING_CONTEXT_DIR="$(basename "$d")"
+      break
+    fi
+  done
+fi
+```
+
+## Classify mode
+
+Classify into one of three modes:
+
+- **Fresh**: no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
+- **Merge**: `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion`:
+  - **Question**: "Split existing `AGENTS.md` / `CLAUDE.md` into per-module sections?"
+  - **Options**:
+    - "Yes, split now": parse the existing file, route each section into the right module, replace the root file with a thin router. Original content is preserved across modules, not destroyed. A monolithic root file is reloaded on every task; splitting is the long-term fix.
+    - "No, stop": exit without changes. You can revisit later by re-running `/exodia`.
+
+  If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
+- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to `protocol/incremental-rerun.md`; do not ask the dir-name question again. If `$CONFIG_PATH` is also present, ignore it and print one warning line: `Config detected but tree exists; ignoring. Delete \`exodia.config.yaml\` to silence this warning.`
+
+When entering the incremental re-run flow, parse the **router region** of `$TARGET/AGENTS.md` for the canonical category → path map. The region is wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers around the `## Context Router` table. If the markers are absent (the scaffold pre-dates this feature), fall back to a plain `<!-- exodia:section:` grep across `$TARGET/$EXISTING_CONTEXT_DIR/`, then lazily inject the markers around the router table on the next emit and note the migration in the wrap-up summary.
