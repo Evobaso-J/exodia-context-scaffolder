@@ -44,5 +44,3 @@ Rule snippets carry a small, fixed set of substitution tokens; resolve all of th
 - `{{CONTEXT_DIR}}`: replace with `$CONTEXT_DIR` for interactive runs, or with `context_dir` from the config for config-driven runs. It is only the default prefix; per-category paths are resolved separately via `$LAYOUT_MAP`, not via a placeholder.
 - `{{LEDGER_ROWS}}`: replace with the rows rendered above from `heuristics/ledgers.yaml`. Each row's host path is resolved per-row from `$LAYOUT_MAP`; there is no separate path token.
 - `{{LINT_COMMANDS}}`: replace with the detected lint/test/typecheck commands from the scan.
-
-No other placeholders are wired in the rule snippets. If a future need arises for per-category indirection outside the ledger table (e.g. Quick Action rows or Context Structure tree group headings), introduce a new explicit token here and document it in this list.
