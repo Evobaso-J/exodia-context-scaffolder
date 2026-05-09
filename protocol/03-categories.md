@@ -4,7 +4,14 @@ Mode-split. Read only the branch matching the current mode.
 
 ## Config-driven branch
 
-If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirely. Use the resolved categories from `$LAYOUT_MAP` as the confirmed set. Still run the detector heuristics in `$SKILL_DIR/heuristics/detectors.md`: for each detected optional canonical (`mobile`, `workspace`, `data`, `infra`) **not already in `$LAYOUT_MAP`** and not declared with `drop: true`, present one focused `AskUserQuestion` per detected category to add it under `<context_dir>/<name>/` (using `context_dir` from the config). Accepted additions are merged into `$LAYOUT_MAP`. Then jump to Step 4. The custom-category interview below does not run; custom categories come exclusively from the config.
+If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirely. Use the resolved categories from `$LAYOUT_MAP` as the confirmed set.
+
+Detector heuristics are gated by the config's `detectors` key (captured as `$DETECTORS` in Step 1; default `on` when absent):
+
+- `$DETECTORS == "on"` (default): run the detector heuristics in `$SKILL_DIR/heuristics/detectors.md`. For each detected optional canonical (`mobile`, `workspace`, `data`, `infra`) **not already in `$LAYOUT_MAP`** and not declared with `drop: true`, present one focused `AskUserQuestion` per detected category to add it under `<context_dir>/<name>/` (using `context_dir` from the config). Accepted additions are merged into `$LAYOUT_MAP`.
+- `$DETECTORS == "off"`: skip the detector pass entirely. The config is treated as exhaustive; no interactive Adds are surfaced. Use this when the config is committed and teammates re-running the scaffolder should not be re-prompted for canonicals deliberately omitted (e.g. infra docs owned elsewhere).
+
+Then jump to Step 4. The custom-category interview below does not run; custom categories come exclusively from the config.
 
 ## Interactive branch
 

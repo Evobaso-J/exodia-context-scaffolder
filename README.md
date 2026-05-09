@@ -56,6 +56,7 @@ For richer layouts (canonical set under `docs/project/`, plus a sibling category
 
 ```yaml
 context_dir: docs/project          # default root for canonical categories without explicit path
+detectors: on                      # 'on' (default) or 'off'; gates optional-canonical detector prompts
 categories:
   domain:    { drop: true }        # remove canonical category
   operations: { drop: true }
@@ -68,6 +69,7 @@ categories:
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `context_dir` | string | `context` | Default prefix for canonical categories that omit `path`. |
+| `detectors` | enum (`on` / `off`) | `on` | When `on`, Step 3 still scans for optional canonicals (`mobile`, `workspace`, `data`, `infra`) not already in the config and asks per-category whether to add them. When `off`, the config is treated as exhaustive: no Step 3 detector prompts fire. Set to `off` when teammates re-running the scaffolder should not be re-prompted for canonicals deliberately omitted (e.g. infra docs owned elsewhere). |
 | `categories` | map | `{}` | Map keyed by category name. |
 | `categories.<name>.path` | string | `<context_dir>/<name>` | Repo-rooted path. Required for custom categories outside `context_dir`. |
 | `categories.<name>.drop` | bool | `false` | Exclude a canonical category. Mutually exclusive with `path` / `custom` / `l3`. |

@@ -9,6 +9,7 @@ failure.
 Schema (see README "Customizing the layout" section for the full reference):
 
     context_dir: docs/project          # default root for canonical categories
+    detectors: on                      # 'on' (default) or 'off'; gates Step 3 detector questions
     categories:
       domain:     { drop: true }       # remove canonical category
       operations: { drop: true }
@@ -284,8 +285,17 @@ def _validate_l3_filename(name: str, line: int) -> None:
 def validate(parsed: dict[str, Any]) -> dict[str, Any]:
     errors: list[ConfigError] = []
     for key in parsed:
-        if key not in ("context_dir", "categories"):
+        if key not in ("context_dir", "categories", "detectors"):
             errors.append(ConfigError(f"unknown top-level key: '{key}'"))
+
+    raw_detectors = parsed.get("detectors", "on")
+    if isinstance(raw_detectors, bool):
+        detectors = "on" if raw_detectors else "off"
+    elif isinstance(raw_detectors, str) and raw_detectors.lower() in ("on", "off"):
+        detectors = raw_detectors.lower()
+    else:
+        errors.append(ConfigError(f"detectors must be 'on' or 'off', got {raw_detectors!r}"))
+        detectors = "on"
 
     context_dir = parsed.get("context_dir", "context")
     if not isinstance(context_dir, str) or not context_dir:
@@ -410,7 +420,7 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
     if errors:
         raise ConfigErrorList(errors)
 
-    return {"context_dir": context_dir, "categories": resolved}
+    return {"context_dir": context_dir, "detectors": detectors, "categories": resolved}
 
 
 class ConfigErrorList(Exception):

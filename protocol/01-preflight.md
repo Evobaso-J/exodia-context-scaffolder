@@ -10,14 +10,17 @@ If `$CONFIG_PATH` is present, parse and validate it **before** mode classificati
 python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH"
 ```
 
-On non-zero exit, abort the run and surface the line-numbered errors from stderr verbatim. Do not attempt to proceed without the config; the user must fix it. On success, pipe the JSON output through `resolve_layout.py` and store the result as `$LAYOUT_MAP`:
+On non-zero exit, abort the run and surface the line-numbered errors from stderr verbatim. Do not attempt to proceed without the config; the user must fix it. On success, pipe the JSON output through `resolve_layout.py` and store the result as `$LAYOUT_MAP`. Also capture the top-level `detectors` flag (default `"on"`) into `$DETECTORS` for Step 3 to consume:
 
 ```bash
-python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH" \
-  | python3 "$SKILL_DIR/scripts/resolve_layout.py" --skill-dir "$SKILL_DIR"
+PARSED_CONFIG="$(python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH")"
+DETECTORS="$(printf '%s' "$PARSED_CONFIG" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin).get("detectors","on"))')"
+LAYOUT_MAP="$(printf '%s' "$PARSED_CONFIG" \
+  | python3 "$SKILL_DIR/scripts/resolve_layout.py" --skill-dir "$SKILL_DIR")"
 ```
 
-`$LAYOUT_MAP` is the single source of truth for `name → path`, kind, L2 template, and L3 specs that every later step consumes.
+`$LAYOUT_MAP` is the single source of truth for `name → path`, kind, L2 template, and L3 specs that every later step consumes. `$DETECTORS` is `"on"` (default) or `"off"`; Step 3 gates the optional-canonical detector questions on it.
 
 ## Detect what already exists
 
