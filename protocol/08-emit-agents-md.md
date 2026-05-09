@@ -39,4 +39,10 @@ Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
 ## Placeholders
 
-Rule snippets (`universal.md`, `conditional/operations-awareness.md`, `self-update.md`, and the `{{CONTEXT_TREE}}` diagram) contain `{{CONTEXT_DIR}}` placeholders. Substitute every `{{CONTEXT_DIR}}` with `$CONTEXT_DIR` for interactive runs. For config-driven runs, `{{CONTEXT_DIR}}` is replaced by `context_dir` from the config (the default prefix), and `{{path:<key>}}` placeholders carry the per-category specifics.
+Rule snippets carry a small, fixed set of substitution tokens; resolve all of them at emit time:
+
+- `{{CONTEXT_DIR}}` (in `universal.md`, `conditional/operations-awareness.md`, `self-update.md`, and the `{{CONTEXT_TREE}}` diagram): replace with `$CONTEXT_DIR` for interactive runs, or with `context_dir` from the config for config-driven runs. It is only the default prefix; per-category paths are resolved separately via `$LAYOUT_MAP`, not via a placeholder.
+- `{{LEDGER_ROWS}}` (in `self-update.md`, between the `exodia:self-update:rows` markers): replace with the rows rendered above from `heuristics/ledgers.yaml`. Each row's host path is resolved per-row from `$LAYOUT_MAP`; there is no separate path token.
+- `{{LINT_COMMANDS}}` (in `conditional/lint-check.md`, only when that snippet is included): replace with the detected lint/test/typecheck commands from the scan.
+
+No other placeholders are wired in the rule snippets. If a future need arises for per-category indirection outside the ledger table (e.g. Quick Action rows or Context Structure tree group headings), introduce a new explicit token here and document it in this list.
