@@ -31,7 +31,7 @@ Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 
 1. Project overview (one paragraph from scan)
 2. Commands (point to the detected package manifest file)
-3. Context Router table (one row per confirmed category, linking to the resolved `<path>/<CATEGORY>.md`). Wrap the table in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers (the template already does this); incremental re-runs parse this region for the category → path map, so do not move the markers or add prose between them and the table.
+3. Context Router table (one row per confirmed category, linking to the resolved `<path>/<CATEGORY>.md`). Wrap the table in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers (the template already does this); incremental re-runs parse this region for the category → path map, so do not move the markers or add prose between them and the table. The full format contract (header row, column count, link-cell shape, single-occurrence rule) lives in `$SKILL_DIR/TROUBLESHOOTING.md` § "Router region invariants"; emit must conform to it.
 4. Behavioral Rules (universal + conditional)
 5. Self-Update Rules (full block, after placeholder substitution + custom-row append)
 6. Quick Action Table (common dev phrases → file to read)
