@@ -46,7 +46,8 @@ from typing import Any
 # directory, so Python adds that directory to `sys.path` automatically.
 from yaml_subset import ConfigError, parse_yaml_subset
 
-CANONICAL_CATEGORIES = {
+# Parse-time validation set: category names that do not require `custom: true`.
+RECOGNIZED_CATEGORIES = {
     "architecture",
     "patterns",
     "domain",
@@ -58,10 +59,10 @@ CANONICAL_CATEGORIES = {
     "infra",
 }
 
-# Default-in set when a config is present. Optional canonicals (mobile,
-# workspace, data, infra) only enter via Step 3 scan detection or explicit
-# config declaration; the canonical five are the baseline.
-CANONICAL_FIVE = ("architecture", "patterns", "domain", "operations", "debugging")
+# Auto-add set: category names auto-added to the resolved layout when a config
+# is present. Other recognized names (mobile, workspace, data, infra) only
+# enter via Step 3 scan detection or explicit config declaration.
+DEFAULT_CATEGORIES = ("architecture", "patterns", "domain", "operations", "debugging")
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
 L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl)$")
@@ -130,12 +131,12 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
             errors.append(ConfigError(f"category '{name}': 'drop: true' is mutually exclusive with other fields"))
             continue
 
-        is_canonical = name in CANONICAL_CATEGORIES
+        is_canonical = name in RECOGNIZED_CATEGORIES
         if not is_canonical and not custom_flag and not drop:
             errors.append(
                 ConfigError(
                     f"category '{name}': non-canonical name requires 'custom: true' "
-                    f"(canonical set: {sorted(CANONICAL_CATEGORIES)})"
+                    f"(canonical set: {sorted(RECOGNIZED_CATEGORIES)})"
                 )
             )
             continue
@@ -179,7 +180,7 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
         )
 
     declared = {c["name"] for c in resolved}
-    for default_name in CANONICAL_FIVE:
+    for default_name in DEFAULT_CATEGORIES:
         if default_name not in declared:
             resolved.append(
                 {
