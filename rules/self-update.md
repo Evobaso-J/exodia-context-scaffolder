@@ -2,7 +2,7 @@ The context files are **shared, living documentation** about the codebase, not p
 
 ### When to update
 
-Target-file paths below are absolute, repo-rooted: a config-driven scaffold may place categories anywhere (e.g. `docs/project/architecture/`, `docs/domain/glossary/`). Without a config, the canonical layout has every category under `{{CONTEXT_DIR}}/`. The scaffolder substitutes the resolved paths into this table at emit time; do not re-derive them.
+Target-file paths below are absolute, repo-rooted: a config-driven scaffold may place categories anywhere (e.g. `docs/project/architecture/`, `docs/handbook/glossary/`). Without a config, the canonical layout has every category under `{{CONTEXT_DIR}}/`. The scaffolder substitutes the resolved paths into this table at emit time; do not re-derive them.
 
 | Signal during conversation | Target file | What to write |
 | -------------------------- | ----------- | ------------- |

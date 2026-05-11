@@ -35,7 +35,7 @@ Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 4. Behavioral Rules (universal + conditional)
 5. Self-Update Rules (full block, after placeholder substitution + custom-row append)
 6. Quick Action Table (common dev phrases → file to read)
-7. Context Structure (tree diagram). Group resolved paths by their longest common prefix and render one tree per group, so multi-root layouts (e.g. `docs/project/...` and `docs/domain/...`) read cleanly.
+7. Context Structure (tree diagram). Group resolved paths by their longest common prefix and render one tree per group, so multi-root layouts (e.g. `docs/project/...` and `docs/handbook/...`) read cleanly.
 
 ## Placeholders
 
