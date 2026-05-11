@@ -28,7 +28,7 @@ Every `.jsonl` file's first line is a schema descriptor:
 
 ## YAML stub
 
-Top-level key + a comment block showing one example entry. Mirror `templates/operations/variants.yaml.tmpl` and `templates/domain/glossary.yaml.tmpl`.
+Top-level key + a comment block showing one example entry. Mirror `templates/operations/variants.yaml.tmpl` and `templates/glossary/glossary.yaml.tmpl`.
 
 ## ID format
 

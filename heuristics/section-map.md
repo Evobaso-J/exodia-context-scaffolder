@@ -9,8 +9,8 @@ Apply rules top-to-bottom. First match wins. If no rule matches, route to `_unso
 | Heading keywords (case-insensitive, substring match) | Category |
 | ---------------------------------------------------- | -------- |
 | `architecture`, `routing`, `router`, `module`, `ssr`, `csr`, `bundle`, `chunk`, `state management`, `store`, `runtime`, `entry point`, `build pipeline` | `architecture` |
-| `pattern`, `convention`, `component`, `composable`, `hook`, `utility`, `helper`, `api call`, `client`, `auth pattern`, `tracking pattern`, `telemetry pattern`, `accessibility`, `a11y`, `testing pattern`, `style guide` | `patterns` |
-| `domain`, `entity`, `entities`, `glossary`, `terminology`, `user journey`, `business logic`, `model` (only if clearly business-model, not ML) | `domain` |
+| `pattern`, `convention`, `component`, `composable`, `hook`, `utility`, `helper`, `api call`, `client`, `auth pattern`, `tracking pattern`, `telemetry pattern`, `accessibility`, `a11y`, `testing pattern`, `style guide` | `design-patterns` |
+| `entity`, `entities`, `glossary`, `terminology`, `user journey`, `business logic`, `model` (only if clearly business-model, not ML) | `glossary` |
 | `environment`, `env var`, `variant`, `market`, `tenant`, `locale`, `i18n`, `translation`, `deploy`, `release`, `config`, `feature flag` | `operations` |
 | `debug`, `troubleshoot`, `common issue`, `gotcha`, `playbook`, `error`, `fix`, `known issue`, `pitfall`, `setup` (only if followed by *local*, *dev*, *environment*) | `debugging` |
 | `mobile`, `ios`, `android`, `react native`, `expo`, `flutter` | `mobile` (if present) |

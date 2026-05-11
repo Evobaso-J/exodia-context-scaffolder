@@ -11,8 +11,8 @@ If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirel
 When no config is present, the **default** starter set is the five canonical categories:
 
 - `architecture/`
-- `patterns/`
-- `domain/`
+- `design-patterns/`
+- `glossary/`
 - `operations/`
 - `debugging/`
 
@@ -43,4 +43,4 @@ When the user adds a **custom category**, ask one follow-up: a one-line purpose 
 
 Carry the proposed `(filename, schema, format, scan_hint)` tuples into Step 6 alongside the L2 draft. `init_structure.sh` will scaffold an empty L2 stub for any category without a template dir; the L3 stubs you propose are drafted in Step 6 and seeded in Step 9.
 
-The target repo picks the shape. Users may drop any canonical category that does not apply: a pure library may have no `operations/`, a data pipeline may have no `patterns/`, a CLI tool may have no `domain/`. `init_structure.sh` accepts any subset of category names matching `^[a-z][a-z0-9_-]*$`; the core set is a default, not an enforced minimum.
+The target repo picks the shape. Users may drop any canonical category that does not apply: a pure library may have no `operations/`, a data pipeline may have no `design-patterns/`, a CLI tool may have no `glossary/`. `init_structure.sh` accepts any subset of category names matching `^[a-z][a-z0-9_-]*$`; the core set is a default, not an enforced minimum.

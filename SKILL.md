@@ -2,7 +2,7 @@
 name: exodia
 description: >
   Scaffold a durable, agent-agnostic context tree for any repo: AGENTS.md router + a
-  `context/` directory split into 5 narrative modules (architecture, patterns, domain,
+  `context/` directory split into 5 narrative modules (architecture, design-patterns, glossary,
   operations, debugging) with append-only L3 data files (.jsonl + .yaml). Interactive:
   scans the repo, proposes categories, drafts each module section-by-section, and
   embeds self-update rules. One-shot. Re-runs incrementally diff existing content.

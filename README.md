@@ -18,8 +18,8 @@ A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that agents rel
 AGENTS.md                          # router + rules + quick action table
 context/
   architecture/   ARCHITECTURE.md + decisions.jsonl
-  patterns/       PATTERNS.md     + reviews.jsonl
-  domain/         DOMAIN.md       + glossary.yaml
+  design-patterns/ DESIGN-PATTERNS.md + reviews.jsonl
+  glossary/        GLOSSARY.md        + glossary.yaml
   operations/     OPERATIONS.md   + variants.yaml
   debugging/      DEBUGGING.md    + gotchas.jsonl + playbooks.jsonl
 ```
@@ -57,12 +57,11 @@ For richer layouts (canonical set under `docs/project/`, plus a sibling category
 ```yaml
 context_dir: docs/project          # default root for canonical categories without explicit path
 categories:
-  domain:    { drop: true }        # remove canonical category
-  operations: { drop: true }
-  glossary:                        # custom category (name not in canonical set)
-    path: docs/domain/glossary     # repo-rooted, may escape context_dir
+  operations: { drop: true }       # remove canonical category
+  releases:                        # custom category (name not in canonical set)
+    path: docs/releases            # repo-rooted, may escape context_dir
     custom: true
-    l3: [glossary.yaml]            # optional; filenames only, schema inferred from name
+    l3: [releases.jsonl]           # optional; filenames only, schema inferred from name
 ```
 
 | Field | Type | Default | Meaning |
@@ -78,7 +77,7 @@ categories:
 
 Recognized as canonical (no `custom: true` required):
 
-`architecture`, `patterns`, `domain`, `operations`, `debugging`, `mobile`, `workspace`, `data`, `infra`.
+`architecture`, `design-patterns`, `glossary`, `operations`, `debugging`, `mobile`, `workspace`, `data`, `infra`.
 
 Any other name in `categories` requires `custom: true` or it is rejected at parse time.
 
@@ -100,32 +99,6 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 4. Non-canonical name without `custom: true`.
 5. `drop: true` combined with any other field.
 6. `l3` filename with an extension other than `.yaml` or `.jsonl`.
-
-### Worked example: weroad case
-
-A repo that wants the canonical set under `docs/project/` *and* a `glossary` category at `docs/domain/glossary/`, while preserving sibling user-owned dirs like `docs/domain/handbook/` and `docs/domain/tech/`:
-
-```yaml
-context_dir: docs/project
-categories:
-  domain:     { drop: true }
-  operations: { drop: true }
-  glossary:
-    path: docs/domain/glossary
-    custom: true
-    l3: [glossary.yaml]
-```
-
-Resolved layout:
-
-| Category | Path | Kind |
-| --- | --- | --- |
-| `architecture` | `docs/project/architecture` | canonical |
-| `patterns` | `docs/project/patterns` | canonical |
-| `debugging` | `docs/project/debugging` | canonical |
-| `glossary` | `docs/domain/glossary` | custom |
-
-`docs/domain/handbook/` and `docs/domain/tech/` are untouched. The wrap-up step prints a sibling notice naming them so the user sees they are not managed.
 
 ## 🎯 Usage
 

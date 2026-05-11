@@ -17,12 +17,12 @@ and emits the layout map every downstream step consumes:
       },
       {
         "name": "glossary",
-        "path": "docs/domain/glossary",
-        "kind": "custom",
-        "l2_template_path": null,
+        "path": "docs/project/glossary",
+        "kind": "canonical",
+        "l2_template_path": "<SKILL_DIR>/templates/glossary/GLOSSARY.md.tmpl",
         "l3_specs": [
           {"filename": "glossary.yaml", "schema_name": "glossary",
-           "schema_template_path": "<SKILL_DIR>/templates/domain/glossary.yaml.tmpl"}
+           "schema_template_path": "<SKILL_DIR>/templates/glossary/glossary.yaml.tmpl"}
         ]
       }
     ]
