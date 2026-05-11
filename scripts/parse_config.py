@@ -61,6 +61,7 @@ RECOGNIZED_CATEGORIES = {
 # Auto-add set: category names auto-added to the resolved layout when a config
 # is present. Other recognized names (mobile, workspace, data, infra) only
 # enter via Step 3 scan detection or explicit config declaration.
+# Tuple order drives L2 draft order in protocol/06-draft-l2.md.
 DEFAULT_CATEGORIES = ("architecture", "design-patterns", "glossary", "operations", "debugging")
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")

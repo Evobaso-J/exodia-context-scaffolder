@@ -45,7 +45,7 @@ Customization knobs (custom context-dir name, dropping canonical modules, custom
 
 ## 🛠 Customizing the layout (config-driven)
 
-For richer layouts (canonical set under `docs/project/`, plus a sibling category at `docs/domain/glossary/`, etc.), drop an opt-in `exodia.config.yaml` at the repo root **before** running `/exodia` for the first time. Categories can be relocated, dropped, or added with arbitrary repo-rooted paths.
+For richer layouts (canonical set under `docs/project/`, plus a sibling category at `docs/handbook/glossary/`, etc.), drop an opt-in `exodia.config.yaml` at the repo root **before** running `/exodia` for the first time. Categories can be relocated, dropped, or added with arbitrary repo-rooted paths.
 
 - **Opt-in.** Absent → the interactive flow runs unchanged.
 - **One-shot.** Consumed exactly once at the first scaffold run (Fresh or Merge mode). Incremental re-runs ignore it.

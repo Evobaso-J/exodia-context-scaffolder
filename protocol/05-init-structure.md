@@ -17,7 +17,7 @@ bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" --pairs \
   architecture=docs/project/architecture \
   design-patterns=docs/project/design-patterns \
   debugging=docs/project/debugging \
-  glossary=docs/domain/glossary
+  glossary=docs/handbook/glossary
 ```
 
 ## Helper behavior (both shapes)
