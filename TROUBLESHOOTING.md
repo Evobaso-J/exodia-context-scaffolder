@@ -5,4 +5,7 @@ Runtime failure modes for the `/exodia` scaffolder. Read this only when one of t
 - **User aborts mid-interview**: leave the repo in whatever partial state exists. No need to roll back. Running `/exodia` again resumes from preflight.
 - **Explore scan times out / returns garbage**: fall back to asking the user to confirm the stack and architecture directly, then continue.
 - **Target repo has committed secrets or `.env` with real values**: never echo these in drafts. If you must reference env vars, name them only.
-- **No git, no agent integration, no lint scripts**: skill still works; just emits the minimal universal rules.
+- **No agent integration, no lint scripts**: skill still works; just emits the minimal universal rules.
+- **`exodia.config.yaml` validation error**: `parse_config.py` exits 65 with line-numbered errors on stderr. Fix the offending line and re-run; the scaffolder will not proceed with an invalid config. Common causes: path uppercase or contains `..`, two categories share a path, a non-canonical category name without `custom: true`, `drop: true` combined with another field.
+- **Config ignored on incremental re-run**: by design. Once the first scaffold has emitted AGENTS.md with the router region wrapped in `<!-- exodia:router:start/end -->`, that table is the sole truth. Re-runs print a warning and skip the file. Delete `exodia.config.yaml` to silence the warning.
+- **Old scaffold without router brackets**: incremental re-runs fall back to a `<!-- exodia:section:` grep across the existing context dir, then lazily inject the bracket markers around the router table on the next emit. The wrap-up summary mentions the migration; user-edited prose outside the router region is preserved.

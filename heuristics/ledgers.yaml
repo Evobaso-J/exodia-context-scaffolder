@@ -1,0 +1,172 @@
+# Canonical ledger registry: single source of truth for every L3 ledger
+# the scaffolder ships. Drives:
+#
+#   - scripts/resolve_layout.py: filename -> (host, schema) lookup
+#   - rules/self-update.md: emitted "When to update" table
+#   - SKILL.md Step 8: {{path:<key>}} resolution
+#   - SKILL.md Step 9: per-ledger seed-scan source / skeleton-source
+#
+# To add or modify a ledger: edit a row here. Do not duplicate the data into
+# resolve_layout.py, self-update.md, or SKILL.md. Each ledger key is the
+# unique {{path:<key>}} placeholder used in self-update.md (and therefore the
+# row's identifier). `host` is the canonical category whose dir hosts the
+# file. `template` is the .tmpl filename under templates/<host>/. `signals`
+# is a list because some ledgers serve multiple signals (e.g. reviews accepts
+# both "PR review surfaces new check" and "API contract change"). YAML-format
+# ledgers carry skeleton_source / skeleton_shape; jsonl-format ones carry
+# scan_source.
+#
+# Field contract (required fields per row, by consumer):
+#   every row:   filename, host, schema, format, signals
+#     - filename, host, schema -> resolve_layout.py (filename to
+#       (host, schema) lookup; host scopes shared filenames like
+#       decisions.jsonl)
+#     - format                 -> Step 9 dispatch (jsonl vs yaml clause)
+#     - signals (list of {signal, action})
+#                              -> Step 8 emits one self-update.md "When to
+#                                 update" row per entry; omit -> no row
+#   format: jsonl rows also require:
+#     - scan_source            -> Step 9 detect-source clause; omit -> no
+#                                 clause emitted for this ledger
+#   format: yaml rows also require:
+#     - skeleton_source, skeleton_shape
+#                              -> Step 9 skeleton clause; omit -> no
+#                                 skeleton proposed
+# Optional: template (informational; resolve_layout.py derives the .tmpl
+# path from filename + host, so the field is documentation, not input).
+
+ledgers:
+
+  decisions:
+    filename: decisions.jsonl
+    host: architecture
+    schema: adr
+    format: jsonl
+    template: decisions.jsonl.tmpl
+    signals:
+      - {signal: "Architecture or design decision taken by the team", action: "New ADR entry"}
+    scan_source: "docs/adr/, docs/decisions/, ARCHITECTURE.md headings with decision language"
+
+  reviews:
+    filename: reviews.jsonl
+    host: patterns
+    schema: rv
+    format: jsonl
+    template: reviews.jsonl.tmpl
+    signals:
+      - {signal: "PR review surfaces new check (prod break, near-miss)", action: "New review entry"}
+      - {signal: "API contract changes or deprecated", action: "New entry tagged `migration` with `old_pattern` / `new_pattern`"}
+    scan_source: "ESLint/Biome custom rules, @deprecated JSDoc / Python DeprecationWarning, CHANGELOG sections matching BREAKING / Deprecated"
+
+  glossary:
+    filename: glossary.yaml
+    host: domain
+    schema: glossary
+    format: yaml
+    template: glossary.yaml.tmpl
+    signals:
+      - {signal: "Domain term clarified or new entity appears", action: "New or updated term"}
+    skeleton_source: "$SCAN §3 (top-level entities / models named in the repo)"
+    skeleton_shape: '`entities:` map, one key per entity, body `definition: ""` and `relationship: "see <file>"`'
+
+  variants:
+    filename: variants.yaml
+    host: operations
+    schema: variants
+    format: yaml
+    template: variants.yaml.tmpl
+    signals:
+      - {signal: "Variant-specific behavior confirmed", action: "New entry under the relevant variant"}
+    skeleton_source: "i18n locales, env files, feature-flag tool from $SCAN §4"
+    skeleton_shape: '`variants:` map with a `default:` key and one key per detected variant, each body `notes: ""`'
+
+  gotchas:
+    filename: gotchas.jsonl
+    host: debugging
+    schema: gotcha
+    format: jsonl
+    template: gotchas.jsonl.tmpl
+    signals:
+      - {signal: "Pitfall or footgun confirmed (don't do X / watch out for Y)", action: "New gotcha entry"}
+    scan_source: "TODO, FIXME, HACK, XXX, WARNING comments grouped by directory/area"
+
+  playbooks:
+    filename: playbooks.jsonl
+    host: debugging
+    schema: pb
+    format: jsonl
+    template: playbooks.jsonl.tmpl
+    signals:
+      - {signal: "Bug pattern identified with non-obvious root cause", action: "New playbook entry"}
+    scan_source: "docs/postmortems/, POSTMORTEM*.md, rich `^fix:` commits (commit body longer than ~200 chars)"
+
+  infra-decisions:
+    filename: decisions.jsonl
+    host: infra
+    schema: adr
+    format: jsonl
+    template: decisions.jsonl.tmpl
+    signals:
+      - {signal: "Infra ADR taken (cloud, IaC, network, observability)", action: "New ADR entry"}
+    scan_source: "infra-scoped commits in `terraform/`, `helm/`, `k8s/`; `infra/CHANGES.md`"
+
+  runbooks:
+    filename: runbooks.jsonl
+    host: infra
+    schema: rb
+    format: jsonl
+    template: runbooks.jsonl.tmpl
+    signals:
+      - {signal: "Infra event response procedure defined (scale, failover, cert rotation)", action: "New runbook entry"}
+    scan_source: "`RUNBOOK*.md`, `docs/runbooks/`, `ops/`, `runbooks/`"
+
+  experiments:
+    filename: experiments.jsonl
+    host: data
+    schema: exp
+    format: jsonl
+    template: experiments.jsonl.tmpl
+    signals:
+      - {signal: "ML experiment run with outcome", action: "New experiment entry"}
+    scan_source: "`experiments/`, `notebooks/`, `runs/` directories; `RESULTS.md`"
+
+  datasets:
+    filename: datasets.yaml
+    host: data
+    schema: datasets
+    format: yaml
+    template: datasets.yaml.tmpl
+    signals:
+      - {signal: "New dataset registered or refresh cadence change", action: "New or updated dataset"}
+    skeleton_source: "DB migrations, schema files, contents of `data/`"
+    skeleton_shape: '`datasets:` map, one key per dataset, body `source: "<file>"`, `schema: ""`, `refresh: ""`, `notes: ""`'
+
+  mobile-gotchas:
+    filename: gotchas.jsonl
+    host: mobile
+    schema: mgotcha
+    format: jsonl
+    template: gotchas.jsonl.tmpl
+    signals:
+      - {signal: "Platform-specific mobile footgun confirmed", action: "New gotcha entry tagged with `platform`"}
+    scan_source: "TODO/FIXME inside `ios/`, `android/`, `*.swift`, `*.kt`; tag each entry `platform: ios | android | both`"
+
+  releases:
+    filename: releases.jsonl
+    host: mobile
+    schema: mrel
+    format: jsonl
+    template: releases.jsonl.tmpl
+    signals:
+      - {signal: "Mobile store rollout (version, phase)", action: "New rollout entry"}
+    scan_source: "store-config files, `fastlane/` metadata, git tags matching version patterns"
+
+  migrations:
+    filename: migrations.jsonl
+    host: workspace
+    schema: wsmig
+    format: jsonl
+    template: migrations.jsonl.tmpl
+    signals:
+      - {signal: "Workspace graph change (package move, scope rename, tooling swap)", action: "New migration entry"}
+    scan_source: "git log touching `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, root `package.json` `workspaces` field"

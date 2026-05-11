@@ -2,25 +2,14 @@ The context files are **shared, living documentation** about the codebase, not p
 
 ### When to update
 
-All target-file paths below are relative to the context directory (`{{CONTEXT_DIR}}/`).
+Target-file paths below are absolute, repo-rooted: a config-driven scaffold may place categories anywhere (e.g. `docs/project/architecture/`, `docs/domain/glossary/`). Without a config, the canonical layout has every category under `{{CONTEXT_DIR}}/`. The scaffolder substitutes the resolved paths into this table at emit time; do not re-derive them.
 
 | Signal during conversation | Target file | What to write |
 | -------------------------- | ----------- | ------------- |
 | Codebase assumption corrected by user or by evidence | L2 `.md` file for that area | Update the incorrect section |
-| Bug pattern identified with non-obvious root cause | `debugging/playbooks.jsonl` | New playbook entry |
-| Pitfall or footgun confirmed ("don't do X" / "watch out for Y") | `debugging/gotchas.jsonl` | New gotcha entry |
-| Architecture or design decision taken by the team | `architecture/decisions.jsonl` | New ADR entry |
-| PR review surfaces new check (prod break, near-miss) | `patterns/reviews.jsonl` | New review entry |
-| API contract changes or deprecated | `patterns/reviews.jsonl` | New entry tagged `migration` with `old_pattern` / `new_pattern` |
-| Variant-specific behavior confirmed | `operations/variants.yaml` | New entry under the relevant variant |
-| Domain term clarified or new entity appears | `domain/glossary.yaml` | New or updated term |
-| Infra ADR taken (cloud, IaC, network, observability) | `infra/decisions.jsonl` | New ADR entry |
-| Infra event response procedure defined (scale, failover, cert rotation) | `infra/runbooks.jsonl` | New runbook entry |
-| Workspace graph change (package move, scope rename, tooling swap) | `workspace/migrations.jsonl` | New migration entry |
-| ML experiment run with outcome | `data/experiments.jsonl` | New experiment entry |
-| New dataset registered or refresh cadence change | `data/datasets.yaml` | New or updated dataset |
-| Platform-specific mobile footgun confirmed | `mobile/gotchas.jsonl` | New gotcha entry tagged with `platform` |
-| Mobile store rollout (version, phase) | `mobile/releases.jsonl` | New rollout entry |
+<!-- exodia:self-update:rows:start -->
+{{LEDGER_ROWS}}
+<!-- exodia:self-update:rows:end -->
 
 ### How to update
 
