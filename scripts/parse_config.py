@@ -14,7 +14,7 @@ Schema (see README "Customizing the layout" section for the full reference):
       releases:                        # custom category (non-canonical name)
         path: docs/releases
         custom: true
-        l3: [releases.jsonl]           # optional override
+        l3: [release_notes.jsonl]      # optional override; filename outside canonical ledger registry -> model writes schema
 
 Validation rules:
   1. `path` matches `^[a-z._-][a-z0-9._/-]*$`, no `..`, no leading or trailing `/`.

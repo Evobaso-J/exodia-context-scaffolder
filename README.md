@@ -61,7 +61,7 @@ categories:
   releases:                        # custom category (name not in canonical set)
     path: docs/releases            # repo-rooted, may escape context_dir
     custom: true
-    l3: [releases.jsonl]           # optional; filenames only, schema inferred from name
+    l3: [release_notes.jsonl]      # optional; filenames only, model writes schema when filename not in canonical ledger registry
 ```
 
 | Field | Type | Default | Meaning |
