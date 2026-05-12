@@ -22,5 +22,5 @@ The user already granted permission in Step 1.
    - **Question**: "Mapping look right?"
    - **Options**: "Accept all", "Reassign rows", "Drop rows", "Edit table".
 
-   If the table is too long for the four-option bound, fall back to a numbered prompt: ask the user to type row reassignments (`3→domain, 5→drop`).
+   If the table is too long for the four-option bound, fall back to a numbered prompt: ask the user to type row reassignments (`3→glossary, 5→drop`).
 5. Carry the accepted mapping into Step 6 as **seed content** for each category draft. The parsed content is being *moved*, not copied; the original file is replaced by Step 8 (router). No `.bak` file is written: the user consented in Step 1, and the content is preserved (split across modules under `$CONTEXT_DIR/`) rather than destroyed.

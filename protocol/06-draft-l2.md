@@ -4,7 +4,7 @@ Applies in Fresh and Merge modes. (Incremental re-runs use the diff flow in `pro
 
 > **Schema inference (custom ledgers).** Whenever this step says "model writes the schema body inline," apply one unified rule. Inputs available: `{purpose, filename-if-given, scan-hints}` (any subset; missing pieces are derived from `$SCAN` and the category's purpose statement). Output is the tuple `{filename, schema, format, scan_hint}`; `format` and any per-format header come from `$SKILL_DIR/heuristics/format-strategy.md` (the `schema` slot is null for `.md`). Result lives in the in-memory `l3_specs` for the category and is referenced by Step 8 (AGENTS.md emit) and Step 9 (seeding). The three sub-cases below are entry points into this single rule, not separate procedures.
 
-For each confirmed category, in order (architecture, patterns, domain, operations, debugging, then optional extras and custom categories):
+For each confirmed category, in order (architecture, design-patterns, glossary, operations, debugging, then optional extras and custom categories):
 
 1. **Choose the section skeleton.** If the category has an `l2_template_path` (canonical with template), read it and lock the voice (terse, factual, table- and bullet-heavy, inline file citations, no marketing prose). For custom categories with no template (`l2_template_path: null`), use the default skeleton already written by `init_structure.sh` (`## Purpose`, `## Key Files`, `## L3 Data`) plus any extra `##` sections you deem useful from the scan.
 2. Using `$SCAN` (and any merge-seeded content from Step 4), fill each `##` section with a short, factual draft. Cite files. No speculation. Keep each section under ~150 words.

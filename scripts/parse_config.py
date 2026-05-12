@@ -10,12 +10,11 @@ Schema (see README "Customizing the layout" section for the full reference):
 
     context_dir: docs/project          # default root for canonical categories
     categories:
-      domain:     { drop: true }       # remove canonical category
-      operations: { drop: true }
-      glossary:                        # custom category
-        path: docs/domain/glossary
+      operations: { drop: true }       # remove canonical category
+      releases:                        # custom category (non-canonical name)
+        path: docs/releases
         custom: true
-        l3: [glossary.yaml]            # optional override
+        l3: [release_notes.jsonl]      # optional override; filename outside canonical ledger registry -> model writes schema
 
 Validation rules:
   1. `path` matches `^[a-z._-][a-z0-9._/-]*$`, no `..`, no leading or trailing `/`.
@@ -49,8 +48,8 @@ from yaml_subset import ConfigError, parse_yaml_subset
 # Parse-time validation set: category names that do not require `custom: true`.
 RECOGNIZED_CATEGORIES = {
     "architecture",
-    "patterns",
-    "domain",
+    "design-patterns",
+    "glossary",
     "operations",
     "debugging",
     "mobile",
@@ -62,7 +61,8 @@ RECOGNIZED_CATEGORIES = {
 # Auto-add set: category names auto-added to the resolved layout when a config
 # is present. Other recognized names (mobile, workspace, data, infra) only
 # enter via Step 3 scan detection or explicit config declaration.
-DEFAULT_CATEGORIES = ("architecture", "patterns", "domain", "operations", "debugging")
+# Tuple order drives L2 draft order in protocol/06-draft-l2.md.
+DEFAULT_CATEGORIES = ("architecture", "design-patterns", "glossary", "operations", "debugging")
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
 L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl)$")

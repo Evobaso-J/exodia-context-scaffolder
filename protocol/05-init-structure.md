@@ -15,9 +15,10 @@ Pass each category's resolved path via the `--pairs` form, one `name=path` per c
 ```bash
 bash "$SKILL_DIR/scripts/init_structure.sh" "$TARGET" --pairs \
   architecture=docs/project/architecture \
-  patterns=docs/project/patterns \
+  design-patterns=docs/project/design-patterns \
+  operations=docs/project/operations \
   debugging=docs/project/debugging \
-  glossary=docs/domain/glossary
+  glossary=docs/handbook/glossary
 ```
 
 ## Helper behavior (both shapes)

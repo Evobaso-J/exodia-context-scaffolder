@@ -11,7 +11,7 @@ Every prompt the user sees during a `/exodia` run should be scannable. Apply the
 ## Option labels
 
 - ≤5 words. Action-verb start: `Accept set`, `Drop categories`, `Add custom`, `Pick different name`, `Abort scaffold`.
-- Cap 4 options per call. If you need more, fall back to a numbered free-text prompt (`Type row reassignments: 3→domain, 5→drop`).
+- Cap 4 options per call. If you need more, fall back to a numbered free-text prompt (`Type row reassignments: 3→glossary, 5→drop`).
 - Long rationale lives in the option `description` field, never in the question body.
 
 ## Lists, tables, and candidate sets
