@@ -37,66 +37,68 @@
                     │                          │
             Fresh / Merge                 Incremental
                     │                          │
+                    ▼                          │
+        ┌────────────────────────────────┐    │
+        │ Step 3: categories             │    │
+        │ Utilities:                     │    │
+        │  - heuristics/detectors.md     │    │
+        │  - heuristics/format-strategy  │    │
+        │    .md (custom ledger picks)   │    │
+        │  - AskUserQuestion             │    │
+        │ Branches:                      │    │
+        │  - config-driven → JUMP to     │    │
+        │    Step 4 (skip Step 3a)       │    │
+        │  - interactive → fall through  │    │
+        └──────────┬─────────────────────┘    │
+                   │                          │
+                   ▼  (interactive only)      │
+        ┌────────────────────────────────┐    │
+        │ Step 3a: $CONTEXT_DIR          │    │
+        │   Fresh/Merge interactive only │    │
+        │   (skipped when $LAYOUT_MAP    │    │
+        │    set: config-driven)         │    │
+        │ Utilities:                     │    │
+        │  - AskUserQuestion             │    │
+        │  - scripts/init_structure.sh   │    │
+        │    (property ref only;         │    │
+        │     skip-existing guarantee)   │    │
+        └──────────┬─────────────────────┘    │
+                   ▼                          │
+        ┌────────────────────────────────┐    │
+        │ Step 4: merge (Merge only)     │    │
+        │ Utilities:                     │    │
+        │  - scripts/parse_existing.py   │    │
+        │  - heuristics/section-map.md   │    │
+        │  - heuristics/prompt-format.md │    │
+        │    (mapping table render)      │    │
+        │  - AskUserQuestion             │    │
+        └──────────┬─────────────────────┘    │
+                   │                          │
+                   └─────────────┬────────────┘
+                                 ▼
+            ┌───────────────────────────────────────────────┐
+            │ Step 4b: materialize $LAYOUT_MAP (ALL MODES)   │
+            │   Fresh/Merge: synthesize in memory from       │
+            │     Step 3 + 3a + 4 inputs; validate           │
+            │   Config-driven: confirm Step 1 output         │
+            │   Incremental: confirm router-parsed map       │
+            │   Print JSON back for user visual confirmation │
+            │ Utilities:                                     │
+            │  - heuristics/layout-map.md (schema + rules)   │
+            └───────┬──────────────────────────┬────────────┘
+                    │                          │
+            Fresh / Merge                 Incremental
+                    │                          │
                     ▼                          ▼
         ┌────────────────────────────────┐  ┌──────────────────────────────┐
-        │ Step 3: categories             │  │ protocol/incremental-rerun.md│
-        │ Utilities:                     │  │ Utilities:                    │
-        │  - heuristics/detectors.md     │  │  - `exodia:section:` markers  │
-        │  - heuristics/format-strategy  │  │  - `exodia:router:start/end`  │
-        │    .md (custom ledger picks)   │  │    region (category→path map) │
-        │  - AskUserQuestion             │  │  - section-id baseline diff   │
-        │ Branches:                      │  │  - AskUserQuestion (per diff) │
-        │  - config-driven → JUMP to     │  │  - reuses Step 9 for L3       │
-        │    Step 4 (skip Step 3a)       │  └─────────────┬────────────────┘
-        │  - interactive → fall through  │                │
-        └──────────┬─────────────────────┘                │
-                   │                                      │
-                   ▼  (interactive only)                  │
-        ┌────────────────────────────────┐                │
-        │ Step 3a: $CONTEXT_DIR          │                │
-        │   Fresh/Merge interactive only │                │
-        │   (skipped when $LAYOUT_MAP    │                │
-        │    set: config-driven)         │                │
-        │ Utilities:                     │                │
-        │  - AskUserQuestion             │                │
-        │  - scripts/init_structure.sh   │                │
-        │    (property ref only;         │                │
-        │     skip-existing guarantee)   │                │
-        └──────────┬─────────────────────┘                │
-                   ▼                                      │
-        ┌────────────────────────────────┐                │
-        │ Step 4: merge (Merge only)     │                │
-        │ Utilities:                     │                │
-        │  - scripts/parse_existing.py   │                │
-        │  - heuristics/section-map.md   │                │
-        │  - heuristics/prompt-format.md │                │
-        │    (mapping table render)      │                │
-        │  - AskUserQuestion             │                │
-        └──────────┬─────────────────────┘                │
-                   ▼                                      ▼
-        ┌────────────────────────────────────────────────┐
-        │ Step 4b: materialize $LAYOUT_MAP (ALL MODES)   │
-        │   Fresh/Merge: synthesize in memory from       │
-        │     Step 3 + 3a + 4 inputs; validate           │
-        │   Config-driven: confirm Step 1 output         │
-        │   Incremental: confirm router-parsed map       │
-        │   Print JSON back for user visual confirmation │
-        │ Utilities:                                     │
-        │  - heuristics/layout-map.md (schema + rules)   │
-        └──────┬─────────────────────────────────┬───────┘
-               │                                 │
-        Fresh / Merge                       Incremental
-               │                                 │
-               ▼                                 ▼
-        ┌────────────────────────────────┐  ┌──────────────────────────────┐
-        │ Step 5: init structure         │  │ (incremental-rerun continues │
-        │ Utilities:                     │  │  with the body shown above)  │
-        │  - scripts/init_structure.sh   │  └─────────────┬────────────────┘
-        │    (legacy positional /        │                │
-        │     --pairs form)              │                │
-        │  - templates/<canonical>/*.tmpl│                │
-        │    (architecture, design-      │                │
-        │     patterns, glossary,        │                │
+        │ Step 5: init structure         │  │ protocol/incremental-rerun.md│
+        │ Utilities:                     │  │   (replaces Steps 3 to 8)    │
+        │  - scripts/init_structure.sh   │  │ Utilities:                   │
+        │    (legacy positional /        │  │  - `exodia:section:` markers │
+        │     --pairs form)              │  │  - section-id baseline diff  │
+        │  - templates/<canonical>/*.tmpl│  │  - AskUserQuestion (per diff)│
+        │    (architecture, design-      │  │  - reuses Step 9 for L3      │
+        │     patterns, glossary,        │  └─────────────┬────────────────┘
         │     operations, debugging,     │                │
         │     mobile, workspace, data,   │                │
         │     infra)                     │                │
@@ -149,32 +151,34 @@
         │    kernel between markers)     │                │
         │  - Write (emit AGENTS.md)      │                │
         └──────────┬─────────────────────┘                │
-                   ▼                                      ▼
-        ┌────────────────────────────────────────────────┐
-        │ Step 9: seed L3 (.jsonl + .yaml)               │
-        │ Utilities:                                     │
-        │  - heuristics/ledgers.yaml                     │
-        │    (format / scan_source /                     │
-        │     skeleton_source / skeleton_shape)          │
-        │  - heuristics/prompt-format.md                 │
-        │  - heuristics/format-strategy.md (ID format)   │
-        │  - AskUserQuestion (per ledger candidates)     │
-        │  - Bash / Explore (scan_source execution)      │
-        └──────────────────┬─────────────────────────────┘
-                           ▼
-        ┌────────────────────────────────────────────────┐
-        │ Step 10: wrap-up                               │
-        │ Utilities:                                     │
-        │  - summary text only                           │
-        │  - sibling notice (config-driven only;         │
-        │    per shared parent dir, list unmanaged       │
-        │    sibling dirs left untouched)                │
-        │  - throwaway-config reminder text              │
-        │    (no automatic cleanup; user deletes         │
-        │     `exodia.config.yaml`)                      │
-        │  - lazy-migration note (Incremental, when      │
-        │    router markers injected)                    │
-        └────────────────────────────────────────────────┘
+                   │                                      │
+                   └─────────────┬────────────────────────┘
+                                 ▼
+            ┌───────────────────────────────────────────────┐
+            │ Step 9: seed L3 (.jsonl + .yaml)               │
+            │ Utilities:                                     │
+            │  - heuristics/ledgers.yaml                     │
+            │    (format / scan_source /                     │
+            │     skeleton_source / skeleton_shape)          │
+            │  - heuristics/prompt-format.md                 │
+            │  - heuristics/format-strategy.md (ID format)   │
+            │  - AskUserQuestion (per ledger candidates)     │
+            │  - Bash / Explore (scan_source execution)      │
+            └───────────────────┬───────────────────────────┘
+                                ▼
+            ┌───────────────────────────────────────────────┐
+            │ Step 10: wrap-up                               │
+            │ Utilities:                                     │
+            │  - summary text only                           │
+            │  - sibling notice (config-driven only;         │
+            │    per shared parent dir, list unmanaged       │
+            │    sibling dirs left untouched)                │
+            │  - throwaway-config reminder text              │
+            │    (no automatic cleanup; user deletes         │
+            │     `exodia.config.yaml`)                      │
+            │  - lazy-migration note (Incremental, when      │
+            │    router markers injected)                    │
+            └────────────────────────────────────────────────┘
 ```
 
 ## Utility inventory
@@ -219,5 +223,5 @@
   - Step 4b (Fresh/Merge synthesizes `$LAYOUT_MAP` in memory; config-driven and Incremental confirm the map produced by Step 1)
   - Step 5 (legacy positional vs `--pairs` form of `init_structure.sh`)
 - `$LAYOUT_MAP` is finalized once, at Step 4b, in every mode. Path resolution in Steps 5, 6, 8, 9, and incremental-rerun reads from it directly without mode branching. Shape contract: `heuristics/layout-map.md`.
-- Steps 3, 4, 5, 6, 7, 8 replaced by `incremental-rerun.md` when re-running. Step 2, Step 4b, and Step 9 still execute.
+- Steps 3, 4, 5, 6, 7, 8 replaced by `incremental-rerun.md` when re-running. Step 2, Step 4b, and Step 9 still execute. The incremental flow forks from Fresh/Merge twice: at Step 2 (Incremental skips Steps 3 to 4 and goes straight to Step 4b) and at Step 4b (Incremental enters the rerun body while Fresh/Merge enters Steps 5 to 8). Both flows reconverge at Step 9.
 - L3 seeding (Step 9) and wrap-up (Step 10) run in every mode.
