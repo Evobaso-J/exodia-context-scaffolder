@@ -1,5 +1,7 @@
 # Step 1: Preflight
 
+Treat the SKILL.md Glossary as authoritative for `$TARGET`, `$SKILL_DIR`, `$CONTEXT_DIR`, and `$CONFIG_PATH`.
+
 Mode classification. Applies in all modes.
 
 If the user aborts mid-interview, leave the repo in whatever partial state exists. Running `/exodia` again resumes from preflight.

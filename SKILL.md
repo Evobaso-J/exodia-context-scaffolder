@@ -52,7 +52,6 @@ Execute steps in order. **Do not skip steps.** Use `AskUserQuestion` for user in
 
 | Step | File | Modes |
 |---|---|---|
-| 0 | [`protocol/00-resolve-context.md`](protocol/00-resolve-context.md) | all |
 | 1 | [`protocol/01-preflight.md`](protocol/01-preflight.md) | all |
 | 2 | [`protocol/02-scan.md`](protocol/02-scan.md) | all |
 | 3 | [`protocol/03-categories.md`](protocol/03-categories.md) | Fresh, Merge |

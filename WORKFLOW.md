@@ -5,14 +5,6 @@
                             │
                             ▼
             ┌───────────────────────────────────────────────┐
-            │ Step 0: resolve context                        │
-            │   $SKILL_DIR, $TARGET, $CONFIG_PATH            │
-            │ Utilities:                                     │
-            │   - SKILL.md frontmatter                       │
-            │   - README.md (config schema reference)        │
-            └───────────────────┬───────────────────────────┘
-                                ▼
-            ┌───────────────────────────────────────────────┐
             │ Step 1: preflight                              │
             │   classify mode (Fresh/Merge/Incremental)      │
             │   classify shape (interactive/config-driven)   │
@@ -196,7 +188,7 @@
 | template | `templates/<canonical>/*.tmpl` | Step 5, Step 6 |
 | rule | `rules/universal.md` | Step 8 |
 | rule | `rules/self-update.md` | Step 8 |
-| docs | `README.md` | Step 0 (config schema reference) |
+| docs | `README.md` | config schema reference (linked from Glossary in `SKILL.md`) |
 
 ## Tool inventory (non-file)
 
