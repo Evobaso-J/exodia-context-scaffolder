@@ -119,13 +119,17 @@
         │  - templates/AGENTS.md.tmpl    │                │
         │  - rules/universal.md          │                │
         │  - rules/self-update.md        │                │
-        │    (+ {{LEDGER_ROWS}} token)   │                │
+        │    (+ {{LEDGER_ROWS}},         │                │
+        │     {{FORMAT_STRATEGY}} tokens)│                │
         │  - rules/conditional/          │                │
         │    operations-awareness.md     │                │
         │  - rules/conditional/          │                │
         │    lint-check.md               │                │
         │  - heuristics/ledgers.yaml     │                │
         │    (ledger row source)         │                │
+        │  - heuristics/format-strategy  │                │
+        │    .md (format-strategy        │                │
+        │    kernel between markers)     │                │
         │  - Write (emit AGENTS.md)      │                │
         └──────────┬─────────────────────┘                │
                    ▼                                      ▼
@@ -167,7 +171,7 @@
 | script | `scripts/yaml_subset.py` | imported by `parse_config.py` / `resolve_layout.py` |
 | heuristic | `heuristics/detectors.md` | Step 3 |
 | heuristic | `heuristics/section-map.md` | Step 4 |
-| heuristic | `heuristics/format-strategy.md` | Step 3, Step 6, Step 9 |
+| heuristic | `heuristics/format-strategy.md` | Step 3, Step 6, Step 8 (kernel substitution for `{{FORMAT_STRATEGY}}`), Step 9 |
 | heuristic | `heuristics/ledgers.yaml` | Step 8, Step 9 |
 | heuristic | `heuristics/prompt-format.md` | Step 4 mapping table, Step 7 draft review, Step 9 candidate list |
 | template | `templates/AGENTS.md.tmpl` | Step 8 |
