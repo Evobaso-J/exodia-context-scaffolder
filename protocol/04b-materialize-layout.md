@@ -26,15 +26,15 @@ Synthesize from the confirmed inputs:
 For each confirmed category, build one object matching `heuristics/layout-map.md`:
 
 - `name`: as confirmed.
-- `path`: `$CONTEXT_DIR/<name>` unless the user supplied an explicit path.
+- `path`: `$CONTEXT_DIR/<name>`. Interactive Fresh/Merge does not collect an explicit path from the user; the default is always used.
 - `kind`: `canonical` if `name` is in the canonical set, else `custom`.
 - `l2_template_path`: `<SKILL_DIR>/templates/<name>/<NAME>.md.tmpl` if the file exists, else `null`.
-- `l3_specs`: for canonicals with a template dir, list every `*.jsonl.tmpl` / `*.yaml.tmpl` under `<SKILL_DIR>/templates/<name>/` and resolve `schema_name` via `heuristics/ledgers.yaml`. For customs, `null`.
+- `l3_specs`: for canonicals with a template dir, list every `*.jsonl.tmpl` / `*.yaml.tmpl` under `<SKILL_DIR>/templates/<name>/` and resolve `schema_name` via `heuristics/ledgers.yaml`. For customs, `null` (deferred; Step 6 fills the slot).
 
-Apply all six validation rules from `heuristics/layout-map.md`. On any failure, abort with a clear single-line message naming the offending category and rule number, e.g. `Step 4b: category 'releases' violates rule 3 (path 'docs' is a strict prefix of 'docs/releases')`. The user must fix inputs by re-running and adjusting answers.
+Apply all five validation rules from `heuristics/layout-map.md`. On any failure, abort with a clear single-line message naming the offending category and rule number, e.g. `Step 4b: category 'releases' violates rule 3 (path 'docs' is a strict prefix of 'docs/releases')`. The user must fix inputs by re-running and adjusting answers.
 
 On success, print the JSON to the user under a `### Layout map` heading inside a fenced ` ```json ` block. Continue to Step 5.
 
 ## Output
 
-A JSON array conforming to `heuristics/layout-map.md`, held in memory as `$LAYOUT_MAP`. No file is written to disk; the artifact is ephemeral. Steps 5, 6, 7, 8, 9, and 10 read it.
+A JSON array conforming to `heuristics/layout-map.md`, held in memory as `$LAYOUT_MAP`. No file is written to disk; the artifact is ephemeral. Shape and category set are finalized here; interactively-added custom categories carry `l3_specs: null` and Step 6 fills those slots in place. After Step 6, the map is immutable. Steps 5, 6, 7, 8, 9, and 10 read it.

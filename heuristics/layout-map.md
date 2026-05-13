@@ -1,8 +1,10 @@
 # `$LAYOUT_MAP` schema
 
-`$LAYOUT_MAP` is the single in-memory artifact that drives Steps 5 to 9. Every mode (Fresh, Merge, Incremental, config-driven) finalizes it at Step 4b and consumers read it without branching on mode. This file is the contract.
+`$LAYOUT_MAP` is the single in-memory artifact that drives Steps 5 to 9. Every mode (Fresh, Merge, Incremental, config-driven) shape-locks it at Step 4b and consumers read it without branching on mode. This file is the contract.
 
 Output is a JSON array of category objects. Order is preserved and drives L2 draft order in Step 6.
+
+**Deferred fields.** For custom categories added interactively (`kind: custom`, no config-declared `l3:`), Step 4b leaves `l3_specs` as `null`. Step 6 fills those slots in place once it has the category's purpose statement and can run schema inference (per `heuristics/format-strategy.md`). The shape and category set are finalized at 4b; only `null` `l3_specs` slots remain mutable, and only Step 6 mutates them. After Step 6, the map is fully immutable.
 
 ## Example
 
@@ -52,16 +54,15 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 
 ## Validation rules
 
-Step 4b applies these in all modes. Rule 4 violations abort the run with a clear message; the user fixes inputs and re-runs.
+Step 4b applies these in all modes. Any rule violation aborts the run with a clear message naming the offending category and rule number; the user fixes inputs and re-runs.
 
 1. `path` matches `^[a-z._-][a-z0-9._/-]*$`. No `..` segments, no leading `/`, no trailing `/`.
 2. No two categories share `path`.
 3. No category's `path` is a strict prefix of another's (e.g. `docs/project` cannot coexist with `docs/project/architecture`).
 4. `name` outside the canonical set requires `kind: custom`. Names violating `^[a-z][a-z0-9_-]*$` are rejected.
 5. Each `l3_specs[].filename` matches `^[a-z][a-z0-9_-]*\.(yaml|jsonl)$`.
-6. Within a single category's `l3_specs`, no two entries share `filename`.
 
-The config-driven adapter (`scripts/parse_config.py`) enforces rules 1 to 5 at config-parse time; Step 4b confirms but does not re-run those checks for config-driven mode. The interactive adapter (Step 4b Fresh/Merge branch) and the router-parse adapter (Step 4b Incremental branch) must apply all six rules.
+These are the rules `scripts/parse_config.py` enforces at config-parse time; Step 4b confirms but does not re-run those checks for config-driven mode. The interactive adapter (Step 4b Fresh/Merge branch) and the router-parse adapter (Step 4b Incremental branch) must apply all five.
 
 ## Producers
 
