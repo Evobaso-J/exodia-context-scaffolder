@@ -2,6 +2,8 @@
 
 Mode classification. Applies in all modes.
 
+If the user aborts mid-interview, leave the repo in whatever partial state exists. Running `/exodia` again resumes from preflight.
+
 ## Config validation (when `$CONFIG_PATH` is present)
 
 If `$CONFIG_PATH` is present, parse and validate it **before** mode classification:
