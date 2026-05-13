@@ -22,3 +22,7 @@ Delegate the initial scan to an `Explore` subagent with **medium** thoroughness 
 > Output the report as a structured list. Do not speculate; cite files for everything.
 
 Store the returned scan as your working `$SCAN`.
+
+## Fallback
+
+If the Explore subagent times out or returns unusable data, fall back to asking the user to confirm the stack and architecture directly, then continue.

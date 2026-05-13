@@ -181,7 +181,6 @@
 | rule | `rules/conditional/operations-awareness.md` | Step 8 (if `operations/` present) |
 | rule | `rules/conditional/lint-check.md` | Step 8 (if lint/test detected) |
 | docs | `README.md` | Step 0 (config schema reference) |
-| docs | `TROUBLESHOOTING.md` | failure pointer, all steps |
 
 ## Tool inventory (non-file)
 
