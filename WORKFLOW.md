@@ -59,7 +59,8 @@
         ┌────────────────────────────────┐    │
         │ Step 4: merge (Merge only)     │    │
         │ Utilities:                     │    │
-        │  - scripts/parse_existing.py   │    │
+        │  - Read (source file)          │    │
+        │  - inline H2 split             │    │
         │  - heuristics/section-map.md   │    │
         │  - heuristics/prompt-format.md │    │
         │    (mapping table render)      │    │
@@ -175,7 +176,6 @@
 |---|---|---|
 | script | `scripts/parse_config.py` | Step 1 |
 | script | `scripts/resolve_layout.py` | Step 1 |
-| script | `scripts/parse_existing.py` | Step 4 |
 | script | `scripts/init_structure.sh` | Step 3a (property ref), Step 5 |
 | script | `scripts/yaml_subset.py` | imported by `parse_config.py` / `resolve_layout.py` |
 | heuristic | `heuristics/detectors.md` | Step 3 |
