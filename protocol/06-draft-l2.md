@@ -1,4 +1,4 @@
-# Step 6: Draft L2 content
+# Step 6: Draft and finalize L2 content
 
 Applies in Fresh and Merge modes. (Incremental re-runs use the diff flow in `protocol/incremental-rerun.md`.)
 
@@ -12,4 +12,14 @@ For each confirmed category, in order (architecture, design-patterns, glossary, 
 4. **Never duplicate data that already lives in the repo.** Versions, ports, env names, paths, commands, config values, dependency lists, script names; all must be *referenced*, not copied. Write `see \`package.json\` \`engines.node\`` or `defined in \`.env.example\``, never the literal value. Duplicated data rots; pointers survive edits.
 5. **`## L3 Data` section.** Drive this section from `l3_specs` in `$LAYOUT_MAP` (finalized in Step 4b per `$SKILL_DIR/heuristics/layout-map.md`). When the L2 template has a `<!-- exodia:section:l3 -->` block, list the L3 files that ship with the module. For custom categories where `l3_specs` is `null` (Step 4b deferred inference here), apply *Schema inference* above with `{purpose}` as input to derive the full tuple and write the inferred entries back into `$LAYOUT_MAP`. For categories whose `l3_specs` are populated (canonical defaults or config-declared overrides), list those entries; copy the schema template to the destination if `schema_template_path` is non-null and the destination does not yet exist; otherwise apply *Schema inference* with `{purpose, filename}` as input to fill `schema_name`. Each line in the L3 section reads `` - `<file>`: <one-line purpose>. ``
 
-Do **not** write the file to disk yet. Hold the draft in memory.
+## Interactive review and write
+
+Walk each L2 draft section-by-section with the user. For each `##` section:
+
+- Render the draft inside a fenced markdown block, prefaced by an H3 anchor: `` ### `<category>/<CATEGORY>.md` § <section-id> ``.
+- Then `AskUserQuestion`:
+  - **Question**: "Accept this section?"
+  - **Options**: "Accept", "Edit", "Skip" (leave empty for later).
+- If edit: let the user dictate changes, re-draft (still inside the fenced block), loop until accepted.
+
+After all sections in a category are accepted, `Write` the finalized L2 file to `$TARGET/$CONTEXT_DIR/<category>/<CATEGORY>.md`.

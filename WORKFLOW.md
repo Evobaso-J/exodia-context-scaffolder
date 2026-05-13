@@ -98,8 +98,10 @@
         └──────────┬─────────────────────┘                │
                    ▼                                      │
         ┌────────────────────────────────┐                │
-        │ Step 6: draft L2 sections      │                │
-        │   (+ write L3 stubs for        │                │
+        │ Step 6: draft + finalize L2    │                │
+        │   (draft each section, then    │                │
+        │    interactively review and    │                │
+        │    write L2 + L3 stubs for     │                │
         │    interactive custom cats)    │                │
         │ Utilities:                     │                │
         │  - templates/<cat>/<CAT>.md    │                │
@@ -109,20 +111,15 @@
         │     l3_specs.schema_template)  │                │
         │  - heuristics/format-strategy  │                │
         │    .md (schema/format/ID rule) │                │
+        │  - heuristics/prompt-format.md │                │
+        │    (section review render)    │                │
         │  - $SCAN data                  │                │
         │  - Step 4 merge-seeded content │                │
         │    (Merge mode only)           │                │
         │  - $LAYOUT_MAP.l3_specs        │                │
-        │  - Write (L3 stubs for         │                │
-        │    interactive custom cats)    │                │
-        └──────────┬─────────────────────┘                │
-                   ▼                                      │
-        ┌────────────────────────────────┐                │
-        │ Step 7: section review         │                │
-        │ Utilities:                     │                │
         │  - AskUserQuestion             │                │
-        │  - heuristics/prompt-format.md │                │
-        │  - Write (emit L2 to disk)     │                │
+        │  - Write (L2 files + L3 stubs  │                │
+        │    for interactive custom cats)│                │
         └──────────┬─────────────────────┘                │
                    ▼                                      │
         ┌────────────────────────────────┐                │
@@ -183,7 +180,7 @@
 | heuristic | `heuristics/format-strategy.md` | Step 3, Step 6, Step 8 (kernel substitution for `{{FORMAT_STRATEGY}}`), Step 9 |
 | heuristic | `heuristics/ledgers.yaml` | Step 8, Step 9 |
 | heuristic | `heuristics/layout-map.md` | Step 1 (shape contract), Step 4b (synthesize + validate), Step 5, Step 6, Step 8, Step 9, incremental-rerun |
-| heuristic | `heuristics/prompt-format.md` | Step 4 mapping table, Step 7 draft review, Step 9 candidate list |
+| heuristic | `heuristics/prompt-format.md` | Step 4 mapping table, Step 6 draft review, Step 9 candidate list |
 | template | `templates/AGENTS.md.tmpl` | Step 8 |
 | template | `templates/<canonical>/*.tmpl` | Step 5, Step 6 |
 | rule | `rules/universal.md` | Step 8 |
@@ -194,10 +191,10 @@
 
 | Tool | Used by |
 |---|---|
-| `AskUserQuestion` | Step 1 (Merge consent), Step 3, Step 3a, Step 4, Step 7, Step 9, incremental-rerun |
+| `AskUserQuestion` | Step 1 (Merge consent), Step 3, Step 3a, Step 4, Step 6, Step 9, incremental-rerun |
 | `Explore` subagent | Step 2 (initial scan), Step 9 (scan_source execution) |
 | `Bash` | Step 1 (config validate + layout resolve via `python3`, plus `ls` / `grep` probes), Step 5 (`init_structure.sh`), Step 9 (scan_source execution) |
-| `Write` / `Edit` | Step 6 (L3 stubs for interactive custom categories), Step 7 (L2 files), Step 8 (AGENTS.md), Step 9 (L3 append) |
+| `Write` / `Edit` | Step 6 (L2 files + L3 stubs for interactive custom categories), Step 8 (AGENTS.md), Step 9 (L3 append) |
 
 ## Key splits
 
@@ -208,5 +205,5 @@
   - Step 4b (Fresh/Merge synthesizes `$LAYOUT_MAP` in memory; config-driven and Incremental confirm the map produced by Step 1)
   - Step 5 (legacy positional vs `--pairs` form of `init_structure.sh`)
 - `$LAYOUT_MAP` is finalized once, at Step 4b, in every mode. Path resolution in Steps 5, 6, 8, 9, and incremental-rerun reads from it directly without mode branching. Shape contract: `heuristics/layout-map.md`.
-- Steps 3, 4, 5, 6, 7, 8 replaced by `incremental-rerun.md` when re-running. Step 2, Step 4b, and Step 9 still execute. The incremental flow forks from Fresh/Merge twice: at Step 2 (Incremental skips Steps 3 to 4 and goes straight to Step 4b) and at Step 4b (Incremental enters the rerun body while Fresh/Merge enters Steps 5 to 8). Both flows reconverge at Step 9.
+- Steps 3, 4, 5, 6, 8 replaced by `incremental-rerun.md` when re-running. Step 2, Step 4b, and Step 9 still execute. The incremental flow forks from Fresh/Merge twice: at Step 2 (Incremental skips Steps 3 to 4 and goes straight to Step 4b) and at Step 4b (Incremental enters the rerun body while Fresh/Merge enters Steps 5 to 8). Both flows reconverge at Step 9.
 - L3 seeding (Step 9) and wrap-up (Step 10) run in every mode.

@@ -1,6 +1,6 @@
 # User-facing prompt format
 
-Every prompt the user sees during a `/exodia` run should be scannable. Apply these rules to every `AskUserQuestion` call site, every Step 7 draft review, every Step 4 mapping table, and every Step 9 candidate list.
+Every prompt the user sees during a `/exodia` run should be scannable. Apply these rules to every `AskUserQuestion` call site, every Step 6 draft review, every Step 4 mapping table, and every Step 9 candidate list.
 
 ## Question text
 
@@ -20,7 +20,7 @@ Every prompt the user sees during a `/exodia` run should be scannable. Apply the
 - Group long lists by directory, category, or file. Cap visible items at ~20; offer a "show more" branch if longer.
 - Truncate long paths mid-segment with `...` (e.g. `apps/web/.../routes/foo.ts`).
 
-## Multi-section drafts (Step 7, Step 4 mapping, incremental diffs)
+## Multi-section drafts (Step 6, Step 4 mapping, incremental diffs)
 
 - Preface each block with an H3 anchor: `### \`<file>\` § <section-id>`. Lets the user scan a long review.
 - Put draft prose inside a fenced markdown block. Put diffs inside a ` ```diff ` block.

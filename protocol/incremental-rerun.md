@@ -1,6 +1,6 @@
 # Incremental re-run
 
-Replaces Steps 3, 4, 5, 6, 7, and 8 when preflight (Step 1) detects an existing exodia setup. Step 1, Step 2, and Step 4b still run (Step 4b prints the router-derived `$LAYOUT_MAP` back for confirmation, as documented in `protocol/04b-materialize-layout.md`); Step 9 logic is reused for L3 seeding; Step 10 prints the wrap-up.
+Replaces Steps 3, 4, 5, 6, and 8 when preflight (Step 1) detects an existing exodia setup. Step 1, Step 2, and Step 4b still run (Step 4b prints the router-derived `$LAYOUT_MAP` back for confirmation, as documented in `protocol/04b-materialize-layout.md`); Step 9 logic is reused for L3 seeding; Step 10 prints the wrap-up.
 
 Step 1 has already reconstructed `$LAYOUT_MAP` from the existing router region per `heuristics/layout-map.md`; this runbook reads it as the single source for category paths.
 

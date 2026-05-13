@@ -60,12 +60,11 @@ Execute steps in order. **Do not skip steps.** Use `AskUserQuestion` for user in
 | 4b | [`protocol/04b-materialize-layout.md`](protocol/04b-materialize-layout.md) | all |
 | 5 | [`protocol/05-init-structure.md`](protocol/05-init-structure.md) | Fresh, Merge |
 | 6 | [`protocol/06-draft-l2.md`](protocol/06-draft-l2.md) | Fresh, Merge |
-| 7 | [`protocol/07-section-review.md`](protocol/07-section-review.md) | Fresh, Merge |
 | 8 | [`protocol/08-emit-agents-md.md`](protocol/08-emit-agents-md.md) | Fresh, Merge |
 | 9 | [`protocol/09-l3-seeding.md`](protocol/09-l3-seeding.md) | Fresh, Merge, Incremental |
 | 10 | [`protocol/10-wrap-up.md`](protocol/10-wrap-up.md) | all |
-| re-run | [`protocol/incremental-rerun.md`](protocol/incremental-rerun.md) | Incremental (replaces Steps 3, 4, 5, 6, 7, 8; Step 4b still runs) |
+| re-run | [`protocol/incremental-rerun.md`](protocol/incremental-rerun.md) | Incremental (replaces Steps 3, 4, 5, 6, 8; Step 4b still runs) |
 
 ## Pointers
 
-- `AskUserQuestion` formatting (question text, option labels, list/table rendering, multi-section H3 anchoring): `$SKILL_DIR/heuristics/prompt-format.md`. Required for every Step 7 draft review, Step 4 mapping table, and Step 9 candidate list.
+- `AskUserQuestion` formatting (question text, option labels, list/table rendering, multi-section H3 anchoring): `$SKILL_DIR/heuristics/prompt-format.md`. Required for every Step 6 draft review, Step 4 mapping table, and Step 9 candidate list.
