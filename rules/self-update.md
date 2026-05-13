@@ -18,8 +18,8 @@ Target-file paths below are absolute, repo-rooted: a config-driven scaffold may 
 3. **Use the existing schema**: every `.jsonl` file starts with a `_schema` line (JSON object with `_schema`, `_version`, `_description`, `_fields`). Read `_fields` to know which keys an entry must carry. Match field names exactly. Do not invent fields. If the schema must evolve, bump `_version` in the first line before adding entries with the new shape.
 4. **Generate the ID**: format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}` using the current date/time. When replacing an entry per rule 2, keep the original ID.
 5. **Append, don't rewrite**: add new lines at the end of `.jsonl` files. For `.md` and `.yaml` files, edit the relevant section. Exception: see rule 2; entries added on the current branch are mutable until merged.
-6. **Archive, don't delete.** When a `.jsonl` entry becomes obsolete (gotcha no longer applies, runbook replaced, experiment failed), set `status: archived` on the entry instead of removing the line. Preserves history for retrospectives. The `status` field is part of every appendable schema's `_fields` (ADR schemas use `status: superseded` for the same purpose, with `supersedes: <id>` pointing at the replacement).
-7. **Keep entries atomic**: one insight per entry. Don't bundle multiple gotchas into one.
+6. **Archive, don't delete.** When a `.jsonl` entry becomes obsolete (playbook fix no longer applies, runbook replaced, experiment failed), set `status: archived` on the entry instead of removing the line. Preserves history for retrospectives. The `status` field is part of every appendable schema's `_fields` (ADR schemas use `status: superseded` for the same purpose, with `supersedes: <id>` pointing at the replacement).
+7. **Keep entries atomic**: one insight per entry. Don't bundle multiple findings into one.
 8. **Be concise**: write for a developer who will read this months later without the conversation context.
 9. **Point, don't hardcode**: never copy values that already live in source files (versions, ports, config). Reference the file instead.
 

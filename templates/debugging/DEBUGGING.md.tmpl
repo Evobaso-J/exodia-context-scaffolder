@@ -14,16 +14,14 @@ How to diagnose common problems. Start here when something breaks.
 1. Reproduce the symptom.
 2. Search `playbooks.jsonl` for matching symptoms.
 3. If found → follow the playbook's fix.
-4. If not found → once solved, append a new playbook entry per the Self-Update Rules.
-5. For recurring footguns (not tied to a specific bug), append to `gotchas.jsonl` instead.
+4. If not found → once solved, append a new playbook entry per the Self-Update Rules. Recurring footguns count: the footgun IS the symptom; name how it surfaces.
 
 ## Common Topics
 
 <!-- exodia:section:topics -->
-{{BUCKET_THE_KNOWN_PAIN_POINTS: e.g. "Build & bundling", "Auth & tokens", "API types", "Env variables", "SSR/hydration". Each bucket references gotcha/playbook IDs where applicable.}}
+{{BUCKET_THE_KNOWN_PAIN_POINTS: e.g. "Build & bundling", "Auth & tokens", "API types", "Env variables", "SSR/hydration". Each bucket references playbook IDs where applicable.}}
 
 ## L3 Data
 
 <!-- exodia:section:l3 -->
-- `gotchas.jsonl`: known footguns and how to avoid them.
-- `playbooks.jsonl`: symptom → root cause → fix recipes.
+- `playbooks.jsonl`: symptom → root cause → fix recipes. Includes recurring footguns (the footgun IS the symptom).
