@@ -2,6 +2,8 @@
 
 Mode-split. Read only the branch matching the current mode.
 
+This step contributes the **category set** to `$LAYOUT_MAP`. Step 4b finalizes the map from these confirmed categories plus the context-dir name from Step 3a and the merge mapping from Step 4 (Merge mode only).
+
 ## Config-driven branch
 
 If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirely. Use the resolved categories from `$LAYOUT_MAP` as the confirmed set. Still run the detector heuristics in `$SKILL_DIR/heuristics/detectors.md`: for each detected optional canonical (`mobile`, `workspace`, `data`, `infra`) **not already in `$LAYOUT_MAP`** and not declared with `drop: true`, present one focused `AskUserQuestion` per detected category to add it under `<context_dir>/<name>/` (using `context_dir` from the config). Accepted additions are merged into `$LAYOUT_MAP`. Then jump to Step 4. The custom-category interview below does not run; custom categories come exclusively from the config.

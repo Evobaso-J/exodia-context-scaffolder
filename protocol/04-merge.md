@@ -4,6 +4,8 @@ Merge mode only. Skip in Fresh and Incremental modes.
 
 The user already granted permission in Step 1.
 
+This step does not change the `$LAYOUT_MAP` shape. The accepted mapping is carried into Step 6 as seed content for category drafts. Step 4b runs immediately after.
+
 1. Pick the parse source:
    - If `AGENTS.md` exists (with or without `CLAUDE.md`), it is the source.
    - If only `CLAUDE.md` exists, parse that.

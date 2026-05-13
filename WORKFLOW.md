@@ -18,10 +18,13 @@
             │   classify shape (interactive/config-driven)   │
             │ Utilities:                                     │
             │   - scripts/parse_config.py  (validate config) │
-            │   - scripts/resolve_layout.py → $LAYOUT_MAP    │
+            │   - scripts/resolve_layout.py                  │
+            │     (config-driven: produces $LAYOUT_MAP)      │
             │   - Bash probes (ls AGENTS.md/CLAUDE.md;       │
             │     grep `exodia:section:` markers;            │
-            │     parse `exodia:router:start/end` region)    │
+            │     parse `exodia:router:start/end` region;    │
+            │     incremental: produces $LAYOUT_MAP)         │
+            │   - heuristics/layout-map.md (shape contract)  │
             │   - AskUserQuestion (Merge consent)            │
             └───────────────────┬───────────────────────────┘
                                 ▼
@@ -70,11 +73,25 @@
         │    (mapping table render)      │                │
         │  - AskUserQuestion             │                │
         └──────────┬─────────────────────┘                │
-                   ▼                                      │
-        ┌────────────────────────────────┐                │
-        │ Step 5: init structure         │                │
-        │ Utilities:                     │                │
-        │  - scripts/init_structure.sh   │                │
+                   ▼                                      ▼
+        ┌────────────────────────────────────────────────┐
+        │ Step 4b: materialize $LAYOUT_MAP (ALL MODES)   │
+        │   Fresh/Merge: synthesize in memory from       │
+        │     Step 3 + 3a + 4 inputs; validate           │
+        │   Config-driven: confirm Step 1 output         │
+        │   Incremental: confirm router-parsed map       │
+        │   Print JSON back for user visual confirmation │
+        │ Utilities:                                     │
+        │  - heuristics/layout-map.md (schema + rules)   │
+        └──────┬─────────────────────────────────┬───────┘
+               │                                 │
+        Fresh / Merge                       Incremental
+               │                                 │
+               ▼                                 ▼
+        ┌────────────────────────────────┐  ┌──────────────────────────────┐
+        │ Step 5: init structure         │  │ (incremental-rerun continues │
+        │ Utilities:                     │  │  with the body shown above)  │
+        │  - scripts/init_structure.sh   │  └─────────────┬────────────────┘
         │    (legacy positional /        │                │
         │     --pairs form)              │                │
         │  - templates/<canonical>/*.tmpl│                │
@@ -173,6 +190,7 @@
 | heuristic | `heuristics/section-map.md` | Step 4 |
 | heuristic | `heuristics/format-strategy.md` | Step 3, Step 6, Step 8 (kernel substitution for `{{FORMAT_STRATEGY}}`), Step 9 |
 | heuristic | `heuristics/ledgers.yaml` | Step 8, Step 9 |
+| heuristic | `heuristics/layout-map.md` | Step 1 (shape contract), Step 4b (synthesize + validate), Step 5, Step 6, Step 8, Step 9, incremental-rerun |
 | heuristic | `heuristics/prompt-format.md` | Step 4 mapping table, Step 7 draft review, Step 9 candidate list |
 | template | `templates/AGENTS.md.tmpl` | Step 8 |
 | template | `templates/<canonical>/*.tmpl` | Step 5, Step 6 |
@@ -194,11 +212,12 @@
 
 ## Key splits
 
-- **Mode** (Fresh / Merge / Incremental) decides which steps run. Step 2 runs in ALL modes.
+- **Mode** (Fresh / Merge / Incremental) decides which steps run. Step 2 and Step 4b run in ALL modes.
 - **Shape** (interactive vs config-driven, via `$CONFIG_PATH = exodia.config.yaml`) is orthogonal to mode, except Incremental always ignores config. Shape affects:
   - Step 3 (config-driven branch skips the custom-category interview and jumps to Step 4)
   - Step 3a (skipped entirely in config-driven runs; `context_dir` baked into resolved paths)
+  - Step 4b (Fresh/Merge synthesizes `$LAYOUT_MAP` in memory; config-driven and Incremental confirm the map produced by Step 1)
   - Step 5 (legacy positional vs `--pairs` form of `init_structure.sh`)
-  - Step 8 and Step 9 (per-row path resolution from `$LAYOUT_MAP`; interactive runs synthesize an equivalent in-memory map)
-- Steps 3 to 8 replaced by `incremental-rerun.md` when re-running. Step 2 and Step 9 still execute.
+- `$LAYOUT_MAP` is finalized once, at Step 4b, in every mode. Path resolution in Steps 5, 6, 8, 9, and incremental-rerun reads from it directly without mode branching. Shape contract: `heuristics/layout-map.md`.
+- Steps 3, 4, 5, 6, 7, 8 replaced by `incremental-rerun.md` when re-running. Step 2, Step 4b, and Step 9 still execute.
 - L3 seeding (Step 9) and wrap-up (Step 10) run in every mode.

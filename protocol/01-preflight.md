@@ -17,7 +17,7 @@ python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH" \
   | python3 "$SKILL_DIR/scripts/resolve_layout.py" --skill-dir "$SKILL_DIR"
 ```
 
-`$LAYOUT_MAP` is the single source of truth for `name → path`, kind, L2 template, and L3 specs that every later step consumes.
+The output conforms to `$SKILL_DIR/heuristics/layout-map.md`. Step 4b will print it back for visual confirmation before any disk writes; downstream steps read it as the only path-resolution source.
 
 ## Detect what already exists
 
@@ -61,4 +61,6 @@ Classify into one of three modes:
   If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
 - **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to `protocol/incremental-rerun.md`; do not ask the dir-name question again. If `$CONFIG_PATH` is also present, ignore it and print one warning line: `Config detected but tree exists; ignoring. Delete \`exodia.config.yaml\` to silence this warning.`
 
-When entering the incremental re-run flow, parse the **router region** of `$TARGET/AGENTS.md` for the canonical category → path map. The region is wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers around the `## Context Router` table. If the markers are absent (the scaffold pre-dates this feature), fall back to a plain `<!-- exodia:section:` grep across `$TARGET/$EXISTING_CONTEXT_DIR/`, then lazily inject the markers around the router table on the next emit and note the migration in the wrap-up summary.
+When entering the incremental re-run flow, parse the **router region** of `$TARGET/AGENTS.md` for the canonical category → path map. The region is wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers around the `## Context Router` table. Materialize the result as `$LAYOUT_MAP` matching `$SKILL_DIR/heuristics/layout-map.md`: each router row becomes a category object, `l2_template_path` is resolved against `$SKILL_DIR/templates/<name>/<NAME>.md.tmpl` (or `null`), and `l3_specs` is populated by listing existing `*.jsonl` and `*.yaml` files on disk under the host path with `schema_name` resolved via `heuristics/ledgers.yaml`. Step 4b will print it back for confirmation.
+
+If the markers are absent (the scaffold pre-dates this feature), fall back to a plain `<!-- exodia:section:` grep across `$TARGET/$EXISTING_CONTEXT_DIR/`, then lazily inject the markers around the router table on the next emit and note the migration in the wrap-up summary.
