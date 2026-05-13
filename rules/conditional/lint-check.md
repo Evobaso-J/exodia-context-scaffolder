@@ -1,1 +1,0 @@
-- **Do not run lint, test, or typecheck unless explicitly asked.** CI and pre-commit hooks own these gates. Detected commands in this repo: `{{LINT_COMMANDS}}`. Running them ad-hoc wastes wall time and muddies terminal output.
