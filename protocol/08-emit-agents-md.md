@@ -10,9 +10,9 @@ Compose `$TARGET/AGENTS.md` from:
 Then append the following conditional bullets to the Behavioral Rules section verbatim (no extra files to load):
 
 - **If `operations/` is in the final category set**, append this bullet:
-  `- **Operations awareness.** Check {{CONTEXT_DIR}}/operations/OPERATIONS.md before touching user-visible text, env variables, routing, deploy config, or anything that differs by environment/tenant/variant. When in doubt, open the file.`
+  `- **Operations awareness.** Check `{{CONTEXT_DIR}}/operations/OPERATIONS.md` before touching user-visible text, env variables, routing, deploy config, or anything that differs by environment/tenant/variant. When in doubt, open the file.`
 - **If the scan detected any lint/test/typecheck scripts**, append this bullet:
-  `- **Do not run lint, test, or typecheck unless explicitly asked.** CI and pre-commit hooks own these gates. Detected commands in this repo: {{LINT_COMMANDS}}. Running them ad-hoc wastes wall time and muddies terminal output.`
+  `- **Do not run lint, test, or typecheck unless explicitly asked.** CI and pre-commit hooks own these gates. Detected commands in this repo: `{{LINT_COMMANDS}}`. Running them ad-hoc wastes wall time and muddies terminal output.`
 
 Resolve `{{CONTEXT_DIR}}` and `{{LINT_COMMANDS}}` at emit time per the Placeholders section below.
 
