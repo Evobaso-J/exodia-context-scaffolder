@@ -67,5 +67,4 @@ Execute steps in order. **Do not skip steps.** Use `AskUserQuestion` for user in
 
 ## Pointers
 
-- Failure modes (user aborts mid-interview, Explore scan timeouts, secrets in target repo, missing toolchain): `$SKILL_DIR/TROUBLESHOOTING.md`.
 - `AskUserQuestion` formatting (question text, option labels, list/table rendering, multi-section H3 anchoring): `$SKILL_DIR/heuristics/prompt-format.md`. Required for every Step 6 draft review, Step 4 mapping table, and Step 9 candidate list.
