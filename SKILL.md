@@ -31,7 +31,7 @@ The self-update rules in `$SKILL_DIR/rules/self-update.md` are **runtime rules f
 | `$SKILL_DIR` | Directory this `SKILL.md` sits in. Resolve at start of run; fall back to `~/.claude/skills/exodia` if unresolvable. |
 | `$CONTEXT_DIR` | Single-segment directory name inside `$TARGET` that holds the context tree. Default `context`; user-named in Step 3a (Fresh / Merge); auto-detected in Step 1 (Incremental). |
 | `$CONFIG_PATH` | `$TARGET/exodia.config.yaml`. Presence flips the run into config-driven mode. Throwaway, ignored by incremental re-runs. |
-| `$LAYOUT_MAP` | JSON map of `name → {path, kind, l2_template_path, l3_specs}` produced by `scripts/parse_config.py \| scripts/resolve_layout.py`. Single source of truth for paths in config-driven runs; interactive runs synthesize an equivalent in-memory map. |
+| `$LAYOUT_MAP` | In-memory JSON array of category objects (`name`, `path`, `kind`, `l2_template_path`, `l3_specs`). Finalized by Step 4b in all modes. Shape and validation rules: `$SKILL_DIR/heuristics/layout-map.md`. |
 | `$SCAN` | Structured Explore-subagent report from Step 2. |
 
 ## Modes
@@ -58,13 +58,14 @@ Execute steps in order. **Do not skip steps.** Use `AskUserQuestion` for user in
 | 3 | [`protocol/03-categories.md`](protocol/03-categories.md) | Fresh, Merge |
 | 3a | [`protocol/03a-context-dir.md`](protocol/03a-context-dir.md) | Fresh, Merge (interactive only) |
 | 4 | [`protocol/04-merge.md`](protocol/04-merge.md) | Merge |
+| 4b | [`protocol/04b-materialize-layout.md`](protocol/04b-materialize-layout.md) | all |
 | 5 | [`protocol/05-init-structure.md`](protocol/05-init-structure.md) | Fresh, Merge |
 | 6 | [`protocol/06-draft-l2.md`](protocol/06-draft-l2.md) | Fresh, Merge |
 | 7 | [`protocol/07-section-review.md`](protocol/07-section-review.md) | Fresh, Merge |
 | 8 | [`protocol/08-emit-agents-md.md`](protocol/08-emit-agents-md.md) | Fresh, Merge |
 | 9 | [`protocol/09-l3-seeding.md`](protocol/09-l3-seeding.md) | Fresh, Merge, Incremental |
 | 10 | [`protocol/10-wrap-up.md`](protocol/10-wrap-up.md) | all |
-| re-run | [`protocol/incremental-rerun.md`](protocol/incremental-rerun.md) | Incremental (replaces Steps 3 to 8) |
+| re-run | [`protocol/incremental-rerun.md`](protocol/incremental-rerun.md) | Incremental (replaces Steps 3, 4, 5, 6, 7, 8; Step 4b still runs) |
 
 ## Pointers
 

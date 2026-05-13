@@ -1,6 +1,8 @@
 # Step 3a: Name the context directory
 
-Fresh and Merge modes only. Skip in Incremental mode (already detected in Step 1). Skip entirely when `$LAYOUT_MAP` is set: paths come from the config, and `context_dir` is the default prefix already baked into each canonical category's resolved path.
+Fresh and Merge modes only (interactive). Skip in Incremental mode (already detected in Step 1). Skip entirely when `$LAYOUT_MAP` was produced from a config in Step 1: paths come from the config, and `context_dir` is the default prefix already baked into each canonical category's resolved path.
+
+This step contributes `$CONTEXT_DIR` to Step 4b, which uses it as the path prefix for every canonical category (`$CONTEXT_DIR/<name>`).
 
 `AskUserQuestion`:
 
