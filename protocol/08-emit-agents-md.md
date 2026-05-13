@@ -44,3 +44,4 @@ Rule snippets carry a small, fixed set of substitution tokens; resolve all of th
 - `{{CONTEXT_DIR}}`: replace with `$CONTEXT_DIR` for interactive runs, or with `context_dir` from the config for config-driven runs. It is only the default prefix; per-category paths are resolved separately via `$LAYOUT_MAP`, not via a placeholder.
 - `{{LEDGER_ROWS}}`: replace with the rows rendered above from `heuristics/ledgers.yaml`. Each row's host path is resolved per-row from `$LAYOUT_MAP`; there is no separate path token.
 - `{{LINT_COMMANDS}}`: replace with the detected lint/test/typecheck commands from the scan.
+- `{{FORMAT_STRATEGY}}`: replace with the content between `<!-- exodia:format-strategy:start -->` and `<!-- exodia:format-strategy:end -->` in `$SKILL_DIR/heuristics/format-strategy.md`. That file is the single source for the runtime "File Format Strategy" guidance; do not inline a duplicate copy in this step or in `rules/self-update.md`.

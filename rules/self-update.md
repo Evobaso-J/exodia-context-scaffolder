@@ -47,10 +47,6 @@ If a recurring signal does not fit any target file in the table above, a new L3 
 
 ### File Format Strategy
 
-| Format | Use when the data is | Examples |
-| ------ | -------------------- | -------- |
-| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, gotchas, playbooks, reviews, runbooks, migrations, experiments, releases |
-| `.yaml` | Named, structured tree describing the *shape* of something stable. Mutated by editing nodes in place. | glossary, variants, datasets registry |
-| `.md` | Long-form narrative: prose read top to bottom. The L2 module file is always `.md`; additional `.md` files at L3 are rare. | walkthroughs, calendars |
-
-If two formats fit, prefer `.jsonl`; agents handle line-delimited records more reliably than nested YAML, and append-only is safer for long-running context. JSONL files always start with a single-line schema header: `{"_schema": "<type>", "_version": "1.0", "_description": "...", "_fields": [...]}`.
+<!-- exodia:format-strategy:start -->
+{{FORMAT_STRATEGY}}
+<!-- exodia:format-strategy:end -->
