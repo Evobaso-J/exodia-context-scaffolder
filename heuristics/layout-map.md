@@ -49,7 +49,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 | `l2_template_path` | string or `null` | Absolute path to the L2 `.md.tmpl` under `$SKILL_DIR/templates/<name>/`. `null` for custom categories without a template; Step 6 falls back to the default stub written by `init_structure.sh`. |
 | `l3_specs` | array or `null` | Ordered list of L3 file specs. `null` means "Step 6 must infer L3 specs inline" (custom category without a config-declared `l3:`). Empty array means "L2-only category". |
 | `l3_specs[].filename` | string | Matches `^[a-z][a-z0-9_-]*\.(yaml\|jsonl)$`. |
-| `l3_specs[].schema_name` | string or `null` | Canonical schema name (e.g. `adr`, `glossary`, `gotcha`). `null` when the filename is outside `heuristics/ledgers.yaml`; Step 6 writes the schema body inline. |
+| `l3_specs[].schema_name` | string or `null` | Canonical schema name (e.g. `adr`, `glossary`, `pb`). `null` when the filename is outside `heuristics/ledgers.yaml`; Step 6 writes the schema body inline. |
 | `l3_specs[].schema_template_path` | string or `null` | Absolute path to the L3 `.tmpl` if one ships in the templates tree. `null` when the schema is model-inferred. |
 
 ## Validation rules

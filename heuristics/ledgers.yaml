@@ -87,7 +87,7 @@ ledgers:
     format: jsonl
     template: playbooks.jsonl.tmpl
     signals:
-      - {signal: "Reproducible behaviour worth a future debugger's time: name the symptom(s), root cause, fix. Includes recurring footguns — the footgun IS the symptom.", action: "New playbook entry"}
+      - {signal: "Reproducible behaviour worth a future debugger's time: name the symptom(s), root cause, fix. Includes recurring footguns: the footgun IS the symptom.", action: "New playbook entry"}
     scan_source: "docs/postmortems/, POSTMORTEM*.md, rich `^fix:` commits (commit body longer than ~200 chars); TODO/FIXME/HACK/XXX/WARNING comments grouped by directory/area"
 
   infra-decisions:
