@@ -7,7 +7,7 @@ The kernel below (between the `exodia:format-strategy` markers) is the runtime-f
 <!-- exodia:format-strategy:start -->
 | Format | Use when the data is | Examples |
 | ------ | -------------------- | -------- |
-| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, gotchas, playbooks, reviews, runbooks, migrations, experiments, releases |
+| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, playbooks, reviews, runbooks, migrations, experiments, releases |
 | `.yaml` | Named, structured tree describing the *shape* of something stable. Mutated by editing nodes in place. | glossary, variants, datasets registry |
 | `.md` | Long-form narrative: prose read top to bottom. The L2 module file is always `.md`; additional `.md` files at L3 are rare. | walkthroughs, calendars |
 

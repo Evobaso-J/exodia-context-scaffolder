@@ -80,16 +80,6 @@ ledgers:
     skeleton_source: "i18n locales, env files, feature-flag tool from $SCAN §4"
     skeleton_shape: '`variants:` map with a `default:` key and one key per detected variant, each body `notes: ""`'
 
-  gotchas:
-    filename: gotchas.jsonl
-    host: debugging
-    schema: gotcha
-    format: jsonl
-    template: gotchas.jsonl.tmpl
-    signals:
-      - {signal: "Pitfall or footgun confirmed (don't do X / watch out for Y)", action: "New gotcha entry"}
-    scan_source: "TODO, FIXME, HACK, XXX, WARNING comments grouped by directory/area"
-
   playbooks:
     filename: playbooks.jsonl
     host: debugging
@@ -97,8 +87,8 @@ ledgers:
     format: jsonl
     template: playbooks.jsonl.tmpl
     signals:
-      - {signal: "Bug pattern identified with non-obvious root cause", action: "New playbook entry"}
-    scan_source: "docs/postmortems/, POSTMORTEM*.md, rich `^fix:` commits (commit body longer than ~200 chars)"
+      - {signal: "Reproducible behaviour worth a future debugger's time: name the symptom(s), root cause, fix. Includes recurring footguns — the footgun IS the symptom.", action: "New playbook entry"}
+    scan_source: "docs/postmortems/, POSTMORTEM*.md, rich `^fix:` commits (commit body longer than ~200 chars); TODO/FIXME/HACK/XXX/WARNING comments grouped by directory/area"
 
   infra-decisions:
     filename: decisions.jsonl

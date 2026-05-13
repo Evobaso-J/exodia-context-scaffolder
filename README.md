@@ -21,7 +21,7 @@ context/
   design-patterns/ DESIGN-PATTERNS.md + reviews.jsonl
   glossary/        GLOSSARY.md        + glossary.yaml
   operations/     OPERATIONS.md   + variants.yaml
-  debugging/      DEBUGGING.md    + gotchas.jsonl + playbooks.jsonl
+  debugging/      DEBUGGING.md    + playbooks.jsonl
 ```
 
 ## ⚡ Install
