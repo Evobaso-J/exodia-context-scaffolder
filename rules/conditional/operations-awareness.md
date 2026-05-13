@@ -1,1 +1,0 @@
-- **Operations awareness.** Check `{{CONTEXT_DIR}}/operations/OPERATIONS.md` before touching user-visible text, env variables, routing, deploy config, or anything that differs by environment/tenant/variant. When in doubt, open the file.

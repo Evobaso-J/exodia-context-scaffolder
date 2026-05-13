@@ -121,10 +121,6 @@
         │  - rules/self-update.md        │                │
         │    (+ {{LEDGER_ROWS}},         │                │
         │     {{FORMAT_STRATEGY}} tokens)│                │
-        │  - rules/conditional/          │                │
-        │    operations-awareness.md     │                │
-        │  - rules/conditional/          │                │
-        │    lint-check.md               │                │
         │  - heuristics/ledgers.yaml     │                │
         │    (ledger row source)         │                │
         │  - heuristics/format-strategy  │                │
@@ -178,8 +174,6 @@
 | template | `templates/<canonical>/*.tmpl` | Step 5, Step 6 |
 | rule | `rules/universal.md` | Step 8 |
 | rule | `rules/self-update.md` | Step 8 |
-| rule | `rules/conditional/operations-awareness.md` | Step 8 (if `operations/` present) |
-| rule | `rules/conditional/lint-check.md` | Step 8 (if lint/test detected) |
 | docs | `README.md` | Step 0 (config schema reference) |
 | docs | `TROUBLESHOOTING.md` | failure pointer, all steps |
 

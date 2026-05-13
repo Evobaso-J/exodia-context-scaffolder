@@ -25,7 +25,7 @@ The canonical five are a strong default, not an enforced minimum. Users may drop
 
 ## Lint/test/typecheck detection
 
-Scan for commands. Used to decide whether to insert the `lint-check.md` rule and to populate its placeholder.
+Scan for commands. Used to decide whether Step 8 should append the inline lint/test/typecheck behavioral rule and to populate its `{{LINT_COMMANDS}}` placeholder.
 
 | File | Look for |
 | ---- | -------- |
@@ -36,4 +36,4 @@ Scan for commands. Used to decide whether to insert the `lint-check.md` rule and
 | `go.mod` + `Makefile` | `go test`, `go vet`, `staticcheck` targets |
 | `Cargo.toml` + Makefile/xtask | `cargo test`, `cargo clippy`, `cargo fmt --check` |
 
-If at least one is detected, insert `rules/conditional/lint-check.md` into the generated `AGENTS.md` and substitute the detected commands into the `{{LINT_COMMANDS}}` placeholder as a comma-separated list.
+If at least one is detected, Step 8 appends the inline lint/test/typecheck rule to the generated `AGENTS.md` and substitutes the detected commands into the `{{LINT_COMMANDS}}` placeholder as a comma-separated list.
