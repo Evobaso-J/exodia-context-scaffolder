@@ -1,5 +1,5 @@
 <!-- purpose: System shape, entry points, and module layout. Read this first to understand how the codebase is organized. -->
-<!-- seam: This file catalogues modules (what exists, where it lives, what it does at the system level). Module-internal APIs — composables, plugin methods, helpers, do/don't rules — belong in design-patterns/DESIGN-PATTERNS.md under the relevant concern section. -->
+<!-- seam: This file catalogues modules (what exists, where it lives, what it does at the system level). Module-internal APIs (composables, plugin methods, helpers, do/don't rules) belong in design-patterns/DESIGN-PATTERNS.md under the relevant concern section. -->
 <!-- glossary: Reference entities and concepts by name; canonical definitions live in glossary/glossary.yaml. Do not redefine them here. -->
 # Architecture
 
@@ -18,7 +18,7 @@
 ## Modules & Boundaries
 
 <!-- exodia:section:modules -->
-{{CATALOGUE_MAJOR_MODULES as a table with columns `| Module | Path | Purpose | Usage docs |`. One row per module. Purpose is one line: what the module is at a system level (one sentence, under ~100 chars). Usage docs is a link to the design-patterns/DESIGN-PATTERNS.md section that owns the module's APIs (composable names, plugin methods, helpers, do/don't rules) — write `see [Authentication](../design-patterns/DESIGN-PATTERNS.md#authentication)` or similar. Do not list composables, methods, or call-site recipes here; those live in design-patterns.}}
+{{CATALOGUE_MAJOR_MODULES as a table with columns `| Module | Path | Purpose | Usage docs |`. One row per module. Purpose is one line: what the module is at a system level (one sentence, under ~100 chars). Usage docs is a link into `design-patterns/DESIGN-PATTERNS.md` to the section that owns this module's APIs; pick the section matching the module's concern (e.g. an auth module points to `## Authentication`, an HTTP-client module to `## API & External Services`, a tracking module to `## Observability / Telemetry`, a UI-conventions module to `## Component / Module Conventions`). Format: `see [<Section>](../design-patterns/DESIGN-PATTERNS.md#<anchor>)`.}}
 
 ## State Management
 

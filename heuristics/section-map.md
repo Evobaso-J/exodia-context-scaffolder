@@ -22,6 +22,7 @@ Non-core categories (mobile, infra, data, workspace, ...) are repo-bespoke under
 - **Commands / Scripts** → maps to `commands` placeholder in `AGENTS.md`.
 - **Quick Action Table / How to work here / For developers** → maps to `quick-actions` placeholder in `AGENTS.md`. If the table format matches closely, pass the rows through verbatim.
 - **Anything under 40 characters of body** → route to `_unsorted`, likely too thin to place confidently.
+- **Module section with usage-surface body** → if a heading matches the `architecture` keyword `module` (e.g. `## Modules`, `## Local Modules`) but the body is dominated by composable names, plugin/method APIs, or call-site recipes, route to `design-patterns` instead. The architecture↔patterns seam (see `templates/architecture/ARCHITECTURE.md.tmpl` and `templates/design-patterns/DESIGN-PATTERNS.md.tmpl` top comments) places module catalogues in architecture and module APIs in design-patterns. Heading match alone cannot tell them apart; inspect the body before routing.
 
 ## User override
 
