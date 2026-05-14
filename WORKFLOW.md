@@ -33,7 +33,6 @@
         ┌────────────────────────────────┐    │
         │ Step 3: categories             │    │
         │ Utilities:                     │    │
-        │  - $REGISTRY (built Step 1)    │    │
         │  - $SCAN (built Step 2)        │    │
         │  - heuristics/format-strategy  │    │
         │    .md (custom ledger picks)   │    │
@@ -93,9 +92,7 @@
         │  - templates/<canonical>/*.tmpl│  │  - AskUserQuestion (per diff)│
         │    (architecture, design-      │  │  - reuses Step 9 for L3      │
         │     patterns, glossary,        │  └─────────────┬────────────────┘
-        │     operations, debugging,     │                │
-        │     mobile, workspace, data,   │                │
-        │     infra)                     │                │
+        │     operations, debugging)     │                │
         └──────────┬─────────────────────┘                │
                    ▼                                      │
         ┌────────────────────────────────┐                │
@@ -174,7 +171,6 @@
 |---|---|---|
 | script | `scripts/parse_config.py` | Step 1 |
 | script | `scripts/resolve_layout.py` | Step 1 |
-| script | `scripts/load_registry.py` | Step 1 (builds `$REGISTRY` from `templates/*/`) |
 | script | `scripts/init_structure.sh` | Step 3a (property ref), Step 5 |
 | script | `scripts/yaml_subset.py` | imported by `parse_config.py` / `resolve_layout.py` |
 | heuristic | `heuristics/lint-detectors.md` | Step 8 (lint/test/typecheck rule emission) |

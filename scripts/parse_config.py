@@ -45,34 +45,16 @@ from typing import Any
 # directory, so Python adds that directory to `sys.path` automatically.
 from yaml_subset import ConfigError, parse_yaml_subset
 
-# Core canonical set. Backstop if the templates dir is missing or unreadable.
-# Tuple order drives L2 draft order in protocol/06-draft-l2.md and the
-# auto-add set when a config is present.
+# Core canonical set: the five curated categories the scaffolder ships
+# templates and ledger schemas for. Tuple order drives L2 draft order in
+# protocol/06-draft-l2.md and the auto-add set when a config is present.
+# This is the canonical recognized set, period: any name outside it requires
+# `custom: true` in `exodia.config.yaml`.
 DEFAULT_CATEGORIES = ("architecture", "design-patterns", "glossary", "operations", "debugging")
 
 
-def _discover_recognized_categories() -> set[str]:
-    """Build the curated-name set by listing `$SKILL_DIR/templates/*/`.
-
-    Any directory under `templates/` is a curated category and does not require
-    `custom: true` in config. Falls back to the core canonical set if the
-    templates dir is missing (e.g. running tests against a partial checkout).
-    """
-    templates_dir = Path(__file__).resolve().parent.parent / "templates"
-    if not templates_dir.is_dir():
-        return set(DEFAULT_CATEGORIES)
-    discovered = {p.name for p in templates_dir.iterdir() if p.is_dir()}
-    # Defensive: keep core five even if a curated template dir is accidentally
-    # removed; validation must not start rejecting `architecture` because
-    # someone deleted `templates/architecture/`.
-    discovered.update(DEFAULT_CATEGORIES)
-    return discovered
-
-
 # Parse-time validation set: category names that do not require `custom: true`.
-# Derived from `templates/` directory listing so adding a new curated category
-# is a one-step operation (drop a new `templates/<name>/` dir).
-RECOGNIZED_CATEGORIES = _discover_recognized_categories()
+RECOGNIZED_CATEGORIES = set(DEFAULT_CATEGORIES)
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
 L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl)$")
