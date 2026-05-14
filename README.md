@@ -37,7 +37,7 @@ Restart Claude Code (or open a new session). Run `/exodia` in any repo. The dire
 ## 🃏 What it does
 
 - **Interactive scaffold**: scans the repo, proposes categories, drafts each module section by section with accept / edit / reject on every `##` heading.
-- **Fixed-5 core + model-proposed adds**: five canonical modules by default; the scaffolder reads the scan and proposes additional categories (curated entries like `mobile/`, `workspace/`, `data/`, `infra/` or custom ones) when repo evidence warrants.
+- **Fixed-5 core + model-proposed adds**: five canonical modules by default; the scaffolder reads the scan and proposes additional repo-bespoke categories when evidence warrants. Non-core categories flow through a single model-derivation path (filename, schema, format, scan_hint derived from purpose plus scan).
 - **Safe re-runs**: running `/exodia` again diffs incrementally, preserves user-edited prose via `<!-- exodia:section:<id> -->` markers, and never overwrites the emitted `AGENTS.md`.
 - **Existing-file merge**: a pre-existing `CLAUDE.md` / `AGENTS.md` is parsed, split by `##`, and routed into the right modules.
 
@@ -77,9 +77,9 @@ categories:
 
 Recognized as canonical (no `custom: true` required):
 
-`architecture`, `design-patterns`, `glossary`, `operations`, `debugging`, `mobile`, `workspace`, `data`, `infra`.
+`architecture`, `design-patterns`, `glossary`, `operations`, `debugging`.
 
-Any other name in `categories` requires `custom: true` or it is rejected at parse time.
+Any other name in `categories` requires `custom: true` or it is rejected at parse time. Cross-repo consistency for non-core categories (e.g. sharing the same `mobile` / `infra` shape across several services) is a user responsibility: share an `exodia.config.yaml` snippet between repos.
 
 ### Path semantics
 

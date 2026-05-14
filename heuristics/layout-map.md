@@ -43,7 +43,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 
 | Field | Type | Meaning |
 |---|---|---|
-| `name` | string | Category identifier, `^[a-z][a-z0-9_-]*$`. Canonical names: `architecture`, `design-patterns`, `glossary`, `operations`, `debugging`, `mobile`, `workspace`, `data`, `infra`. Anything else is `kind: custom`. |
+| `name` | string | Category identifier, `^[a-z][a-z0-9_-]*$`. Canonical names: `architecture`, `design-patterns`, `glossary`, `operations`, `debugging`. Anything else is `kind: custom`. |
 | `path` | string | Repo-rooted destination under `$TARGET`. Same regex as config: `^[a-z._-][a-z0-9._/-]*$`. |
 | `kind` | `"canonical"` or `"custom"` | Drives L2 template lookup and Step 6 schema-inference branching. |
 | `l2_template_path` | string or `null` | Absolute path to the L2 `.md.tmpl` under `$SKILL_DIR/templates/<name>/`. `null` for custom categories without a template; Step 6 falls back to the default stub written by `init_structure.sh`. |

@@ -13,10 +13,8 @@ Apply rules top-to-bottom. First match wins. If no rule matches, route to `_unso
 | `domain`, `entity`, `entities`, `glossary`, `terminology`, `user journey`, `business logic`, `model` (only if clearly business-model, not ML) | `glossary` |
 | `environment`, `env var`, `variant`, `market`, `tenant`, `locale`, `i18n`, `translation`, `deploy`, `release`, `config`, `feature flag` | `operations` |
 | `debug`, `troubleshoot`, `common issue`, `gotcha`, `playbook`, `error`, `fix`, `known issue`, `pitfall`, `setup` (only if followed by *local*, *dev*, *environment*) | `debugging` |
-| `mobile`, `ios`, `android`, `react native`, `expo`, `flutter` | `mobile` (if present) |
-| `workspace`, `monorepo`, `package graph`, `turbo`, `nx`, `pnpm workspace` | `workspace` (if present) |
-| `notebook`, `pipeline`, `ml`, `training`, `model` (when clearly ML-context), `dataset`, `etl` | `data` (if present) |
-| `infra`, `terraform`, `kubernetes`, `helm`, `cloudformation`, `provisioning`, `cdk`, `pulumi`, `observability`, `oncall`, `monitoring` | `infra` (if present) |
+
+Non-core categories (mobile, infra, data, workspace, ...) are repo-bespoke under A2; when one is part of the confirmed category set, the user may reassign sections to it manually during the merge mapping review.
 
 ## Special rules
 

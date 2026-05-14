@@ -1,13 +1,13 @@
 # L3 file format strategy
 
-When scaffolding L3 data files for any module (canonical, optional, or user-defined), pick the format from this table. The rule comes from the original digital-brain-skill source ([github.com/muratcankoylan/Agent-Skills-for-Context-Engineering, examples/digital-brain-skill/SKILL.md](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/blob/main/examples/digital-brain-skill/SKILL.md) § "File Format Strategy").
+When scaffolding L3 data files for any module (core canonical or user-defined), pick the format from this table. The rule comes from the original digital-brain-skill source ([github.com/muratcankoylan/Agent-Skills-for-Context-Engineering, examples/digital-brain-skill/SKILL.md](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/blob/main/examples/digital-brain-skill/SKILL.md) § "File Format Strategy").
 
 The kernel below (between the `exodia:format-strategy` markers) is the runtime-facing version of this guidance; it is the single source for the `### File Format Strategy` block in emitted `AGENTS.md` files. Step 8 substitutes it into `rules/self-update.md`'s `{{FORMAT_STRATEGY}}` token verbatim. Keep the kernel terse and L3-focused so target repos receive runtime-appropriate examples. Anything below the kernel is scaffolder-only guidance (decision questions, JSONL header detail, ID format) and is not emitted.
 
 <!-- exodia:format-strategy:start -->
 | Format | Use when the data is | Examples |
 | ------ | -------------------- | -------- |
-| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, playbooks, reviews, runbooks, migrations, experiments, releases |
+| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, playbooks, reviews |
 | `.yaml` | Named, structured tree describing the *shape* of something stable. Mutated by editing nodes in place. | glossary, variants, datasets registry |
 | `.md` | Long-form narrative: prose read top to bottom. The L2 module file is always `.md`; additional `.md` files at L3 are rare. | walkthroughs, calendars |
 
@@ -31,6 +31,24 @@ Every `.jsonl` file's first line is a schema descriptor:
 ```
 
 `_fields` is exodia-specific (the source skill uses only `_schema` / `_version` / `_description`). Keep it: it gives future sessions an explicit field list to validate against.
+
+## Baseline `_fields` for derived JSONL ledgers
+
+When deriving `_fields` for a new ledger (custom category, or any non-core category under A2), every `_fields` array MUST include:
+
+- `id`: canonical ID format `{schema}_{YYYYMMDD}_{HHMMSS}_{4hex}`.
+- `title`: one-line label for the entry.
+- `status`: lifecycle marker (`active`, `archived`, schema-specific values welcome).
+- timestamp: `created` for append-only logs, `date` for event records (pick one based on schema semantics).
+
+Two more SHOULD be included when applicable:
+
+- `files`: citation list pointing at relevant files in the repo.
+- `tags`: cross-cutting filters (free-form, schema-specific).
+
+Schema-specific fields follow these. Place them in semantic order: cause-before-effect for incident-style schemas, before / after for change-style schemas, and so on.
+
+This baseline is not emitted into the runtime kernel: once a ledger is scaffolded, its `_fields` header IS the contract for future agents appending to it. The prescription only applies at scaffolding time.
 
 ## YAML stub
 

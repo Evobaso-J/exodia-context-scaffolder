@@ -56,9 +56,8 @@ from yaml_subset import parse_yaml_subset
 def _load_canonical_ledgers(skill_dir: Path) -> dict[str, list[tuple[str, str]]]:
     """Build filename -> ordered [(host, schema)] map from the registry.
 
-    Tiebreaker for shared filenames (e.g. `decisions.jsonl` lives in both
-    architecture/ and infra/): preserve registry insertion order so callers
-    that pass a matching `host_category` win, else first-match.
+    Tiebreaker for shared filenames: preserve registry insertion order so
+    callers that pass a matching `host_category` win, else first-match.
     """
     registry_path = skill_dir / "heuristics" / "ledgers.yaml"
     parsed = parse_yaml_subset(registry_path.read_text(encoding="utf-8"))

@@ -18,7 +18,7 @@ After this step, Steps 5 to 9 do not branch on mode for path resolution; they re
 
 Synthesize from the confirmed inputs:
 
-- Categories list from Step 3 (canonical defaults plus any optional canonicals and custom categories the user accepted).
+- Categories list from Step 3 (the core five defaults plus any non-core categories the user accepted, whether model-proposed or user-added custom).
 - `$CONTEXT_DIR` from Step 3a.
 - Merge mapping from Step 4 if Merge mode (does not change the layout map shape; consumed in Step 6 as seed content, not here).
 - Custom-category L3 derivations produced by Step 3's interview deferral to Step 6 schema inference: leave `l3_specs: null` for custom categories the user added interactively; Step 6 inference fills the field.
