@@ -6,6 +6,16 @@ Mode classification. Applies in all modes.
 
 If the user aborts mid-interview, leave the repo in whatever partial state exists. Running `/exodia` again resumes from preflight.
 
+## Build `$REGISTRY`
+
+Before mode classification, build `$REGISTRY` as the curated-category index. It is a JSON object mapping `name -> one-line purpose`, derived by listing `$SKILL_DIR/templates/*/` and reading each L2 template's leading `<!-- purpose: ... -->` comment:
+
+```bash
+REGISTRY="$(python3 "$SKILL_DIR/scripts/load_registry.py" --skill-dir "$SKILL_DIR")"
+```
+
+Step 3 reads `$REGISTRY` alongside `$SCAN` to judge fit between any proposed category name and the curated set. Adding a new curated category (e.g. a fifth canonical default) means creating a new `templates/<name>/<NAME>.md.tmpl` with a leading `<!-- purpose: ... -->` line plus the relevant ledger entries; no Python, scan, or detector edits required.
+
 ## Config validation (when `$CONFIG_PATH` is present)
 
 If `$CONFIG_PATH` is present, parse and validate it **before** mode classification:

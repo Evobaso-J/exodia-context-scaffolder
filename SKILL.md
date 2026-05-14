@@ -33,6 +33,7 @@ The self-update rules in `$SKILL_DIR/rules/self-update.md` are **runtime rules f
 | `$CONFIG_PATH` | `$TARGET/exodia.config.yaml`. Presence flips the run into config-driven mode. Throwaway, ignored by incremental re-runs. |
 | `$LAYOUT_MAP` | In-memory JSON array of category objects (`name`, `path`, `kind`, `l2_template_path`, `l3_specs`). Finalized by Step 4b in all modes. Shape and validation rules: `$SKILL_DIR/heuristics/layout-map.md`. |
 | `$SCAN` | Structured Explore-subagent report from Step 2. |
+| `$REGISTRY` | In-memory JSON object mapping curated category `name -> one-line purpose`. Built by Step 1 from `$SKILL_DIR/templates/*/` via `scripts/load_registry.py`. Step 3 reads this alongside `$SCAN` to judge fit between proposed categories and the curated set. |
 
 ## Modes
 

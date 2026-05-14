@@ -37,11 +37,11 @@ Restart Claude Code (or open a new session). Run `/exodia` in any repo. The dire
 ## 🃏 What it does
 
 - **Interactive scaffold**: scans the repo, proposes categories, drafts each module section by section with accept / edit / reject on every `##` heading.
-- **Fixed-5 core + detected optionals**: five canonical modules by default; `mobile/`, `workspace/`, `data/`, `infra/` auto-proposed when repo signals fire.
+- **Fixed-5 core + model-proposed adds**: five canonical modules by default; the scaffolder reads the scan and proposes additional categories (curated entries like `mobile/`, `workspace/`, `data/`, `infra/` or custom ones) when repo evidence warrants.
 - **Safe re-runs**: running `/exodia` again diffs incrementally, preserves user-edited prose via `<!-- exodia:section:<id> -->` markers, and never overwrites the emitted `AGENTS.md`.
 - **Existing-file merge**: a pre-existing `CLAUDE.md` / `AGENTS.md` is parsed, split by `##`, and routed into the right modules.
 
-Customization knobs (custom context-dir name, dropping canonical modules, custom categories, optional auto-add detectors): see [`SKILL.md`](SKILL.md).
+Customization knobs (custom context-dir name, dropping canonical modules, custom categories): see [`SKILL.md`](SKILL.md).
 
 ## 🛠 Customizing the layout (config-driven)
 
