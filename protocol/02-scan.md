@@ -10,14 +10,9 @@ Delegate the initial scan to an `Explore` subagent with **medium** thoroughness 
 > 2. **Architecture summary**: routing style, state management, module layout, SSR/CSR split, backend/frontend divide. One paragraph.
 > 3. **Glossary signals**: top-level entities or models you can name. Look wherever the repo keeps its domain objects: schema files, model classes, type definitions, or a dedicated directory.
 > 4. **Operations signals**: i18n tooling if any framework-specific lib is present (locale files, translation dirs), multi-env config (env files, `deploy/`, k8s, helm, terraform), multi-tenant patterns, feature-flag tools.
-> 5. **Category-tweak triggers**: report presence/absence of each:
->    - i18n / multi-market
->    - mobile (React Native, Expo, Flutter, iOS/Android dirs)
->    - monorepo (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, `packages/`, `apps/`)
->    - data / ML (`notebooks/`, `models/`, `data/`, ipynb files, pytorch / tf / jax deps)
->    - infra (`terraform/`, `helm/`, `k8s/`, `.tf` files, CloudFormation)
-> 6. **Lint/test/typecheck scripts** detected in `package.json`, `pyproject.toml`, `Gemfile`, `go.mod`, `Cargo.toml`, `Makefile`. Name the commands (e.g. `pnpm lint`, `pytest`).
-> 7. **Existing docs**: if `AGENTS.md` / `CLAUDE.md` / `README.md` has structured sections, list the `##` headings.
+> 5. **Lint/test/typecheck scripts** detected in `package.json`, `pyproject.toml`, `Gemfile`, `go.mod`, `Cargo.toml`, `Makefile`. Name the commands (e.g. `pnpm lint`, `pytest`).
+> 6. **Existing docs**: if `AGENTS.md` / `CLAUDE.md` / `README.md` has structured sections, list the `##` headings.
+> 7. **Other structural signals**: anything else in the repo layout, top-level files, or dependencies that stands out as a cross-cutting concern worth its own documentation section. Cite files.
 >
 > Output the report as a structured list. Do not speculate; cite files for everything.
 
