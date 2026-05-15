@@ -7,14 +7,11 @@ Compose `$TARGET/AGENTS.md` from:
 - `$SKILL_DIR/rules/universal.md` (always included)
 - `$SKILL_DIR/rules/self-update.md` (always, near the top).
 
-Then append the following conditional bullets to the Behavioral Rules section verbatim (no extra files to load):
+Then, **if `operations/` is in the final category set**, append this conditional bullet to the Behavioral Rules section verbatim:
 
-- **If `operations/` is in the final category set**, append this bullet:
-  `- **Operations awareness.** Check `{{CONTEXT_DIR}}/operations/OPERATIONS.md` before touching user-visible text, env variables, routing, deploy config, or anything that differs by environment/tenant/variant. When in doubt, open the file.`
-- **If the scan detected any lint/test/typecheck scripts**, append this bullet:
-  `- **Do not run lint, test, or typecheck unless explicitly asked.** CI and pre-commit hooks own these gates. Detected commands in this repo: `{{LINT_COMMANDS}}`. Running them ad-hoc wastes wall time and muddies terminal output.`
+`- **Operations awareness.** Check `{{CONTEXT_DIR}}/operations/OPERATIONS.md` before touching user-visible text, env variables, routing, deploy config, or anything that differs by environment/tenant/variant. When in doubt, open the file.`
 
-Resolve `{{CONTEXT_DIR}}` and `{{LINT_COMMANDS}}` at emit time per the Placeholders section below.
+Resolve `{{CONTEXT_DIR}}` at emit time per the Placeholders section below.
 
 ## Ledger row generation
 
@@ -29,8 +26,6 @@ For each ledger entry in `ledgers.yaml`:
 Then append generated rows for **custom-category ledgers** (categories with `kind: custom` in `$LAYOUT_MAP` whose `l3_specs` is non-empty). For each `(category, ledger)` pair: if the ledger's `schema_name` matches a row in `ledgers.yaml`, reuse that row's signals/actions with the custom category's resolved path. Otherwise write a one-line "When to update" hint from the category's purpose statement.
 
 Substitute `{{LEDGER_ROWS}}` with the rendered rows joined by newlines.
-
-The `File Format Strategy` § at the bottom of `self-update.md` is always retained; it guides future agents adding new ledgers.
 
 ## Final shape
 
@@ -50,5 +45,3 @@ Rule snippets carry a small, fixed set of substitution tokens; resolve all of th
 
 - `{{CONTEXT_DIR}}`: replace with `$CONTEXT_DIR` (set in Step 3a for interactive runs, or from the config's `context_dir` for config-driven runs). It is only the default prefix; per-category paths are resolved separately via `$LAYOUT_MAP`, not via a placeholder.
 - `{{LEDGER_ROWS}}`: replace with the rows rendered above from `heuristics/ledgers.yaml`. Each row's host path is resolved per-row from `$LAYOUT_MAP`; there is no separate path token.
-- `{{LINT_COMMANDS}}`: replace with the detected lint/test/typecheck commands from the scan.
-- `{{FORMAT_STRATEGY}}`: replace with the content between `<!-- exodia:format-strategy:start -->` and `<!-- exodia:format-strategy:end -->` in `$SKILL_DIR/heuristics/format-strategy.md`. That file is the single source for the runtime "File Format Strategy" guidance; do not inline a duplicate copy in this step or in `rules/self-update.md`.
