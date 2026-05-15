@@ -100,7 +100,10 @@
         │   (draft each section, then    │                │
         │    interactively review and    │                │
         │    write L2 + L3 stubs for     │                │
-        │    interactive custom cats)    │                │
+        │    interactive custom cats;    │                │
+        │    design-patterns: derive H2  │                │
+        │    sections, spin out          │                │
+        │    docs/<slug>.md deep dives)  │                │
         │ Utilities:                     │                │
         │  - templates/<cat>/<CAT>.md    │                │
         │    .tmpl (L2 skeleton + voice) │                │

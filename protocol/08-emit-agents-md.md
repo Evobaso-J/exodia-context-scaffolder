@@ -25,6 +25,8 @@ For each ledger entry in `ledgers.yaml`:
 
 Then append generated rows for **custom-category ledgers** (categories with `kind: custom` in `$LAYOUT_MAP` whose `l3_specs` is non-empty). For each `(category, ledger)` pair: if the ledger's `schema_name` matches a row in `ledgers.yaml`, reuse that row's signals/actions with the custom category's resolved path. Otherwise write a one-line "When to update" hint from the category's purpose statement.
 
+**Conditional row for `design-patterns` progressive disclosure.** When `design-patterns` is in the final category set, append one more row (this is not a ledger; it lives in the same self-update table and gates on category presence, similar to the operations awareness bullet below): `\| L2 guardrail grows past ~3 lines or pattern needs nuance \| \`<design-patterns-path>/docs/<slug>.md\` \| Spin out a deep dive, replace the L2 section body with `See [docs/<slug>.md](docs/<slug>.md) for full details.` \|`. Resolve `<design-patterns-path>` from `$LAYOUT_MAP`.
+
 Substitute `{{LEDGER_ROWS}}` with the rendered rows joined by newlines.
 
 ## Final shape
