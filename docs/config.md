@@ -1,11 +1,6 @@
 # `exodia.config.yaml` reference
 
-`exodia.config.yaml` is an **opt-in, one-shot, throwaway** config file you can drop at the repo root *before* the first `/exodia` run to override the canonical layout. It lets you relocate categories, drop canonical ones, or add custom categories at arbitrary repo-rooted paths.
-
-- **Opt-in.** Absent means the interactive flow runs unchanged.
-- **One-shot.** Consumed exactly once at the first scaffold run (Fresh or Merge mode). Incremental re-runs ignore it.
-- **Throwaway.** After the first run, the `AGENTS.md` router table (wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->`) is the sole persistent source of truth. Delete or `.gitignore` the file once the scaffolded tree is committed.
-- **Sparse + defaults.** Encode only the diff from the canonical layout. Anything not declared keeps its default.
+`exodia.config.yaml` is an **opt-in, one-shot, throwaway** config file you drop at the repo root *before* the first `/exodia` run to override the canonical layout. Opt-in (absent means the interactive flow runs unchanged); one-shot (consumed only on the first Fresh / Merge run, ignored by Incremental re-runs); throwaway (the `AGENTS.md` router table wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` becomes the sole persistent source of truth, so the config file can be deleted or `.gitignore`d once the scaffolded tree is committed). Sparse by default: encode only the diff from the canonical layout.
 
 ## Schema
 
@@ -81,5 +76,3 @@ This produces:
 - `docs/project/operations/` (canonical, default path under `context_dir`)
 - `docs/handbook/glossary/` (canonical, explicit path)
 - `docs/mobile/` (custom, model drafts L2 and writes schemas for the two declared L3 files)
-
-After the first run, commit the scaffolded tree and delete (or `.gitignore`) `exodia.config.yaml`. Subsequent `/exodia` re-runs read the layout from the router table inside `AGENTS.md` and ignore the config file.

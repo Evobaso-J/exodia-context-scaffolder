@@ -12,15 +12,7 @@
 
 ## 🧩 Why
 
-A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile. Every turn, the agent reloads the whole thing, the rules you wrote on line 12 fight with the gotchas you logged on line 487, and nobody (human or model) can find anything.
-
-`/exodia` splits that same knowledge into a thin router plus five narrative modules, each backed by append-only data logs. The router is small enough that the agent loads it on every turn. The modules and logs are only loaded when the task actually touches them. Max two hops to any fact.
-
-The result is a context tree that:
-
-- **Stays cheap to load.** Routine work touches the router and maybe one module, not 800 lines of mixed concerns.
-- **Self-heals.** Every emitted `AGENTS.md` ships with rules telling future sessions where to log new bug root causes, footguns, decisions, and review lessons. Knowledge accumulates instead of evaporating between sessions.
-- **Survives re-runs.** Edit the prose by hand; `/exodia` won't clobber it. Re-running diffs only the auto-filled sections.
+A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent reloads in full every turn. `/exodia` splits the same knowledge into a thin router plus five narrative modules, each backed by append-only data logs. The router loads every turn; modules and logs load only when the task touches them. Max two hops to any fact.
 
 ## 🃏 What it looks like
 
@@ -70,15 +62,11 @@ Two-service split: `api/` (FastAPI) handles request routing and auth;
 - Database access from `api/` is read-mostly; writes go through the worker.
 ```
 
-The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line per entry:
+The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line per entry, conforming to the schema declared on line 1 of the file:
 
 ```jsonl
-{"id":"decision_20260514_103211_a4f2","date":"2026-05-14","title":"Move auth to gateway","why":"Per-service JWT validation was duplicated across 4 services; centralizing cut latency variance and unblocked rate limiting.","status":"merged"}
+{"id":"decision_20260514_103211_a4f2","title":"Move auth to gateway","status":"merged","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","date":"2026-05-14"}
 ```
-
-That's the whole shape: **router, narrative, ledger**. Five modules, same pattern.
-
-Full hand-authored snapshot: [`examples/scaffolded-tree/`](examples/scaffolded-tree/).
 
 ## 🧠 Mental model: L1 / L2 / L3
 
@@ -90,13 +78,9 @@ Full hand-authored snapshot: [`examples/scaffolded-tree/`](examples/scaffolded-t
 | L2   | A module's narrative. Mid-size. Human-edited.| `context/architecture/ARCHITECTURE.md`        | When the task touches that module |
 | L3   | Append-only data. Grepped, not read whole.   | `decisions.jsonl`, `glossary.yaml`            | When a specific entry is needed |
 
-The **two-hop rule**: from L1, you reach any fact in at most two more reads. Router points to the module; module narrative either contains the answer (L2) or names the ledger that does (L3). The agent never reads the whole tree to answer one question.
-
-This matters because the alternative, a single big `CLAUDE.md`, costs the full file in input tokens *every turn*, even when the task only needs three lines from it. Splitting trades one cheap read for one targeted read, and the savings compound across a session.
+**Two-hop rule**: from L1, every fact is at most two more reads away. The router points to a module; the module narrative either contains the answer (L2) or names the ledger that does (L3).
 
 ## 📚 The 5 modules
-
-The canonical set is fixed at five. The scaffolder may also propose repo-bespoke categories on top when the scan warrants it (see [`SKILL.md`](SKILL.md)), but every scaffolded repo starts with these.
 
 ### `architecture/` : what the system *is*
 The shape of the codebase: services, boundaries, data flow, build topology. L2 prose answers "what's where and why". The ledger `decisions.jsonl` is ADR-lite: one append-only entry per architectural decision, capturing the *why* so future sessions don't relitigate it.
@@ -111,7 +95,7 @@ Domain terms, abbreviations, and the names this codebase uses for things that ha
 Commands, environment knobs, gotchas in the dev loop. `variants.yaml` captures behavior that differs across environments or feature flags, so the agent knows "in staging this flag is off" without you re-explaining each time.
 
 ### `debugging/` : what bites you
-Known pitfalls, fragile spots, recurring bug shapes. `playbooks.jsonl` is append-only: one entry per root cause, with the smell, the diagnosis, and the fix. This is the module that grows fastest in real use; it's also the one that pays back loudest.
+Known pitfalls, fragile spots, recurring bug shapes. `playbooks.jsonl` is append-only: one entry per root cause, with the smell, the diagnosis, and the fix.
 
 ## ⚡ Install
 
@@ -131,9 +115,7 @@ cd ~/your-repo
 /exodia
 ```
 
-That's it. The skill scans the repo, proposes a category set, drafts each module section by section with accept / edit / reject on every `##` heading, and emits the router. The first run is interactive; expect to review and steer.
-
-Re-running `/exodia` on an already-scaffolded repo automatically enters incremental mode. No flag needed. Full interview protocol lives in [`SKILL.md`](SKILL.md).
+The skill scans the repo, proposes a category set, drafts each module section by section with accept / edit / reject on every `##` heading, and emits the router. Re-running on an already-scaffolded repo automatically enters incremental mode. Full interview protocol: [`SKILL.md`](SKILL.md).
 
 ## 🔁 Modes: Fresh / Merge / Incremental
 
@@ -145,7 +127,7 @@ Preflight classifies the target repo and picks the flow:
 
 ## 📓 Self-update
 
-Every emitted `AGENTS.md` ships with a routing table that tells future sessions where to log new knowledge (bug root causes, footguns, architecture decisions, PR review lessons, domain terms, variant behavior). Each entry gets an ID of the form `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. While a branch is in flight, a new insight on the same topic overwrites the earlier entry in place instead of stacking duplicates. Once the branch merges, the entry is settled: only a later branch can supersede it. Agents append without asking, and the user can always revert via git.
+Every emitted `AGENTS.md` ships with a routing table that tells future sessions where to log new knowledge (bug root causes, footguns, architecture decisions, PR review lessons, domain terms, variant behavior). Each entry gets an ID of the form `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. On the current branch, a new insight on the same topic replaces the entry the same branch added earlier (checked via `git diff <default-branch>`), so one branch produces one entry per topic. Once merged, the entry is settled: only a later branch can supersede it. Agents append without asking, and the user can always revert via git.
 
 Full signal-to-file mapping and write rules: [`rules/self-update.md`](rules/self-update.md).
 

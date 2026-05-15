@@ -1,12 +1,6 @@
 # Worked example: monorepo with the canonical 5 modules under `docs/project/`,
 # glossary relocated to a sibling handbook, and a custom `mobile/` category.
-#
-# Drop this file at the root of your repo BEFORE the first `/exodia` run, then
-# delete it (or .gitignore it) once the scaffolded tree is committed. The
-# router table inside the emitted `AGENTS.md` becomes the sole persistent
-# source of truth on re-runs.
-#
-# Full schema, validation rules, and path semantics: ../docs/config.md
+# Full schema: ../docs/config.md
 
 context_dir: docs/project          # default root for canonical categories without explicit `path`
 categories:

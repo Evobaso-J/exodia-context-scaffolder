@@ -1,7 +1,4 @@
-# Smallest useful `exodia.config.yaml`: drop one canonical category and add
-# one custom category. Everything else falls back to defaults (5 canonical
-# modules under `context/`).
-#
+# Smallest useful `exodia.config.yaml`: one drop + one custom category.
 # Full schema: ../docs/config.md
 
 categories:
