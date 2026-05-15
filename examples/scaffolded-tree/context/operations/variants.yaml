@@ -1,0 +1,30 @@
+# Per-variant behavioral differences (any per-variant deviation from default behavior).
+# Populate as variants are introduced. Each entry captures only what differs from the default.
+#
+# Suggested shape, adapt as needed:
+#
+# variants:
+#   default:
+#     notes: "Baseline behavior."
+#   <variant_key>:
+#     <override_key>: <value>
+#     notes: "<what differs from default>"
+
+variants:
+  default:
+    notes: "Baseline tier: rate limit 10 req/s, artifact retention 7 days, all feature flags default-off."
+  free:
+    rate_limit_per_second: 1
+    artifact_retention_days: 1
+    notes: "Free tier; tight retention. Daily caps enforced at the gateway, not in `api/`."
+  pro:
+    rate_limit_per_second: 50
+    artifact_retention_days: 30
+    notes: "Pro tier."
+  enterprise:
+    rate_limit_per_second: 500
+    artifact_retention_days: 365
+    feature_flags:
+      private_link: true
+      bring_your_own_kms: true
+    notes: "Enterprise tier; KMS keys provided by the customer. See packages/flags/keys.py."

@@ -1,0 +1,25 @@
+# Extended glossary terminology
+# Add entries as the team clarifies meanings or introduces new concepts.
+# Each entry: definition (required), plus optional relationship / synonyms / notes.
+
+entities:
+  Run:
+    definition: A single execution of an ingest pipeline for one tenant.
+    relationship: "see packages/contracts/run.py"
+  Source:
+    definition: An upstream data origin (S3 bucket, HTTP feed, manual upload).
+    relationship: "see packages/contracts/source.py"
+  Tenant:
+    definition: A logical isolation boundary; all Runs and Sources belong to exactly one.
+    relationship: "see packages/contracts/tenant.py"
+  Artifact:
+    definition: A file produced by a successful Run.
+    relationship: "see packages/contracts/run.py (parent: Run)"
+
+concepts:
+  idempotency_key:
+    definition: Caller-supplied header on POST /v1/ingest that lets the same logical request retry safely.
+    notes: "Stored server-side for 24h. Replaying with the same key returns the original response without creating a new Run."
+  dead_letter:
+    definition: A Celery task that has exceeded its retry budget and is parked for manual inspection.
+    notes: "Routed to the `dlq.ingest` queue; surfaced in the on-call dashboard."

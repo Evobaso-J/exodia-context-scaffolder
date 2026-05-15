@@ -1,0 +1,11 @@
+# Smallest useful `exodia.config.yaml`: drop one canonical category and add
+# one custom category. Everything else falls back to defaults (5 canonical
+# modules under `context/`).
+#
+# Full schema: ../docs/config.md
+
+categories:
+  glossary: { drop: true }
+  releases:
+    custom: true
+    description: "Release notes per published version"
