@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/Evobaso-J/exodia-context-scaffolder/compare/v2.0.0...v2.1.0) (2026-05-15)
+
+
+### Features
+
+* allow .md filenames in `categories.<name>.l3:` config ([#72](https://github.com/Evobaso-J/exodia-context-scaffolder/issues/72)) ([916a616](https://github.com/Evobaso-J/exodia-context-scaffolder/commit/916a6169a7b189112cb9586a2d706741de5c2290))
+
 ## [2.0.0](https://github.com/Evobaso-J/exodia-context-scaffolder/compare/v1.1.0...v2.0.0) (2026-05-15)
 
 
