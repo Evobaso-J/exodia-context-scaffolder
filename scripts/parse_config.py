@@ -59,6 +59,7 @@ RECOGNIZED_CATEGORIES = set(DEFAULT_CATEGORIES)
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
 L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl)$")
 CATEGORY_NAME_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
+DESCRIPTION_MAX_LEN = 200
 
 
 # ---------- validation ----------
@@ -78,6 +79,19 @@ def _validate_path(path: str, line: int) -> None:
 def _validate_l3_filename(name: str, line: int) -> None:
     if not L3_FILENAME_RE.match(name):
         raise ConfigError(f"l3 filename must match {L3_FILENAME_RE.pattern}: '{name}'", line)
+
+
+def _validate_description(text: object, line: int) -> None:
+    if not isinstance(text, str):
+        raise ConfigError(f"description must be a string, got {type(text).__name__}", line)
+    if not text:
+        raise ConfigError("description must not be empty", line)
+    if "\n" in text or "\r" in text:
+        raise ConfigError("description must be a single line (no newlines)", line)
+    if len(text) > DESCRIPTION_MAX_LEN:
+        raise ConfigError(
+            f"description must be <= {DESCRIPTION_MAX_LEN} chars (got {len(text)})", line
+        )
 
 
 def validate(parsed: dict[str, Any]) -> dict[str, Any]:
@@ -111,15 +125,18 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
             errors.append(ConfigError(f"category '{name}' body must be a mapping"))
             continue
         for k in body:
-            if k not in ("path", "drop", "custom", "l3"):
+            if k not in ("path", "drop", "custom", "l3", "description"):
                 errors.append(ConfigError(f"category '{name}': unknown field '{k}'"))
 
         drop = bool(body.get("drop", False))
         custom_flag = bool(body.get("custom", False))
         path = body.get("path")
         l3 = body.get("l3")
+        description = body.get("description")
 
-        if drop and (path is not None or custom_flag or l3 is not None):
+        if drop and (
+            path is not None or custom_flag or l3 is not None or description is not None
+        ):
             errors.append(ConfigError(f"category '{name}': 'drop: true' is mutually exclusive with other fields"))
             continue
 
@@ -153,9 +170,23 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
                 except ConfigError as e:
                     errors.append(ConfigError(f"category '{name}': {e}"))
 
+        if description is not None:
+            try:
+                _validate_description(description, line=0)
+            except ConfigError as e:
+                errors.append(ConfigError(f"category '{name}': {e}"))
+                continue
+
         if drop:
             resolved.append(
-                {"name": name, "path": None, "kind": "canonical", "l3_override": None, "drop": True}
+                {
+                    "name": name,
+                    "path": None,
+                    "kind": "canonical",
+                    "l3_override": None,
+                    "description": None,
+                    "drop": True,
+                }
             )
             continue
 
@@ -167,6 +198,7 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
                 "path": resolved_path,
                 "kind": kind,
                 "l3_override": list(l3) if l3 is not None else None,
+                "description": description if description is not None else None,
                 "drop": False,
             }
         )
@@ -180,6 +212,7 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
                     "path": f"{context_dir}/{default_name}",
                     "kind": "canonical",
                     "l3_override": None,
+                    "description": None,
                     "drop": False,
                 }
             )

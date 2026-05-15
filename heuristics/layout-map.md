@@ -16,6 +16,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
     "name": "architecture",
     "path": "docs/project/architecture",
     "kind": "canonical",
+    "description": null,
     "l2_template_path": "<SKILL_DIR>/templates/architecture/ARCHITECTURE.md.tmpl",
     "l3_specs": [
       {
@@ -29,6 +30,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
     "name": "releases",
     "path": "docs/releases",
     "kind": "custom",
+    "description": "Release notes per published version",
     "l2_template_path": null,
     "l3_specs": [
       {
@@ -48,6 +50,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 | `name` | string | Category identifier, `^[a-z][a-z0-9_-]*$`. Canonical names: `architecture`, `design-patterns`, `glossary`, `operations`, `debugging`. Anything else is `kind: custom`. |
 | `path` | string | Repo-rooted destination under `$TARGET`. Same regex as config: `^[a-z._-][a-z0-9._/-]*$`. |
 | `kind` | `"canonical"` or `"custom"` | Drives L2 template lookup and Step 6 schema-inference branching. |
+| `description` | string or `null` | Optional one-line purpose statement from `exodia.config.yaml` (single line, &le;200 chars). When non-null, Step 6 feeds it as `{purpose}` to schema inference and seeds the L2 default skeleton's `## Purpose` section; Step 9 reads it as disambiguator for custom L3 scan hints. `null` when config did not declare it or category came from another adapter (interactive / incremental). |
 | `l2_template_path` | string or `null` | Absolute path to the L2 `.md.tmpl` under `$SKILL_DIR/templates/<name>/`. `null` for custom categories without a template; Step 6 falls back to the default stub written by `init_structure.sh`. |
 | `l3_specs` | array or `null` | Ordered list of L3 file specs. `null` means "Step 6 must infer L3 specs inline" (custom category without a config-declared `l3:`). Empty array means "L2-only category". |
 | `l3_specs[].filename` | string | Matches `^[a-z][a-z0-9_-]*\.(yaml\|jsonl)$`. |

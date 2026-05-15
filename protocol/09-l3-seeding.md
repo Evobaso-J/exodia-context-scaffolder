@@ -27,4 +27,4 @@ On accept or after edit, overwrite the YAML stub with the populated skeleton.
 
 ## Custom L3 clause
 
-For each model-proposed custom ledger from Step 3 (or config-declared custom ledger), use the scan hint the model derived alongside the schema. If the hint is non-empty, run it as a Bash/Explore query, present candidates the same way as built-in JSONL clauses, and append approved entries (using the ledger's own `_schema` prefix). If the hint is `none`, skip seeding and leave the file empty.
+For each model-proposed custom ledger from Step 3 (or config-declared custom ledger), use the scan hint the model derived alongside the schema. If the hint is non-empty, run it as a Bash/Explore query, present candidates the same way as built-in JSONL clauses, and append approved entries (using the ledger's own `_schema` prefix). If the hint is `none`, skip seeding and leave the file empty. When candidate filtering is ambiguous and `$LAYOUT_MAP[category].description` is non-null, use that purpose statement to disambiguate which candidates fit.
