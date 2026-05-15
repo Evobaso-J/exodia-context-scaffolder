@@ -2,8 +2,6 @@
 
 When scaffolding L3 data files for any module (core canonical or user-defined), pick the format from this table. The rule comes from the original digital-brain-skill source ([github.com/muratcankoylan/Agent-Skills-for-Context-Engineering, examples/digital-brain-skill/SKILL.md](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/blob/main/examples/digital-brain-skill/SKILL.md) § "File Format Strategy").
 
-This file is scaffolder-only guidance. It is consumed by Step 3 (custom-category proposals), Step 6 (L2 drafting with schema inference for custom ledgers), and Step 9 (L3 seeding ID format). It is no longer emitted into the runtime `AGENTS.md`: new L3 files are only added via fresh or incremental scaffolds, both of which run through these steps.
-
 | Format | Use when the data is | Examples |
 | ------ | -------------------- | -------- |
 | `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, playbooks, reviews |
