@@ -29,6 +29,8 @@ Target-file paths below are absolute, repo-rooted: a config-driven scaffold may 
 - Ephemeral debugging steps that only apply to this session.
 - User preferences about agent behavior (those belong in `.claude/` or equivalent settings, not here).
 - Information that can be derived from reading the code or git history.
+- Entity or concept definitions outside `glossary/glossary.yaml` (or the equivalent glossary L3 under the resolved category path). The glossary L3 is the single source of truth; reference entities by name from other L2 files, do not redefine them.
+  - If a term is missing from the glossary, add it there first, then reference it from the L2 file.
 
 ### What NOT to capture (codebase-specific)
 
