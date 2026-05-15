@@ -12,6 +12,10 @@ For **custom-category ledgers** (categories with `kind: custom` whose `l3_specs`
 
 Append JSONL entries using the canonical ID format `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the target file's `_schema` value, verbatim (read the first line of the `.jsonl`). See `$SKILL_DIR/heuristics/format-strategy.md` § ID format.
 
+## Markdown clauses
+
+For any `l3_specs[]` entry whose `filename` ends in `.md`, skip Step 9. These files are populated as prose deep-dives during Step 6 (see `protocol/06-draft-l2.md` § "Markdown L3 deep-dives"), analogous to the `design-patterns/docs/<slug>.md` flow. The JSONL and YAML clauses below iterate `ledgers.yaml` rows (which only contain jsonl/yaml entries), so `.md` files naturally fall out: this clause documents the intent.
+
 ## JSONL clauses
 
 Iterate `ledgers.yaml` rows where `format: jsonl`. For each row: run the registry-declared `scan_source`, render the candidate list per `$SKILL_DIR/heuristics/prompt-format.md`, then `AskUserQuestion` to approve a subset. Append approved entries with canonical IDs.
