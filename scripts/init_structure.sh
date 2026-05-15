@@ -113,6 +113,27 @@ EOF
     cp "$tmpl" "$dest"
     echo "wrote: $dest"
   done < <(find "$src_dir" -maxdepth 1 -type f -name '*.tmpl' -print0)
+
+  # Mirror template subdirs (e.g. design-patterns/docs/ for progressive
+  # disclosure). Created at init time so the empty subdir is committable;
+  # contents are populated later by Step 6 draft. Inner files that are not
+  # .tmpl (e.g. .gitkeep) are copied verbatim and never overwritten.
+  while IFS= read -r -d '' subdir; do
+    local rel destsub
+    rel="${subdir#$src_dir/}"
+    destsub="$abs_dest/$rel"
+    mkdir -p "$destsub"
+    while IFS= read -r -d '' f; do
+      local fdest
+      fdest="$destsub/$(basename "$f")"
+      if [[ -e "$fdest" ]]; then
+        echo "skip (exists): $fdest"
+        continue
+      fi
+      cp "$f" "$fdest"
+      echo "wrote: $fdest"
+    done < <(find "$subdir" -maxdepth 1 -type f ! -name '*.tmpl' -print0)
+  done < <(find "$src_dir" -mindepth 1 -maxdepth 1 -type d -print0)
 }
 
 # ---------- dispatch ----------

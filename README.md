@@ -18,11 +18,13 @@ A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that agents rel
 AGENTS.md                          # router + rules + quick action table
 context/
   architecture/   ARCHITECTURE.md + decisions.jsonl
-  design-patterns/ DESIGN-PATTERNS.md + reviews.jsonl
+  design-patterns/ DESIGN-PATTERNS.md + reviews.jsonl + docs/<slug>.md (deep dives)
   glossary/        GLOSSARY.md        + glossary.yaml
   operations/     OPERATIONS.md   + variants.yaml
   debugging/      DEBUGGING.md    + playbooks.jsonl
 ```
+
+`design-patterns` uses **progressive disclosure**: `DESIGN-PATTERNS.md` holds short guardrails only (2-3 lines per topic); detailed explanations are spun out to `design-patterns/docs/<slug>.md` and linked from the L2. Section headings inside the L2 are model-derived from the scan, not a fixed list.
 
 ## ⚡ Install
 

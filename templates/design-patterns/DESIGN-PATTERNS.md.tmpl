@@ -2,42 +2,10 @@
 # Design Patterns
 
 <!-- exodia:section:intro -->
-Code conventions, idioms, and shared utilities. Read this before introducing new patterns.
+> **Progressive disclosure:** this file holds short guardrails only (do/don't, 2-3 lines per topic). Detailed explanations live in `./docs/`. Drafted sections cite files and link to deep dives when a topic warrants more than ~3 lines.
 
-## Component / Module Conventions
-
-<!-- exodia:section:components -->
-{{HOW_COMPONENTS_OR_MODULES_ARE_WRITTEN: file layout, naming, style conventions.}}
-
-## Reusable Utilities
-
-<!-- exodia:section:utilities -->
-{{LIST_THE_COMPOSABLES_HOOKS_HELPERS_THAT_EVERYONE_SHOULD_USE, with 1-line purpose + file path.}}
-
-## API & External Services
-
-<!-- exodia:section:api -->
-{{HOW_API_CALLS_ARE_MADE: client wrapper, type generation, error handling, auth header injection.}}
-
-## Authentication
-
-<!-- exodia:section:auth -->
-{{AUTH_STRATEGY: provider, token handling, refresh, route guards. Cite files.}}
-
-## Observability / Telemetry (if applicable)
-
-<!-- exodia:section:tracking -->
-{{SKIP IF N/A. OBSERVABILITY_STACK: logs, metrics, traces, or product analytics. Which library, where events are defined, how to add a new one.}}
-
-## Testing
-
-<!-- exodia:section:testing -->
-{{TEST_FRAMEWORKS, where tests live, run commands, coverage policy.}}
-
-## Accessibility & i18n (if applicable)
-
-<!-- exodia:section:a11y -->
-{{SKIP IF N/A. A11Y_AND_I18N_RULES: semantic HTML, keyboard, focus, alt, ARIA; i18n rules for copy.}}
+<!-- exodia:section:body -->
+{{MODEL_DRAFTS_SECTIONS_FROM_SCAN: one `##` section per repo-specific concern (components, modals, composables, imports, API, auth, tracking, testing, icons, accessibility, i18n, etc., as evidence supports). 2-3 lines of guardrails per section. When a topic needs more depth, spin out `./docs/<slug>.md` and replace the body of the section with a single line `See [docs/<slug>.md](docs/<slug>.md) for full details.` Cite files inline. No marketing prose.}}
 
 ## L3 Data
 

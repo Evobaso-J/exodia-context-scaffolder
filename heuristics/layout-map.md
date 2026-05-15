@@ -6,6 +6,8 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 
 **Deferred fields.** For custom categories added interactively (`kind: custom`, no config-declared `l3:`), Step 4b leaves `l3_specs` as `null`. Step 6 fills those slots in place once it has the category's purpose statement and can run schema inference (per `heuristics/format-strategy.md`). The shape and category set are finalized at 4b; only `null` `l3_specs` slots remain mutable, and only Step 6 mutates them. After Step 6, the map is fully immutable.
 
+**Implicit subdir for `design-patterns`.** The `design-patterns` category carries an implicit `docs/` subdirectory at `<path>/docs/` for progressive-disclosure deep dives (per `protocol/06-draft-l2.md`). The map does not encode it; `scripts/init_structure.sh` mirrors it from the template and Step 6 populates it. Path-level invariants (rule 3 below: no prefix nesting) still apply: a category's `path` may not be a prefix of `<design-patterns-path>/docs/` for any other category.
+
 ## Example
 
 ```json
