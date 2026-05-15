@@ -14,6 +14,7 @@ Schema (see README "Customizing the layout" section for the full reference):
       releases:                        # custom category (non-canonical name)
         path: docs/releases
         custom: true
+        description: "Release notes per published version"  # optional one-line purpose
         l3: [release_notes.jsonl]      # optional override; filename outside canonical ledger registry -> model writes schema
 
 Validation rules:
@@ -23,6 +24,7 @@ Validation rules:
   4. Custom category (non-canonical name) without `custom: true` -> reject.
   5. `drop: true` combined with any other field -> reject.
   6. `l3` filename matches `^[a-z][a-z0-9_-]*\\.(yaml|jsonl)$`; reject other extensions.
+  7. `description` is a single-line non-empty string of length <= 200.
 
 Stdlib-only: parses a deliberately small YAML subset (mappings, scalar
 strings/bools, inline `{}` and `[]` collections, comments). Sufficient for
