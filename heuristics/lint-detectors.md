@@ -2,6 +2,8 @@
 
 Scan for commands. Used to decide whether Step 8 should append the inline lint/test/typecheck behavioral rule and to populate its `{{LINT_COMMANDS}}` placeholder.
 
+For content-level consistency checks on the **emitted context tree itself** (e.g. module dossiers leaking into architecture), see `heuristics/content-lints.md`.
+
 | File | Look for |
 | ---- | -------- |
 | `package.json` | Keys under `scripts` matching `/^(lint|test|type-?check|tsc|eslint|prettier|format)/` |
