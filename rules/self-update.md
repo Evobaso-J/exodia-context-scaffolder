@@ -41,12 +41,3 @@ These rot fast; pointer only, never hardcode:
 - Test names, file counts, directory listings: rerun the command.
 - One-session workarounds that will be gone next branch, unless the fix teaches a durable rule.
 
-### When adding a new L3 file
-
-If a recurring signal does not fit any target file in the table above, a new L3 file may be justified. Pick its format from the **File Format Strategy** table embedded above (or in `heuristics/format-strategy.md` at scaffolder time). Add a row to the signal-target table at the same time so future sessions route to it.
-
-### File Format Strategy
-
-<!-- exodia:format-strategy:start -->
-{{FORMAT_STRATEGY}}
-<!-- exodia:format-strategy:end -->
