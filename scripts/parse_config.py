@@ -15,7 +15,7 @@ Schema (see README "Customizing the layout" section for the full reference):
         path: docs/releases
         custom: true
         description: "Release notes per published version"  # optional one-line purpose
-        l3: [release_notes.jsonl]      # optional override; filename outside canonical ledger registry -> model writes schema
+        l3: [release_notes.jsonl, runbook.md]  # optional override; jsonl/yaml outside canonical registry -> model writes schema; .md -> prose deep-dive
 
 Validation rules:
   1. `path` matches `^[a-z._-][a-z0-9._/-]*$`, no `..`, no leading or trailing `/`.
@@ -23,7 +23,9 @@ Validation rules:
   3. No category path is a prefix of another's path.
   4. Custom category (non-canonical name) without `custom: true` -> reject.
   5. `drop: true` combined with any other field -> reject.
-  6. `l3` filename matches `^[a-z][a-z0-9_-]*\\.(yaml|jsonl)$`; reject other extensions.
+  6. `l3` filename matches `^[a-z][a-z0-9_-]*\\.(yaml|jsonl|md)$`; reject other extensions.
+     `.md` entries are standalone markdown deep-dives (no schema header, no Step 9 seeding),
+     populated as prose during Step 6 alongside the L2 draft.
   7. `description` is a single-line non-empty string of length <= 200.
 
 Stdlib-only: parses a deliberately small YAML subset (mappings, scalar
@@ -59,7 +61,7 @@ DEFAULT_CATEGORIES = ("architecture", "design-patterns", "glossary", "operations
 RECOGNIZED_CATEGORIES = set(DEFAULT_CATEGORIES)
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
-L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl)$")
+L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl|md)$")
 CATEGORY_NAME_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
 DESCRIPTION_MAX_LEN = 200
 

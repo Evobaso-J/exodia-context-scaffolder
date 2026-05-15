@@ -157,6 +157,19 @@ def resolve(parsed: dict, skill_dir: Path) -> list[dict]:
         if l3_override is not None:
             l3_specs: list[dict] | None = []
             for fname in l3_override:
+                # `.md` L3 entries are standalone prose deep-dives, not ledgers:
+                # no canonical-name lookup, no schema, no template copy. Step 6
+                # drafts the body alongside the L2 (see protocol/06-draft-l2.md
+                # § "Markdown L3 deep-dives"); Step 9 skips them.
+                if fname.endswith(".md"):
+                    l3_specs.append(
+                        {
+                            "filename": fname,
+                            "schema_name": None,
+                            "schema_template_path": None,
+                        }
+                    )
+                    continue
                 schema_name, src_cat = _lookup_canonical_ledger(ledgers, fname, name)
                 tmpl_path: str | None = None
                 if src_cat is not None:
