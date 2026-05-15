@@ -9,6 +9,7 @@ and emits the layout map every downstream step consumes:
         "name": "architecture",
         "path": "docs/project/architecture",
         "kind": "canonical",
+        "description": null,
         "l2_template_path": "<SKILL_DIR>/templates/architecture/ARCHITECTURE.md.tmpl",
         "l3_specs": [
           {"filename": "decisions.jsonl", "schema_name": "adr",
@@ -19,6 +20,7 @@ and emits the layout map every downstream step consumes:
         "name": "glossary",
         "path": "docs/project/glossary",
         "kind": "canonical",
+        "description": null,
         "l2_template_path": "<SKILL_DIR>/templates/glossary/GLOSSARY.md.tmpl",
         "l3_specs": [
           {"filename": "glossary.yaml", "schema_name": "glossary",
@@ -148,6 +150,7 @@ def resolve(parsed: dict, skill_dir: Path) -> list[dict]:
         name = cat["name"]
         kind = cat["kind"]
         l3_override = cat["l3_override"]
+        description = cat.get("description")
 
         l2_path = _l2_template_path(skill_dir, name) if kind == "canonical" else None
 
@@ -176,6 +179,7 @@ def resolve(parsed: dict, skill_dir: Path) -> list[dict]:
                 "name": name,
                 "path": cat["path"],
                 "kind": kind,
+                "description": description,
                 "l2_template_path": str(l2_path) if l2_path else None,
                 "l3_specs": l3_specs,
             }

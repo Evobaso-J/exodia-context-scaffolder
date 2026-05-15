@@ -6,9 +6,9 @@ This step contributes the **category set** to `$LAYOUT_MAP`. Step 4b finalizes t
 
 ## Config-driven branch
 
-If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirely. Use the resolved categories from `$LAYOUT_MAP` as the confirmed set.
+If `$LAYOUT_MAP` is set (config present), skip the category-set proposal entirely. Use the resolved categories from `$LAYOUT_MAP` as the confirmed set. Each custom category carries an optional `description` field; treat it as the authoritative purpose statement for that category in Steps 6 and 9 (no need to re-elicit purpose from the user).
 
-Still surface "did you forget X?" proposals: in one model turn, read `$SCAN` and propose any categories that are **not already in `$LAYOUT_MAP`** and not declared with `drop: true`. Each proposal carries `(name, rationale_citing_scan_evidence)` plus the derived `(filename, schema, format, scan_hint)` tuples for any L3 ledgers, all produced in the same response per `$SKILL_DIR/heuristics/format-strategy.md`. Present one focused `AskUserQuestion` per proposal to add it under `<context_dir>/<name>/` (using `context_dir` from the config). Accepted additions are merged into `$LAYOUT_MAP`. Then jump to Step 4.
+Still surface "did you forget X?" proposals: in one model turn, read `$SCAN` and propose any categories that are **not already in `$LAYOUT_MAP`** and not declared with `drop: true`. Each proposal carries `(name, rationale_citing_scan_evidence)` plus the derived `(filename, schema, format, scan_hint)` tuples for any L3 ledgers, all produced in the same response per `$SKILL_DIR/heuristics/format-strategy.md`. Present one focused `AskUserQuestion` per proposal to add it under `<context_dir>/<name>/` (using `context_dir` from the config). Accepted additions are merged into `$LAYOUT_MAP` (their `description` slot stays `null`; the rationale travels in conversation). Then jump to Step 4.
 
 ## Interactive branch
 

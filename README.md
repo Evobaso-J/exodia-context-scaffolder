@@ -63,6 +63,7 @@ categories:
   releases:                        # custom category (name not in canonical set)
     path: docs/releases            # repo-rooted, may escape context_dir
     custom: true
+    description: "Release notes per published version"  # optional; one-line purpose passed to the model
     l3: [release_notes.jsonl]      # optional; filenames only, model writes schema when filename not in canonical ledger registry
 ```
 
@@ -71,8 +72,9 @@ categories:
 | `context_dir` | string | `context` | Default prefix for canonical categories that omit `path`. |
 | `categories` | map | `{}` | Map keyed by category name. |
 | `categories.<name>.path` | string | `<context_dir>/<name>` | Repo-rooted path. Required for custom categories outside `context_dir`. |
-| `categories.<name>.drop` | bool | `false` | Exclude a canonical category. Mutually exclusive with `path` / `custom` / `l3`. |
+| `categories.<name>.drop` | bool | `false` | Exclude a canonical category. Mutually exclusive with `path` / `custom` / `l3` / `description`. |
 | `categories.<name>.custom` | bool | `false` | Required for non-canonical names. Signals "model drafts L2 + infers L3 if `l3:` absent". |
+| `categories.<name>.description` | string | absent | Optional one-line purpose (single line, &le;200 chars). Passed to the model as `{purpose}` when drafting the L2 `## Purpose` section and inferring custom L3 schemas / scan hints. Most useful for custom categories whose intent is not obvious from the name. |
 | `categories.<name>.l3` | list[string] | absent | Override model's L3 inference. Each entry is a filename matching `^[a-z][a-z0-9_-]*\.(yaml\|jsonl)$`. Schema inferred via canonical-name lookup when the filename matches a known ledger; otherwise model writes the schema. |
 
 ### Canonical category names
@@ -101,6 +103,7 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 4. Non-canonical name without `custom: true`.
 5. `drop: true` combined with any other field.
 6. `l3` filename with an extension other than `.yaml` or `.jsonl`.
+7. `description` that is empty, multiline, or longer than 200 characters.
 
 ## 🎯 Usage
 
