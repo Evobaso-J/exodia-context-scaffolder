@@ -1,4 +1,4 @@
-# exodia-scaffolder
+# exodia-context-scaffolder
 
 <p align="center">
   <img src="assets/exodia.png" alt="Exodia, the Forbidden One" width="420">
@@ -102,7 +102,7 @@ Known pitfalls, fragile spots, recurring bug shapes. `playbooks.jsonl` is append
 `exodia` is a single Claude Code skill. Clone it into your personal skills dir:
 
 ```bash
-git clone https://github.com/Evobaso-J/exodia-scaffolder ~/.claude/skills/exodia
+git clone https://github.com/Evobaso-J/exodia-context-scaffolder ~/.claude/skills/exodia
 ```
 
 Restart Claude Code (or open a new session). Run `/exodia` in any repo. The directory name (`exodia`) must match the skill name in `SKILL.md` frontmatter; do not rename it.
@@ -150,7 +150,7 @@ Copy-pasteable: [`examples/exodia.config.yaml`](examples/exodia.config.yaml) (fu
 
 ## 🙏 Credits
 
-Inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering: digital-brain-skill](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill)**, which applies progressive disclosure (Anthropic's Agent Skills loading pattern) to personal-knowledge context. `exodia-scaffolder` ports the same L1/L2/L3 lazy-load idea to per-repo agent context, packaged as a one-shot scaffolder centered on five canonical modules.
+Inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering: digital-brain-skill](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill)**, which applies progressive disclosure (Anthropic's Agent Skills loading pattern) to personal-knowledge context. `exodia-context-scaffolder` ports the same L1/L2/L3 lazy-load idea to per-repo agent context, packaged as a one-shot scaffolder centered on five canonical modules.
 
 ## 📜 License
 
