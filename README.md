@@ -18,6 +18,8 @@ A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent 
 
 After `/exodia` runs, your repo gets one router at the root and a five-module tree underneath.
 
+**L1 / router**
+
 The router (`AGENTS.md`) holds the loading rules, the quick action table, and a `<!-- exodia:router:start -->` block that tells future sessions where to log new knowledge:
 
 ```markdown
@@ -48,6 +50,8 @@ The router (`AGENTS.md`) holds the loading rules, the quick action table, and a 
 <!-- exodia:router:end -->
 ```
 
+**L2 / narrative**
+
 A narrative L2 (`context/architecture/ARCHITECTURE.md`) reads like a focused module README, not a wiki dump:
 
 ```markdown
@@ -61,6 +65,8 @@ Two-service split: `api/` (FastAPI) handles request routing and auth;
 - `api/` never imports from `worker/`. Communication is queue-only.
 - Database access from `api/` is read-mostly; writes go through the worker.
 ```
+
+**L3 / ledger**
 
 The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line per entry, conforming to the schema declared on line 1 of the file:
 
@@ -86,7 +92,7 @@ The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line p
 The shape of the codebase: services, boundaries, data flow, build topology. L2 prose answers "what's where and why". The ledger `decisions.jsonl` is ADR-lite: one append-only entry per architectural decision, capturing the *why* so future sessions don't relitigate it.
 
 ### `design-patterns/` : how to write code here
-Conventions and review rules. Uses **progressive disclosure**: `DESIGN-PATTERNS.md` holds only short guardrails (2-3 lines per topic); detailed explanations are spun out to `design-patterns/docs/<slug>.md` and linked from the L2. Section headings inside the L2 are model-derived from the scan, not a fixed list. The ledger `reviews.jsonl` logs lessons surfaced in code review: "this PR almost shipped X, the fix is Y".
+Conventions and review rules. The L2 `DESIGN-PATTERNS.md` holds only short guardrails (2-3 lines per topic); detailed explanations live in `design-patterns/docs/<slug>.md` and are linked from the L2. Section headings inside the L2 are model-derived from the scan, not a fixed list. The ledger `reviews.jsonl` logs lessons surfaced in code review: "this PR almost shipped X, the fix is Y".
 
 ### `glossary/` : the words you have to know
 Domain terms, abbreviations, and the names this codebase uses for things that have other names elsewhere. `glossary.yaml` is the source of truth; the L2 narrative explains the high-trust ones in context.
@@ -147,6 +153,16 @@ categories:
 ```
 
 Copy-pasteable: [`examples/exodia.config.yaml`](examples/exodia.config.yaml) (full monorepo example) or [`examples/exodia.config.minimal.yaml`](examples/exodia.config.minimal.yaml) (smallest useful override). Full schema, canonical category names, path semantics, and validation rules: [`docs/config.md`](docs/config.md).
+
+## 🧱 Core principles
+
+Inherited from [`digital-brain-skill`](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill), adapted to per-repo agent context:
+
+1. **Progressive disclosure**: load only what the current task needs. Router every turn; modules on touch; ledgers per entry.
+2. **Append-only data**: ledgers never overwrite. Branch-scoped supersession, settled once merged. History is the artifact.
+3. **Module separation**: five independent modules, no cross-contamination. A change in `operations/` does not leak into `architecture/`.
+4. **Platform agnostic**: emits the [agents.md](https://agents.md) convention. Works with Claude Code, Cursor, Codex, Windsurf, or any tool that respects it.
+5. **Two-hop rule** (exodia-specific): from L1, every fact is at most two more reads away. Router points to a module; the module either contains the answer or names the ledger.
 
 ## 🙏 Credits
 
