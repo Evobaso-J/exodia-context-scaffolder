@@ -1,0 +1,16 @@
+# Worked example: monorepo with the canonical 5 modules under `docs/project/`,
+# glossary relocated to a sibling handbook, and a custom `mobile/` category.
+# Full schema: ../docs/config.md
+
+context_dir: docs/project          # default root for canonical categories without explicit `path`
+categories:
+  glossary:
+    path: docs/handbook/glossary   # canonical category relocated outside `context_dir`
+  debugging: { drop: true }        # not needed for this repo
+  mobile:                          # custom category (name not in the canonical set)
+    path: docs/mobile
+    custom: true
+    description: "iOS / Android client quirks, device-specific footguns, release-train cadence"
+    l3:
+      - device_quirks.jsonl
+      - release_train.yaml

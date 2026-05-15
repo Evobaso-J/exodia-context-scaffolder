@@ -1,0 +1,8 @@
+# Smallest useful `exodia.config.yaml`: one drop + one custom category.
+# Full schema: ../docs/config.md
+
+categories:
+  glossary: { drop: true }
+  releases:
+    custom: true
+    description: "Release notes per published version"
