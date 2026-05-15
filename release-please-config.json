@@ -9,7 +9,7 @@
   "prerelease": false,
   "packages": {
     ".": {
-      "package-name": "exodia-scaffolder"
+      "package-name": "exodia-context-scaffolder"
     }
   }
 }
