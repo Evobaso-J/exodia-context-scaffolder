@@ -14,6 +14,18 @@
 
 A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent reloads in full every turn. `/exodia` splits the same knowledge into a thin router plus five narrative modules, each backed by append-only data logs. The router loads every turn; modules and logs load only when the task touches them. Max two hops to any fact.
 
+## 🧠 Mental model: L1 / L2 / L3
+
+`exodia` borrows Anthropic's Agent Skills loading pattern (also used by `digital-brain-skill`, see Credits) and applies it to per-repo context:
+
+| Tier | What it is                                   | Example                                       | Loaded |
+|------|----------------------------------------------|-----------------------------------------------|--------|
+| L1   | The router. Small. Always loaded.            | `AGENTS.md`                                   | Every turn |
+| L2   | A module's narrative. Mid-size. Human-edited.| `context/architecture/ARCHITECTURE.md`        | When the task touches that module |
+| L3   | Append-only data. Grepped, not read whole.   | `decisions.jsonl`, `glossary.yaml`            | When a specific entry is needed |
+
+**Two-hop rule**: from L1, every fact is at most two more reads away. The router points to a module; the module narrative either contains the answer (L2) or names the ledger that does (L3).
+
 ## 🃏 What it looks like
 
 After `/exodia` runs, your repo gets one router at the root and a five-module tree underneath.
@@ -73,18 +85,6 @@ The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line p
 ```jsonl
 {"id":"decision_20260514_103211_a4f2","title":"Move auth to gateway","status":"merged","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","date":"2026-05-14"}
 ```
-
-## 🧠 Mental model: L1 / L2 / L3
-
-`exodia` borrows Anthropic's Agent Skills loading pattern (also used by `digital-brain-skill`, see Credits) and applies it to per-repo context:
-
-| Tier | What it is                                   | Example                                       | Loaded |
-|------|----------------------------------------------|-----------------------------------------------|--------|
-| L1   | The router. Small. Always loaded.            | `AGENTS.md`                                   | Every turn |
-| L2   | A module's narrative. Mid-size. Human-edited.| `context/architecture/ARCHITECTURE.md`        | When the task touches that module |
-| L3   | Append-only data. Grepped, not read whole.   | `decisions.jsonl`, `glossary.yaml`            | When a specific entry is needed |
-
-**Two-hop rule**: from L1, every fact is at most two more reads away. The router points to a module; the module narrative either contains the answer (L2) or names the ledger that does (L3).
 
 ## 📚 The 5 modules
 
