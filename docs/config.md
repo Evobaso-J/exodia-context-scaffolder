@@ -23,7 +23,7 @@ categories:
 | `categories.<name>.drop` | bool | `false` | Exclude a canonical category. Mutually exclusive with `path` / `custom` / `l3` / `description`. |
 | `categories.<name>.custom` | bool | `false` | Required for non-canonical names. Signals "model drafts L2 + infers L3 if `l3:` absent". |
 | `categories.<name>.description` | string | absent | Optional one-line purpose (single line, &le;200 chars). Passed to the model as `{purpose}` when drafting the L2 `## Purpose` section and inferring custom L3 schemas / scan hints. Most useful for custom categories whose intent is not obvious from the name. |
-| `categories.<name>.l3` | list[string] | absent | Override model's L3 inference. Each entry is a filename matching `^[a-z][a-z0-9_-]*(?:/[a-z][a-z0-9_-]*)*\.(yaml\|jsonl\|md)$`. Filenames may include `/` to nest under the host category path (e.g. `style/imports.md`); each `/`-separated segment must independently match `[a-z][a-z0-9_-]*`, which blocks leading/trailing slashes, empty segments, and `..` by construction. For `.yaml` / `.jsonl`, schema is inferred via canonical-name lookup when the filename matches a known ledger; otherwise the model writes the schema. Nested entries always fall through to model-derived schema (canonical lookup is keyed on the flat filename). For `.md`, the entry is a standalone markdown deep-dive (no schema, no ledger semantics): Step 6 drafts prose alongside the L2; Step 9 skips it. |
+| `categories.<name>.l3` | list[string] | absent | Override model's L3 inference. Each entry is a filename ending in `.yaml`, `.jsonl`, or `.md`. Filenames may include `/` to nest under the host category path (e.g. `style/imports.md`); each segment must start with a lowercase letter and contain only lowercase letters, digits, hyphens, or underscores. Leading/trailing `/`, empty segments, and `..` are rejected. For `.yaml` / `.jsonl`, schema is inferred via canonical-name lookup when the filename matches a known ledger; otherwise the model writes the schema. Nested entries always fall through to model-derived schema (canonical lookup is keyed on the flat filename). For `.md`, the entry is a standalone markdown deep-dive (no schema, no ledger semantics): Step 6 drafts prose alongside the L2; Step 9 skips it. |
 
 ## Canonical category names
 
@@ -36,7 +36,7 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 ## Path semantics
 
 - Repo-rooted absolute (relative to `$TARGET`).
-- Regex: `^[a-z._-][a-z0-9._/-]*$`.
+- Lowercase letters, digits, and a few separators (`.`, `_`, `-`, `/`) only; first character must be a letter, `.`, `_`, or `-`.
 - No `..` segments, no leading `/`, no trailing `/`.
 - Two categories may not share a path.
 - One category's path may not be a strict prefix of another's.
@@ -45,14 +45,16 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 
 `scripts/parse_config.py` rejects (with line-numbered errors on stderr, exit 65):
 
-1. Path violates the regex above or contains `..` / leading `/` / trailing `/`.
+1. Path violates the shape constraints above (allowed character set, no `..`, no leading or trailing `/`).
 2. Two categories share `path`.
 3. One category's `path` is a prefix of another's.
 4. Non-canonical name without `custom: true`.
 5. `drop: true` combined with any other field.
-6. `l3` filename with an extension other than `.yaml`, `.jsonl`, or `.md`, or with a segment that does not match `[a-z][a-z0-9_-]*` (this blocks leading `/`, trailing `/`, empty segments like `//`, and `..`).
+6. `l3` filename with an extension other than `.yaml`, `.jsonl`, or `.md`, or with a segment violating the segment shape (lowercase letters, digits, hyphens, underscores; must start with a letter). This also blocks leading `/`, trailing `/`, empty segments like `//`, and `..`.
 7. `description` that is empty, multiline, or longer than 200 characters.
 8. Two `l3:` entries in the same category share an identical filename.
+
+Exact regex patterns live in `scripts/parse_config.py`.
 
 ## `.md` L3 entries
 
