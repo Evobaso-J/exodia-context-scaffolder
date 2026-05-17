@@ -6,6 +6,8 @@
 
 <p align="center"><em>"I have assembled all 5 special modules, all 5 pieces of the puzzle! Exodia! <strong>OBLITERATE</strong> token consumption!"</em></p>
 
+<p align="center"><strong>AGENTS.md scaffolder for context engineering: one-shot generator of a durable, agent-agnostic context tree (Claude Code, Cursor, Codex, Windsurf, Gemini CLI).</strong></p>
+
 > One-shot scaffolder that bootstraps durable, self-maintaining agent context for any codebase.
 
 `exodia` generates an `AGENTS.md` router and a `context/` tree tailored to your repo. Output is **agent-agnostic**: works with Claude Code, Cursor, Codex, Windsurf, and any tool that respects the [agents.md](https://agents.md) convention.
@@ -171,3 +173,7 @@ Inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering: digital-brai
 ## 📜 License
 
 MIT. See [LICENSE](LICENSE).
+
+## Keywords
+
+AGENTS.md scaffolder. AGENTS.md generator. Agent context engineering. Context engineering for AI agents. Claude Code skill. Cursor rules generator. Codex AGENTS.md. Progressive context loading. L1 / L2 / L3 context tree. Append-only agent memory. Self-maintaining AI context.

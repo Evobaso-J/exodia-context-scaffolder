@@ -1,13 +1,15 @@
 ---
 name: exodia
 description: >
-  Scaffold a durable, agent-agnostic context tree for any repo: AGENTS.md router + a
-  `context/` directory split into 5 narrative modules (architecture, design-patterns, glossary,
+  AGENTS.md scaffolder for context engineering. One-shot generator of a durable,
+  agent-agnostic context tree for any repo: an `AGENTS.md` router plus a `context/`
+  directory split into 5 narrative modules (architecture, design-patterns, glossary,
   operations, debugging) with append-only L3 data files (.jsonl + .yaml). Interactive:
   scans the repo, proposes categories, drafts each module section-by-section, and
-  embeds self-update rules. One-shot. Re-runs incrementally diff existing content.
-  Trigger: /exodia. Also triggers on "scaffold agent context", "initialize AGENTS.md",
-  "bootstrap context tree".
+  embeds self-update rules. Re-runs incrementally diff existing content. Works with
+  Claude Code, Cursor, Codex, Windsurf, and any tool that respects the agents.md
+  convention. Trigger: /exodia. Also triggers on "scaffold agent context",
+  "initialize AGENTS.md", "bootstrap context tree", "generate AGENTS.md".
 ---
 
 # /exodia: scaffold agent context for a repo
