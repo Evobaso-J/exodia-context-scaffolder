@@ -2,7 +2,7 @@
 
 Applies in Fresh and Merge modes. Incremental re-runs reuse this step via `protocol/incremental-rerun.md`.
 
-For each L3 file in the final category set, apply the matching seed clause below. The "target file" is resolved against `$LAYOUT_MAP` (finalized in Step 4b per `$SKILL_DIR/heuristics/layout-map.md`): `<host_path>/<filename>`. Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip.
+For each L3 file in the final category set, apply the matching seed clause below. The "target file" is resolved against `$LAYOUT_MAP` (finalized in Step 4b per `$SKILL_DIR/heuristics/layout-map.md`): `<host_path>/<filename>`. Skip any clause whose target file does not exist (the user may have dropped that category in Step 3). JSONL clauses scan candidates and let the user approve a subset via `AskUserQuestion`; YAML clauses propose a skeleton (named keys with empty body fields) for the user to accept, edit, or skip. If nested, `mkdir -p "$(dirname "<host_path>/<filename>")"` before write/append.
 
 **Driven by `$SKILL_DIR/heuristics/ledgers.yaml`.** That file is the single source for `format` (jsonl vs yaml), `scan_source` (jsonl), and `skeleton_source` / `skeleton_shape` (yaml) for every ledger the scaffolder ships. Do not duplicate this data in this step.
 

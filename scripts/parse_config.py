@@ -23,10 +23,14 @@ Validation rules:
   3. No category path is a prefix of another's path.
   4. Custom category (non-canonical name) without `custom: true` -> reject.
   5. `drop: true` combined with any other field -> reject.
-  6. `l3` filename matches `^[a-z][a-z0-9_-]*\\.(yaml|jsonl|md)$`; reject other extensions.
+  6. `l3` filename matches `^[a-z][a-z0-9_-]*(?:/[a-z][a-z0-9_-]*)*\\.(yaml|jsonl|md)$`;
+     reject other extensions. Filenames may include `/` to nest under the host category
+     path; each `/`-separated segment must independently match `[a-z][a-z0-9_-]*`, which
+     blocks leading/trailing slashes, empty segments, and `..` by construction.
      `.md` entries are standalone markdown deep-dives (no schema header, no Step 9 seeding),
      populated as prose during Step 6 alongside the L2 draft.
   7. `description` is a single-line non-empty string of length <= 200.
+  8. Two `l3:` entries in the same category share an identical filename -> reject.
 
 Stdlib-only: parses a deliberately small YAML subset (mappings, scalar
 strings/bools, inline `{}` and `[]` collections, comments). Sufficient for
@@ -61,8 +65,12 @@ DEFAULT_CATEGORIES = ("architecture", "design-patterns", "glossary", "operations
 RECOGNIZED_CATEGORIES = set(DEFAULT_CATEGORIES)
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
-L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*\.(yaml|jsonl|md)$")
-CATEGORY_NAME_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
+# Shared "valid identifier segment" body used by category names and each
+# `/`-separated L3 filename segment. Composing both regexes from this constant
+# keeps the two patterns in lockstep if the identifier shape ever tightens.
+_SEGMENT = r"[a-z][a-z0-9_-]*"
+CATEGORY_NAME_RE = re.compile(rf"^{_SEGMENT}$")
+L3_FILENAME_RE = re.compile(rf"^{_SEGMENT}(?:/{_SEGMENT})*\.(yaml|jsonl|md)$")
 DESCRIPTION_MAX_LEN = 200
 
 
@@ -168,11 +176,15 @@ def validate(parsed: dict[str, Any]) -> dict[str, Any]:
             if not isinstance(l3, list) or not all(isinstance(x, str) for x in l3):
                 errors.append(ConfigError(f"category '{name}': 'l3' must be a list of filename strings"))
                 continue
+            seen_l3: set[str] = set()
             for fname in l3:
                 try:
                     _validate_l3_filename(fname, line=0)
                 except ConfigError as e:
                     errors.append(ConfigError(f"category '{name}': {e}"))
+                if fname in seen_l3:
+                    errors.append(ConfigError(f"category '{name}': duplicate l3 entry '{fname}'"))
+                seen_l3.add(fname)
 
         if description is not None:
             try:
