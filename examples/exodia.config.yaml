@@ -14,3 +14,4 @@ categories:
     l3:
       - device_quirks.jsonl
       - release_train.yaml
+      - quirks/ios.md           # nested .md deep-dive: writes to docs/mobile/quirks/ios.md
