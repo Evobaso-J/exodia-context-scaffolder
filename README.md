@@ -156,11 +156,15 @@ Copy-pasteable: [`examples/exodia.config.yaml`](examples/exodia.config.yaml) (fu
 
 Inherited from [`digital-brain-skill`](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill), adapted to per-repo agent context:
 
-1. **Progressive disclosure**: load only what the current task needs. Router every turn; modules on touch; ledgers per entry.
-2. **Append-only data**: ledgers never overwrite. Branch-scoped supersession, settled once merged. History is the artifact.
-3. **Module separation**: five independent modules, no cross-contamination. A change in `operations/` does not leak into `architecture/`.
-4. **Platform agnostic**: emits the [agents.md](https://agents.md) convention. Works with Claude Code, Cursor, Codex, Windsurf, or any tool that respects it.
-5. **Two-hop rule** (exodia-specific): from L1, every fact is at most two more reads away. Router points to a module; the module either contains the answer or names the ledger.
+1. **Progressive disclosure**. An agent pays for every token it loads, every turn. A monolithic `AGENTS.md` forces the model to reread the whole thing even when the task only touches one corner of the codebase. Exodia tiers the context so cost matches relevance: the router loads every turn (cheap, always-on map of the repo), a module's narrative loads only when the task touches that module, and an append-only ledger is grepped for the one entry that matters instead of read whole. The payoff is a context budget that scales with task scope, not with repo size.
+
+2. **Append-only data**. Ledgers (`decisions.jsonl`, `reviews.jsonl`, `playbooks.jsonl`, etc.) are never deleted. When an entry becomes obsolete, its `status` flips to `archived` (or, for ADRs, `superseded` with a `supersedes: <id>` pointer to the replacement) and a new entry is appended. Within a single branch, an entry on the same topic is replaced in-place so one branch produces one entry per topic; once that branch merges, the entry is settled and a later branch can only supersede it via a new appended entry. The history of how the team's understanding evolved is the artifact: you can read the ledger and see *why* the current answer is the current answer, not just *that* it is.
+
+3. **Module separation**. The five modules (`architecture`, `design-patterns`, `glossary`, `operations`, `debugging`) are chosen so each answers a different question and they do not overlap: "what the system is", "how to write code here", "what the words mean", "how to run it", "what bites you". An architectural decision lives in `architecture/decisions.jsonl`, not smeared across a debugging playbook; a runbook gotcha lives in `operations/`, not in a glossary entry. The payoff is that an agent loading one module gets a coherent slice of context, not a grab bag, and edits in one module never silently drift the meaning of another.
+
+4. **Platform agnostic**. The output follows the agents.md convention: a root `AGENTS.md` plus a plain-Markdown `context/` tree, no proprietary frontmatter, no tool-specific directives. Claude Code, Cursor, Codex, Windsurf, Gemini CLI, and anything else that respects the convention read the same files with no adapter. The payoff is no lock-in: switching agents (or running several side by side) does not require regenerating the context tree.
+
+5. **Two-hop rule** (exodia-specific). From the router (L1), any fact in the tree is at most two more file reads away: read the module narrative (L2), and if the answer is not in the prose, the prose names the ledger (L3) that has it. This is a hard ceiling on lookup depth, which keeps both humans and agents from rabbit-holing through chains of cross-references. If you find yourself wanting a third hop, that is a signal to flatten: either promote the fact into the module narrative or split the module.
 
 ## 🙏 Credits
 
@@ -169,7 +173,3 @@ Inspired by **[muratcankoylan/Agent-Skills-for-Context-Engineering: digital-brai
 ## 📜 License
 
 MIT. See [LICENSE](LICENSE).
-
-## Keywords
-
-AGENTS.md scaffolder. AGENTS.md generator. Agent context engineering. Context engineering for AI agents. Claude Code skill. Cursor rules generator. Codex AGENTS.md. Progressive context loading. L1 / L2 / L3 context tree. Append-only agent memory. Self-maintaining AI context.
