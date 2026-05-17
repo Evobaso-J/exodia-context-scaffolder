@@ -89,9 +89,10 @@ Two-service split: `api/` (FastAPI) handles request routing and auth;
 
 **L3 / ledger**
 
-The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line per entry, conforming to the schema declared on line 1 of the file:
+The L3 ledger is one append-only line per entry, conforming to the schema declared on line 1 of the file:
 
 ```jsonl
+# context/architecture/decisions.jsonl
 {"id":"adr_20260514_103211_a4f2","title":"Move auth to gateway","status":"active","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","consequences_positive":"One place to rotate keys; uniform 401 behaviour.","consequences_negative":"Gateway is now a hard dependency for local dev.","supersedes":null,"date":"2026-05-14"}
 ```
 
