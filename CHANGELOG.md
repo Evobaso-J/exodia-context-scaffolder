@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/Evobaso-J/exodia-context-scaffolder/compare/v2.1.0...v2.2.0) (2026-05-17)
+
+
+### Features
+
+* allow nested-dir paths in `categories.<name>.l3:` config ([#74](https://github.com/Evobaso-J/exodia-context-scaffolder/issues/74)) ([4fed8b3](https://github.com/Evobaso-J/exodia-context-scaffolder/commit/4fed8b3abe8d2b1774530cd5c96d59a47252f9d5))
+
 ## [2.1.0](https://github.com/Evobaso-J/exodia-context-scaffolder/compare/v2.0.0...v2.1.0) (2026-05-15)
 
 
