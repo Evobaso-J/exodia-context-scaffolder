@@ -30,34 +30,43 @@ After `/exodia` runs, your repo gets one router at the root and a five-module tr
 
 **L1 / router**
 
-The router (`AGENTS.md`) holds the loading rules, the quick action table, and a `<!-- exodia:router:start -->` block that tells future sessions where to log new knowledge:
+The router (`AGENTS.md`) holds the routing tables. Abbreviated:
 
 ```markdown
 # AGENTS.md
 
-## How to load context
-1. Read this file (the router).
-2. Open the L2 narrative for the relevant module.
-3. Only load L3 data files (.jsonl / .yaml) when the task needs specific entries.
+<!-- exodia:section:overview -->
+{one-paragraph project overview from the scan}
 
-## Quick reference
-| Need                          | Read                                                |
-|-------------------------------|-----------------------------------------------------|
-| System shape, boundaries      | `context/architecture/ARCHITECTURE.md`              |
-| Conventions, code review rules| `context/design-patterns/DESIGN-PATTERNS.md`        |
-| Domain vocabulary             | `context/glossary/GLOSSARY.md`                      |
-| Run / build / test / deploy   | `context/operations/OPERATIONS.md`                  |
-| Footguns, known pitfalls      | `context/debugging/DEBUGGING.md`                    |
+## Context Router
 
+<!-- exodia:section:router -->
 <!-- exodia:router:start -->
-| Signal type     | Append to                                           |
-|-----------------|-----------------------------------------------------|
-| `decision`      | `context/architecture/decisions.jsonl`              |
-| `review`        | `context/design-patterns/reviews.jsonl`             |
-| `term`          | `context/glossary/glossary.yaml`                    |
-| `variant`       | `context/operations/variants.yaml`                  |
-| `playbook`      | `context/debugging/playbooks.jsonl`                 |
+Route by task type. Read the relevant L2 module, then load L3 data (`.jsonl` / `.yaml`) only when needed. **Max 2 hops.**
+
+| Task type                       | Load                                                |
+| ------------------------------- | --------------------------------------------------- |
+| System shape, boundaries        | `context/architecture/ARCHITECTURE.md`              |
+| Conventions, code review rules  | `context/design-patterns/DESIGN-PATTERNS.md`        |
+| Domain vocabulary               | `context/glossary/GLOSSARY.md`                      |
+| Run / build / test / deploy     | `context/operations/OPERATIONS.md`                  |
+| Footguns, known pitfalls        | `context/debugging/DEBUGGING.md`                    |
 <!-- exodia:router:end -->
+
+## Self-Update Rules
+
+<!-- exodia:section:self-update -->
+| Signal during conversation                                       | Target file                            | What to write |
+| ---------------------------------------------------------------- | -------------------------------------- | ------------- |
+| Codebase assumption corrected by user or by evidence             | L2 `.md` file for that area            | Update the incorrect section |
+<!-- exodia:self-update:rows:start -->
+| Architecture or design decision taken by the team                | `context/architecture/decisions.jsonl` | New ADR entry |
+| PR review surfaces new check (prod break, near-miss)             | `context/design-patterns/reviews.jsonl`| New review entry |
+| API contract changes or deprecated                               | `context/design-patterns/reviews.jsonl`| New entry tagged `migration` with `old_pattern` / `new_pattern` |
+| Domain term clarified or new entity appears                      | `context/glossary/glossary.yaml`       | New or updated term |
+| Variant-specific behavior confirmed                              | `context/operations/variants.yaml`     | New entry under the relevant variant |
+| Reproducible behaviour worth a future debugger's time            | `context/debugging/playbooks.jsonl`    | New playbook entry |
+<!-- exodia:self-update:rows:end -->
 ```
 
 **L2 / narrative**
@@ -65,13 +74,15 @@ The router (`AGENTS.md`) holds the loading rules, the quick action table, and a 
 A narrative L2 (`context/architecture/ARCHITECTURE.md`) reads like a focused module README, not a wiki dump:
 
 ```markdown
-<!-- exodia:section:overview -->
 ## Overview
+
+<!-- exodia:section:overview -->
 Two-service split: `api/` (FastAPI) handles request routing and auth;
 `worker/` (Celery) owns long-running ingest. Shared schema in `packages/contracts/`.
 
-<!-- exodia:section:boundaries -->
 ## Boundaries
+
+<!-- exodia:section:boundaries -->
 - `api/` never imports from `worker/`. Communication is queue-only.
 - Database access from `api/` is read-mostly; writes go through the worker.
 ```
@@ -81,7 +92,7 @@ Two-service split: `api/` (FastAPI) handles request routing and auth;
 The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line per entry, conforming to the schema declared on line 1 of the file:
 
 ```jsonl
-{"id":"decision_20260514_103211_a4f2","title":"Move auth to gateway","status":"merged","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","date":"2026-05-14"}
+{"id":"adr_20260514_103211_a4f2","title":"Move auth to gateway","status":"active","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","consequences_positive":"One place to rotate keys; uniform 401 behaviour.","consequences_negative":"Gateway is now a hard dependency for local dev.","supersedes":null,"date":"2026-05-14"}
 ```
 
 ## 📚 The 5 modules
