@@ -1,12 +1,12 @@
 # exodia-context-scaffolder
 
+<p align="center"><strong>AGENTS.md scaffolder for context engineering: one-shot generator of a durable, agent-agnostic context tree (Claude Code, Cursor, Codex, Windsurf, Gemini CLI).</strong></p>
+
 <p align="center">
   <img src="assets/exodia.png" alt="Exodia, the Forbidden One" width="420">
 </p>
 
 <p align="center"><em>"I have assembled all 5 special modules, all 5 pieces of the puzzle! Exodia! <strong>OBLITERATE</strong> token consumption!"</em></p>
-
-<p align="center"><strong>AGENTS.md scaffolder for context engineering: one-shot generator of a durable, agent-agnostic context tree (Claude Code, Cursor, Codex, Windsurf, Gemini CLI).</strong></p>
 
 > One-shot scaffolder that bootstraps durable, self-maintaining agent context for any codebase.
 
