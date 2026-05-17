@@ -65,8 +65,12 @@ DEFAULT_CATEGORIES = ("architecture", "design-patterns", "glossary", "operations
 RECOGNIZED_CATEGORIES = set(DEFAULT_CATEGORIES)
 
 PATH_RE = re.compile(r"^[a-z._-][a-z0-9._/-]*$")
-L3_FILENAME_RE = re.compile(r"^[a-z][a-z0-9_-]*(?:/[a-z][a-z0-9_-]*)*\.(yaml|jsonl|md)$")
-CATEGORY_NAME_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
+# Shared "valid identifier segment" body used by category names and each
+# `/`-separated L3 filename segment. Composing both regexes from this constant
+# keeps the two patterns in lockstep if the identifier shape ever tightens.
+_SEGMENT = r"[a-z][a-z0-9_-]*"
+CATEGORY_NAME_RE = re.compile(rf"^{_SEGMENT}$")
+L3_FILENAME_RE = re.compile(rf"^{_SEGMENT}(?:/{_SEGMENT})*\.(yaml|jsonl|md)$")
 DESCRIPTION_MAX_LEN = 200
 
 
