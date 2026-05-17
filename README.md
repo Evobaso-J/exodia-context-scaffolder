@@ -30,7 +30,7 @@ After `/exodia` runs, your repo gets one router at the root and a five-module tr
 
 **L1 / router**
 
-The router (`AGENTS.md`) emits a fixed set of `##` sections: a one-paragraph project overview, `Commands`, `Context Router`, `Behavioral Rules`, `Self-Update Rules`, `Quick Action Table`, `Context Structure`. The Context Router table (wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers, parsed on re-runs to recover the category map) tells the agent which L2 module to read by task type. A separate self-update table inside Behavioral / Self-Update Rules (wrapped in `<!-- exodia:self-update:rows:start -->` / `<!-- exodia:self-update:rows:end -->`) tells future sessions where to log new knowledge. Abbreviated:
+The router (`AGENTS.md`) holds the routing tables. Abbreviated:
 
 ```markdown
 # AGENTS.md
@@ -69,8 +69,6 @@ Route by task type. Read the relevant L2 module, then load L3 data (`.jsonl` / `
 <!-- exodia:self-update:rows:end -->
 ```
 
-(Sections elided for brevity: `Commands`, `Behavioral Rules`, `Quick Action Table`, `Context Structure`. Full shape: [`templates/AGENTS.md.tmpl`](templates/AGENTS.md.tmpl).)
-
 **L2 / narrative**
 
 A narrative L2 (`context/architecture/ARCHITECTURE.md`) reads like a focused module README, not a wiki dump:
@@ -89,8 +87,6 @@ Two-service split: `api/` (FastAPI) handles request routing and auth;
 - Database access from `api/` is read-mostly; writes go through the worker.
 ```
 
-The marker sits **below** the `##` heading and **above** the body. Incremental re-runs read content after the marker to decide whether to diff or treat the section as user-edited.
-
 **L3 / ledger**
 
 The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line per entry, conforming to the schema declared on line 1 of the file:
@@ -98,8 +94,6 @@ The L3 ledger (`context/architecture/decisions.jsonl`) is one append-only line p
 ```jsonl
 {"id":"adr_20260514_103211_a4f2","title":"Move auth to gateway","status":"active","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","consequences_positive":"One place to rotate keys; uniform 401 behaviour.","consequences_negative":"Gateway is now a hard dependency for local dev.","supersedes":null,"date":"2026-05-14"}
 ```
-
-The `id` prefix is the file's `_schema` value verbatim (here `adr`, not the filename stem). Documented `status` values are `active`, `archived`, and `superseded` (the last pairs with a `supersedes: <id>` pointer); `merged` is not a lifecycle state. Field names and order match the schema's `_fields`: omitting a declared field, or inventing new ones, breaks the contract.
 
 ## 📚 The 5 modules
 
