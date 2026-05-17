@@ -8,17 +8,13 @@
 
 <p align="center"><em>"I have assembled all 5 special modules, all 5 pieces of the puzzle! Exodia! <strong>OBLITERATE</strong> token consumption!"</em></p>
 
-> One-shot scaffolder that bootstraps durable, self-maintaining agent context for any codebase.
-
-`exodia` generates an `AGENTS.md` router and a `context/` tree tailored to your repo. Output is **agent-agnostic**: works with Claude Code, Cursor, Codex, Windsurf, and any tool that respects the [agents.md](https://agents.md) convention.
-
 ## 🧩 Why
 
 A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent reloads in full every turn. `/exodia` splits the same knowledge into a thin router plus five narrative modules, each backed by append-only data logs. The router loads every turn; modules and logs load only when the task touches them. Max two hops to any fact.
 
 ## 🧠 Mental model: L1 / L2 / L3
 
-`exodia` borrows Anthropic's Agent Skills loading pattern (also used by `digital-brain-skill`, see Credits) and applies it to per-repo context:
+`exodia` borrows Anthropic's Agent Skills loading pattern and applies it to per-repo context:
 
 | Tier | What it is                                   | Example                                       | Loaded |
 |------|----------------------------------------------|-----------------------------------------------|--------|
@@ -141,7 +137,7 @@ Full signal-to-file mapping and write rules: [`rules/self-update.md`](rules/self
 
 ## 🛠 Customizing the layout
 
-The default layout (canonical 5 modules under `context/`) covers most repos. For richer setups, like a canonical set under `docs/project/` plus a sibling handbook category at `docs/handbook/glossary/`, drop an opt-in `exodia.config.yaml` at the repo root **before** the first `/exodia` run. The file is sparse (encode only the diff from defaults), one-shot (consumed at first run, ignored on re-runs), and throwaway (delete once the scaffolded tree is committed).
+The default layout (canonical 5 modules under `context/`) covers most repos. For richer setups, like a canonical set under `docs/project/` plus a sibling handbook category at `docs/handbook/glossary/`, drop an opt-in `exodia.config.yaml` at the repo root before the `/exodia` run. The file is sparse (encode only the diff from defaults), one-shot (consumed at first run, ignored on re-runs), and throwaway (delete once the scaffolded tree is committed). However, you can always create an `exodia.config.yaml` after the first run to reshape your current structure.
 
 ```yaml
 context_dir: docs/project
