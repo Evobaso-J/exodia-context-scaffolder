@@ -6,7 +6,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 
 **Deferred fields.** For custom categories added interactively (`kind: custom`, no config-declared `l3:`), Step 4b leaves `l3_specs` as `null`. Step 6 fills those slots in place once it has the category's purpose statement and can run schema inference (per `heuristics/format-strategy.md`). The shape and category set are finalized at 4b; only `null` `l3_specs` slots remain mutable, and only Step 6 mutates them. After Step 6, the map is fully immutable.
 
-**Implicit subdir for `design-patterns`.** The `design-patterns` category carries an implicit `docs/` subdirectory at `<path>/docs/` for progressive-disclosure deep dives (per `protocol/06-draft-l2.md`). The map does not encode it; `scripts/init_structure.sh` mirrors it from the template and Step 6 populates it. Path-level invariants (rule 3 below: no prefix nesting) still apply: a category's `path` may not be a prefix of `<design-patterns-path>/docs/` for any other category.
+**Implicit subdir for `design-patterns`.** The `design-patterns` category carries an implicit `docs/` subdirectory at `<path>/docs/` for progressive-disclosure deep dives (per `protocol/06-draft-l2.md`). The map does not encode it; `dist/init-structure.mjs` mirrors it from the template and Step 6 populates it. Path-level invariants (rule 3 below: no prefix nesting) still apply: a category's `path` may not be a prefix of `<design-patterns-path>/docs/` for any other category.
 
 ## Example
 
@@ -51,7 +51,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 | `path` | string | Repo-rooted destination under `$TARGET`. Same regex as config: `^[a-z._-][a-z0-9._/-]*$`. |
 | `kind` | `"canonical"` or `"custom"` | Drives L2 template lookup and Step 6 schema-inference branching. |
 | `description` | string or `null` | Optional one-line purpose statement from `exodia.config.yaml` (single line, &le;200 chars). When non-null, Step 6 feeds it as `{purpose}` to schema inference and seeds the L2 default skeleton's `## Purpose` section; Step 9 reads it as disambiguator for custom L3 scan hints. `null` when config did not declare it or category came from another adapter (interactive / incremental). |
-| `l2_template_path` | string or `null` | Absolute path to the L2 `.md.tmpl` under `$SKILL_DIR/templates/<name>/`. `null` for custom categories without a template; Step 6 falls back to the default stub written by `init_structure.sh`. |
+| `l2_template_path` | string or `null` | Absolute path to the L2 `.md.tmpl` under `$SKILL_DIR/templates/<name>/`. `null` for custom categories without a template; Step 6 falls back to the default stub written by `init-structure.mjs`. |
 | `l3_specs` | array or `null` | Ordered list of L3 file specs. `null` means "Step 6 must infer L3 specs inline" (custom category without a config-declared `l3:`). Empty array means "L2-only category". |
 | `l3_specs[].filename` | string | Matches `^[a-z][a-z0-9_-]*\.(yaml\|jsonl\|md)$`. `.md` entries are standalone prose deep-dives, not ledgers: `schema_name` and `schema_template_path` are always `null`, and Step 6 drafts the body (same flow as `design-patterns/docs/<slug>.md`). Step 9 skips them. |
 | `l3_specs[].schema_name` | string or `null` | Canonical schema name (e.g. `adr`, `glossary`, `pb`). `null` when the filename is outside `heuristics/ledgers.yaml` (Step 6 writes the schema body inline) or when the filename ends in `.md` (no schema). |
@@ -67,12 +67,12 @@ Step 4b applies these in all modes. Any rule violation aborts the run with a cle
 4. `name` outside the canonical set requires `kind: custom`. Names violating `^[a-z][a-z0-9_-]*$` are rejected.
 5. Each `l3_specs[].filename` matches `^[a-z][a-z0-9_-]*\.(yaml|jsonl|md)$`. For `.md` entries, `schema_name` and `schema_template_path` MUST be `null`.
 
-These are the rules `scripts/parse_config.py` enforces at config-parse time; Step 4b confirms but does not re-run those checks for config-driven mode. The interactive adapter (Step 4b Fresh/Merge branch) and the router-parse adapter (Step 4b Incremental branch) must apply all five.
+These are the rules `dist/parse-config.mjs` enforces at config-parse time; Step 4b confirms but does not re-run those checks for config-driven mode. The interactive adapter (Step 4b Fresh/Merge branch) and the router-parse adapter (Step 4b Incremental branch) must apply all five.
 
 ## Producers
 
 Three adapters land on this shape:
 
-- **Config-driven (Step 1)**: `scripts/parse_config.py | scripts/resolve_layout.py` emits the JSON. Step 4b prints it back for visual confirmation.
+- **Config-driven (Step 1)**: `dist/parse-config.mjs | dist/resolve-layout.mjs` emits the JSON. Step 4b prints it back for visual confirmation.
 - **Interactive Fresh/Merge (Step 4b)**: synthesized from confirmed categories (Step 3), context-dir name (Step 3a), and merge mapping (Step 4 when present). Built in memory by the scaffolder.
 - **Incremental (Step 1, finalized at Step 4b)**: parsed from the `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` region of the existing `AGENTS.md`. Each router-table row becomes a category object; `l2_template_path` and `l3_specs` are resolved by walking the existing tree.

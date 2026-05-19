@@ -19,7 +19,7 @@ You are running the `exodia` scaffolder. Your job is to generate an `AGENTS.md` 
 
 `/exodia` is a **scaffolder**, not a runtime context system. Two distinct roles:
 
-- **Scaffolder instructions** (this file + `$SKILL_DIR/protocol/` + `$SKILL_DIR/heuristics/` + `$SKILL_DIR/templates/` + `$SKILL_DIR/rules/` + `$SKILL_DIR/scripts/`): tell *you* how to interview the user, scan the repo, and emit files. Consumed once per run.
+- **Scaffolder instructions** (this file + `$SKILL_DIR/protocol/` + `$SKILL_DIR/heuristics/` + `$SKILL_DIR/templates/` + `$SKILL_DIR/rules/` + `$SKILL_DIR/dist/`): tell *you* how to interview the user, scan the repo, and emit files. Consumed once per run.
 - **Runtime instructions** (emitted into `$TARGET/AGENTS.md` + `$TARGET/$CONTEXT_DIR/`): tell *future agent sessions* how to load context and self-update while working on the target repo. Consumed every session after scaffold.
 
 The self-update rules in `$SKILL_DIR/rules/self-update.md` are **runtime rules for the target repo**; they get composed into the emitted `AGENTS.md`. They do not govern this scaffolder. Do not apply them to `$SKILL_DIR/` itself.

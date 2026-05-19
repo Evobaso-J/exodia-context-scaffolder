@@ -1,13 +1,14 @@
+.claude/
 .DS_Store
 ._*
 *.bak
 *.pre-exodia.bak
 *.swp
 node_modules/
-__pycache__/
-*.pyc
-.venv/
 .env
 .env.local
 .idea/
 .vscode/
+coverage/
+.tsbuildinfo
+*.tsbuildinfo

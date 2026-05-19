@@ -8,7 +8,7 @@ After this step, Steps 5 to 9 do not branch on mode for path resolution; they re
 
 ### Config-driven
 
-`$LAYOUT_MAP` was produced in Step 1 by `parse_config.py | resolve_layout.py`. Nothing to synthesize. Print the JSON back to the user for visual confirmation under a `### Layout map` heading inside a fenced ` ```json ` block. Continue.
+`$LAYOUT_MAP` was produced in Step 1 by `parse-config.mjs | resolve-layout.mjs`. Nothing to synthesize. Print the JSON back to the user for visual confirmation under a `### Layout map` heading inside a fenced ` ```json ` block. Continue.
 
 ### Incremental
 

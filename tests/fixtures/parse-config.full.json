@@ -1,0 +1,57 @@
+{
+  "context_dir": "docs/project",
+  "categories": [
+    {
+      "name": "glossary",
+      "path": "docs/handbook/glossary",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    },
+    {
+      "name": "debugging",
+      "path": null,
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": true
+    },
+    {
+      "name": "mobile",
+      "path": "docs/mobile",
+      "kind": "custom",
+      "l3_override": [
+        "device_quirks.jsonl",
+        "release_train.yaml",
+        "quirks/ios.md"
+      ],
+      "description": "iOS / Android client quirks, device-specific footguns, release-train cadence",
+      "drop": false
+    },
+    {
+      "name": "architecture",
+      "path": "docs/project/architecture",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    },
+    {
+      "name": "design-patterns",
+      "path": "docs/project/design-patterns",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    },
+    {
+      "name": "operations",
+      "path": "docs/project/operations",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    }
+  ]
+}

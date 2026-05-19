@@ -1,0 +1,66 @@
+[
+  {
+    "name": "releases",
+    "path": "context/releases",
+    "kind": "custom",
+    "description": "Release notes per published version",
+    "l2_template_path": null,
+    "l3_specs": null
+  },
+  {
+    "name": "architecture",
+    "path": "context/architecture",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/architecture/ARCHITECTURE.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "decisions.jsonl",
+        "schema_name": "adr",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/architecture/decisions.jsonl.tmpl"
+      }
+    ]
+  },
+  {
+    "name": "design-patterns",
+    "path": "context/design-patterns",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/design-patterns/DESIGN-PATTERNS.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "reviews.jsonl",
+        "schema_name": "rv",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/design-patterns/reviews.jsonl.tmpl"
+      }
+    ]
+  },
+  {
+    "name": "operations",
+    "path": "context/operations",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/operations/OPERATIONS.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "variants.yaml",
+        "schema_name": "variants",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/operations/variants.yaml.tmpl"
+      }
+    ]
+  },
+  {
+    "name": "debugging",
+    "path": "context/debugging",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/debugging/DEBUGGING.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "playbooks.jsonl",
+        "schema_name": "pb",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/debugging/playbooks.jsonl.tmpl"
+      }
+    ]
+  }
+]

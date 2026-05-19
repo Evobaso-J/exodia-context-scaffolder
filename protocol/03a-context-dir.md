@@ -24,4 +24,4 @@ A directory with a common name like `docs/`, `knowledge/`, or `ai/` may already 
     - "Pick different name": re-ask the Step 3a question.
     - "Abort scaffold": stop the skill cleanly.
 
-The scaffolder never overwrites existing files (`init_structure.sh` skips any destination that already exists), but a shared top-level directory still entangles the exodia tree with unrelated content. The consent step makes that entanglement explicit.
+The scaffolder never overwrites existing files (`init-structure.mjs` skips any destination that already exists), but a shared top-level directory still entangles the exodia tree with unrelated content. The consent step makes that entanglement explicit.
