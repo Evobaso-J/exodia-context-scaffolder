@@ -1,0 +1,53 @@
+{
+  "context_dir": "context",
+  "categories": [
+    {
+      "name": "glossary",
+      "path": null,
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": true
+    },
+    {
+      "name": "releases",
+      "path": "context/releases",
+      "kind": "custom",
+      "l3_override": null,
+      "description": "Release notes per published version",
+      "drop": false
+    },
+    {
+      "name": "architecture",
+      "path": "context/architecture",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    },
+    {
+      "name": "design-patterns",
+      "path": "context/design-patterns",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    },
+    {
+      "name": "operations",
+      "path": "context/operations",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    },
+    {
+      "name": "debugging",
+      "path": "context/debugging",
+      "kind": "canonical",
+      "l3_override": null,
+      "description": null,
+      "drop": false
+    }
+  ]
+}

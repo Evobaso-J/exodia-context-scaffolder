@@ -1,0 +1,82 @@
+[
+  {
+    "name": "glossary",
+    "path": "docs/handbook/glossary",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/glossary/GLOSSARY.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "glossary.yaml",
+        "schema_name": "glossary",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/glossary/glossary.yaml.tmpl"
+      }
+    ]
+  },
+  {
+    "name": "mobile",
+    "path": "docs/mobile",
+    "kind": "custom",
+    "description": "iOS / Android client quirks, device-specific footguns, release-train cadence",
+    "l2_template_path": null,
+    "l3_specs": [
+      {
+        "filename": "device_quirks.jsonl",
+        "schema_name": null,
+        "schema_template_path": null
+      },
+      {
+        "filename": "release_train.yaml",
+        "schema_name": null,
+        "schema_template_path": null
+      },
+      {
+        "filename": "quirks/ios.md",
+        "schema_name": null,
+        "schema_template_path": null
+      }
+    ]
+  },
+  {
+    "name": "architecture",
+    "path": "docs/project/architecture",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/architecture/ARCHITECTURE.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "decisions.jsonl",
+        "schema_name": "adr",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/architecture/decisions.jsonl.tmpl"
+      }
+    ]
+  },
+  {
+    "name": "design-patterns",
+    "path": "docs/project/design-patterns",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/design-patterns/DESIGN-PATTERNS.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "reviews.jsonl",
+        "schema_name": "rv",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/design-patterns/reviews.jsonl.tmpl"
+      }
+    ]
+  },
+  {
+    "name": "operations",
+    "path": "docs/project/operations",
+    "kind": "canonical",
+    "description": null,
+    "l2_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/operations/OPERATIONS.md.tmpl",
+    "l3_specs": [
+      {
+        "filename": "variants.yaml",
+        "schema_name": "variants",
+        "schema_template_path": "/Users/andrea.basile/projects/exodia-scaffolder/templates/operations/variants.yaml.tmpl"
+      }
+    ]
+  }
+]

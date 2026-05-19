@@ -9,8 +9,8 @@
             │   classify mode (Fresh/Merge/Incremental)      │
             │   classify shape (interactive/config-driven)   │
             │ Utilities:                                     │
-            │   - scripts/parse_config.py  (validate config) │
-            │   - scripts/resolve_layout.py                  │
+            │   - dist/parse-config.mjs  (validate config) │
+            │   - dist/resolve-layout.mjs                  │
             │     (config-driven: produces $LAYOUT_MAP)      │
             │   - Bash probes (ls AGENTS.md/CLAUDE.md;       │
             │     grep `exodia:section:` markers;            │
@@ -51,7 +51,7 @@
         │    set: config-driven)         │    │
         │ Utilities:                     │    │
         │  - AskUserQuestion             │    │
-        │  - scripts/init_structure.sh   │    │
+        │  - dist/init-structure.mjs   │    │
         │    (property ref only;         │    │
         │     skip-existing guarantee)   │    │
         └──────────┬─────────────────────┘    │
@@ -86,7 +86,7 @@
         ┌────────────────────────────────┐  ┌──────────────────────────────┐
         │ Step 5: init structure         │  │ protocol/incremental-rerun.md│
         │ Utilities:                     │  │   (replaces Steps 3 to 8)    │
-        │  - scripts/init_structure.sh   │  │ Utilities:                   │
+        │  - dist/init-structure.mjs   │  │ Utilities:                   │
         │    (legacy positional /        │  │  - `exodia:section:` markers │
         │     --pairs form)              │  │  - section-id baseline diff  │
         │  - templates/<canonical>/*.tmpl│  │  - AskUserQuestion (per diff)│
@@ -168,10 +168,9 @@
 
 | Kind | Path | Used by |
 |---|---|---|
-| script | `scripts/parse_config.py` | Step 1 |
-| script | `scripts/resolve_layout.py` | Step 1 |
-| script | `scripts/init_structure.sh` | Step 3a (property ref), Step 5 |
-| script | `scripts/yaml_subset.py` | imported by `parse_config.py` / `resolve_layout.py` |
+| script | `dist/parse-config.mjs` (source: `src/parse-config.ts`) | Step 1 |
+| script | `dist/resolve-layout.mjs` (source: `src/resolve-layout.ts`) | Step 1 |
+| script | `dist/init-structure.mjs` (source: `src/init-structure.ts`) | Step 3a (property ref), Step 5 |
 | heuristic | `heuristics/section-map.md` | Step 4 |
 | heuristic | `heuristics/format-strategy.md` | Step 3, Step 6, Step 9 |
 | heuristic | `heuristics/ledgers.yaml` | Step 8, Step 9 |
@@ -189,7 +188,7 @@
 |---|---|
 | `AskUserQuestion` | Step 1 (Merge consent), Step 3, Step 3a, Step 4, Step 6, Step 9, incremental-rerun |
 | `Explore` subagent | Step 2 (initial scan), Step 9 (scan_source execution) |
-| `Bash` | Step 1 (config validate + layout resolve via `python3`, plus `ls` / `grep` probes), Step 5 (`init_structure.sh`), Step 9 (scan_source execution) |
+| `Bash` | Step 1 (config validate + layout resolve via `node`, plus `ls` / `grep` probes), Step 5 (`init-structure.mjs`), Step 9 (scan_source execution) |
 | `Write` / `Edit` | Step 6 (L2 files + L3 stubs for interactive custom categories), Step 8 (AGENTS.md), Step 9 (L3 append) |
 
 ## Key splits
@@ -199,7 +198,7 @@
   - Step 3 (config-driven branch skips the custom-category interview and jumps to Step 4)
   - Step 3a (skipped entirely in config-driven runs; `context_dir` baked into resolved paths)
   - Step 4b (Fresh/Merge synthesizes `$LAYOUT_MAP` in memory; config-driven and Incremental confirm the map produced by Step 1)
-  - Step 5 (legacy positional vs `--pairs` form of `init_structure.sh`)
+  - Step 5 (legacy positional vs `--pairs` form of `init-structure.mjs`)
 - `$LAYOUT_MAP` is finalized once, at Step 4b, in every mode. Path resolution in Steps 5, 6, 8, 9, and incremental-rerun reads from it directly without mode branching. Shape contract: `heuristics/layout-map.md`.
 - Steps 3, 4, 5, 6, 8 replaced by `incremental-rerun.md` when re-running. Step 2, Step 4b, and Step 9 still execute. The incremental flow forks from Fresh/Merge twice: at Step 2 (Incremental skips Steps 3 to 4 and goes straight to Step 4b) and at Step 4b (Incremental enters the rerun body while Fresh/Merge enters Steps 5 to 8). Both flows reconverge at Step 9.
 - L3 seeding (Step 9) and wrap-up (Step 10) run in every mode.

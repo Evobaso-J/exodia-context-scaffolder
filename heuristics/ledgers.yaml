@@ -1,13 +1,13 @@
 # Canonical ledger registry: single source of truth for every L3 ledger
 # the scaffolder ships. Drives:
 #
-#   - scripts/resolve_layout.py: filename -> (host, schema) lookup
+#   - scripts/resolve-layout.mjs: filename -> (host, schema) lookup
 #   - rules/self-update.md: emitted "When to update" table
 #   - SKILL.md Step 8: {{path:<key>}} resolution
 #   - SKILL.md Step 9: per-ledger seed-scan source / skeleton-source
 #
 # To add or modify a ledger: edit a row here. Do not duplicate the data into
-# resolve_layout.py, self-update.md, or SKILL.md. Each ledger key is the
+# resolve-layout.mjs, self-update.md, or SKILL.md. Each ledger key is the
 # unique {{path:<key>}} placeholder used in self-update.md (and therefore the
 # row's identifier). `host` is the canonical category whose dir hosts the
 # file. `template` is the .tmpl filename under templates/<host>/. `signals`
@@ -18,7 +18,7 @@
 #
 # Field contract (required fields per row, by consumer):
 #   every row:   filename, host, schema, format, signals
-#     - filename, host, schema -> resolve_layout.py (filename to
+#     - filename, host, schema -> resolve-layout.mjs (filename to
 #       (host, schema) lookup; host scopes shared filenames like
 #       decisions.jsonl)
 #     - format                 -> Step 9 dispatch (jsonl vs yaml clause)
@@ -32,7 +32,7 @@
 #     - skeleton_source, skeleton_shape
 #                              -> Step 9 skeleton clause; omit -> no
 #                                 skeleton proposed
-# Optional: template (informational; resolve_layout.py derives the .tmpl
+# Optional: template (informational; resolve-layout.mjs derives the .tmpl
 # path from filename + host, so the field is documentation, not input).
 
 ledgers:

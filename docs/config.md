@@ -43,7 +43,7 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 
 ## Validation rules
 
-`scripts/parse_config.py` rejects (with line-numbered errors on stderr, exit 65):
+`dist/parse-config.mjs` rejects (with line-numbered errors on stderr, exit 65):
 
 1. Path violates the shape constraints above (allowed character set, no `..`, no leading or trailing `/`).
 2. Two categories share `path`.
@@ -54,7 +54,7 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 7. `description` that is empty, multiline, or longer than 200 characters.
 8. Two `l3:` entries in the same category share an identical filename.
 
-Exact regex patterns live in `scripts/parse_config.py`.
+Exact regex patterns live in `src/schemas.ts`.
 
 ## `.md` L3 entries
 

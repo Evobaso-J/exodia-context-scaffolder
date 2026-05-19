@@ -11,14 +11,14 @@ If the user aborts mid-interview, leave the repo in whatever partial state exist
 If `$CONFIG_PATH` is present, parse and validate it **before** mode classification:
 
 ```bash
-python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH"
+node "$SKILL_DIR/dist/parse-config.mjs" "$CONFIG_PATH"
 ```
 
-On non-zero exit, abort the run and surface the line-numbered errors from stderr verbatim. Do not attempt to proceed without the config; the user must fix it. On success, pipe the JSON output through `resolve_layout.py` and store the result as `$LAYOUT_MAP`:
+On non-zero exit, abort the run and surface the line-numbered errors from stderr verbatim. Do not attempt to proceed without the config; the user must fix it. On success, pipe the JSON output through `resolve-layout.mjs` and store the result as `$LAYOUT_MAP`:
 
 ```bash
-python3 "$SKILL_DIR/scripts/parse_config.py" "$CONFIG_PATH" \
-  | python3 "$SKILL_DIR/scripts/resolve_layout.py" --skill-dir "$SKILL_DIR"
+node "$SKILL_DIR/dist/parse-config.mjs" "$CONFIG_PATH" \
+  | node "$SKILL_DIR/dist/resolve-layout.mjs" --skill-dir "$SKILL_DIR"
 ```
 
 The output conforms to `$SKILL_DIR/heuristics/layout-map.md`. Step 4b will print it back for visual confirmation before any disk writes; downstream steps read it as the only path-resolution source.

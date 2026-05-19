@@ -123,6 +123,8 @@ git clone https://github.com/Evobaso-J/exodia-context-scaffolder ~/.claude/skill
 
 Restart Claude Code (or open a new session). Run `/exodia` in any repo. The directory name (`exodia`) must match the skill name in `SKILL.md` frontmatter; do not rename it.
 
+**Runtime requirement:** Node.js ≥ 20.10. The skill ships pre-built CLI helpers under `dist/`; no `npm install` is needed to run the skill. To hack on the helpers, see [Development](#development) below.
+
 ## 🎯 Usage
 
 ```bash
@@ -177,6 +179,29 @@ Inherited from [`digital-brain-skill`](https://github.com/muratcankoylan/Agent-S
 4. **Platform agnostic**. The output follows the agents.md convention: a root `AGENTS.md` plus a plain-Markdown `context/` tree, no proprietary frontmatter, no tool-specific directives. Claude Code, Cursor, Codex, Windsurf, Gemini CLI, and anything else that respects the convention read the same files with no adapter. The payoff is no lock-in: switching agents (or running several side by side) does not require regenerating the context tree.
 
 5. **Two-hop rule** (exodia-specific). From the router (L1), any fact in the tree is at most two more file reads away: read the module narrative (L2), and if the answer is not in the prose, the prose names the ledger (L3) that has it. This is a hard ceiling on lookup depth, which keeps both humans and agents from rabbit-holing through chains of cross-references. If you find yourself wanting a third hop, that is a signal to flatten: either promote the fact into the module narrative or split the module.
+
+## 🧰 Development
+
+The skill's three CLI helpers are written in TypeScript and bundled to `dist/` with [tsup](https://tsup.egoist.dev/). The bundled `dist/*.mjs` files are committed so end users do not need to run `npm install` to use the skill.
+
+```bash
+pnpm install      # install dev + runtime deps locally
+pnpm typecheck    # tsc --noEmit
+pnpm test         # vitest (golden-master parity against the previous Python/Bash impl)
+pnpm build        # rebuild dist/ via tsup
+```
+
+CI verifies that the committed `dist/` matches a fresh rebuild. If you edit `src/`, run `pnpm build` and commit the regenerated `dist/`. The pre-commit hook (husky + lint-staged) does this automatically when `src/**/*.ts` is staged.
+
+Source layout:
+
+| Path | Purpose |
+|---|---|
+| `src/parse-config.ts` | Validates `exodia.config.yaml`; emits JSON for the layout pipeline. |
+| `src/resolve-layout.ts` | Merges parsed config with the canonical-ledger registry; emits the resolved `$LAYOUT_MAP`. |
+| `src/init-structure.ts` | Creates the context directory tree and copies templates into the target repo. |
+| `src/schemas.ts` | Shared regexes, canonical categories, and TypeScript types. |
+| `tests/fixtures/` | Golden-master JSON captured from the previous Python implementation; parity is enforced by `tests/*.test.ts`. |
 
 ## 🙏 Credits
 

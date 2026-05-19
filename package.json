@@ -1,0 +1,39 @@
+{
+  "name": "exodia-context-scaffolder",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AGENTS.md scaffolder for context engineering. Helper CLIs invoked by the /exodia skill protocol.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "packageManager": "pnpm@10.30.2",
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "yaml": "2.6.1",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "husky": "9.1.7",
+    "lint-staged": "15.3.0",
+    "tsup": "8.3.5",
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "bash -c 'pnpm build'",
+      "bash -c 'git add dist'"
+    ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}
