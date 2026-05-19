@@ -29,8 +29,8 @@
   },
   "lint-staged": {
     "src/**/*.ts": [
-      "pnpm build",
-      "git add dist"
+      "bash -c 'pnpm build'",
+      "bash -c 'git add dist'"
     ]
   },
   "pnpm": {
