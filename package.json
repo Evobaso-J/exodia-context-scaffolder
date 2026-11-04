@@ -1,6 +1,6 @@
 {
   "name": "exodia-context-scaffolder",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "description": "AGENTS.md scaffolder for context engineering. Helper CLIs invoked by the /exodia skill protocol.",
   "type": "module",
