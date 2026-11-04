@@ -13,9 +13,9 @@ How to diagnose common problems. Start here when something breaks.
 
 <!-- exodia:section:how-to-use -->
 1. Reproduce the symptom.
-2. Search `playbooks.jsonl` for matching symptoms.
+2. Grep `playbooks/` for the symptom (`rg -l '<symptom>' playbooks/`) and read only the matches.
 3. If found → follow the playbook's fix.
-4. If not found → once solved, append a new playbook entry per the Self-Update Rules. Recurring footguns count: the footgun IS the symptom; name how it surfaces.
+4. If not found → once solved, add a new playbook file per the Self-Update Rules. Recurring footguns count: the footgun IS the symptom; name how it surfaces.
 
 ## Common Topics
 
@@ -25,4 +25,4 @@ How to diagnose common problems. Start here when something breaks.
 ## L3 Data
 
 <!-- exodia:section:l3 -->
-- `playbooks.jsonl`: symptom → root cause → fix recipes. Includes recurring footguns (the footgun IS the symptom).
+- `playbooks/`: one file per entry, symptom → root cause → fix recipes. Includes recurring footguns (the footgun IS the symptom).

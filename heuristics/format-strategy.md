@@ -4,38 +4,48 @@ When scaffolding L3 data files for any module (core canonical or user-defined), 
 
 | Format | Use when the data is | Examples |
 | ------ | -------------------- | -------- |
-| `.jsonl` | Append-only list of dated records, OR id-keyed record list mutated by id-rewrite. One self-contained record per line. | decisions, playbooks, reviews |
+| entry directory (`<name>/`) | Growing list of dated records: one Markdown file per entry, frontmatter + prose body. | decisions, playbooks, reviews |
 | `.yaml` | Named, structured tree describing the *shape* of something stable. Mutated by editing nodes in place. | glossary, variants, datasets registry |
 | `.md` | Long-form narrative: prose read top to bottom. The L2 module file is always `.md`; additional `.md` files at L3 are rare. | walkthroughs, calendars |
 
-If two formats fit, prefer `.jsonl`; agents handle line-delimited records more reliably than nested YAML, and append-only is safer for long-running context. JSONL files always start with a single-line schema header: `{"_schema": "<type>", "_version": "1.0", "_description": "...", "_fields": [...]}`.
+If two formats fit, prefer the entry directory. A single append-only file makes every branch write to the same tail line, so parallel work conflicts on every merge; one file per entry gives each branch its own path and nothing to merge. Each directory carries a `_schema.md` describing the frontmatter fields and body sections.
 
 ## Decision questions (top-down)
 
-1. Is each entry self-contained and timestamped, with new entries added over time? → `.jsonl`.
+1. Is each entry self-contained and timestamped, with new entries added over time? → entry directory.
 2. Is it a fixed set of named buckets that gets edited (not appended)? → `.yaml`.
 3. Is it prose meant to be read sequentially? → `.md` (rarely needed at L3).
 
-If two formats fit, prefer `.jsonl`: agents handle line-delimited records more reliably than nested YAML, and append-only is safer for long-running context.
+If two formats fit, prefer the entry directory: it is the only shape that cannot conflict when two branches add entries at the same time.
 
-## JSONL schema header
+## Entry-directory schema
 
-Every `.jsonl` file's first line is a schema descriptor:
+Every entry directory carries a `_schema.md` that lists the frontmatter fields, the body sections, and the filename rule `{id}__{slug}.md`. Each entry file looks like:
 
-```json
-{"_schema": "<type>", "_version": "1.0", "_description": "...", "_fields": ["id", ...]}
+```markdown
+---
+id: "pb_20260814_101500_a1b2"
+title: "Google OAuth fails in dev/QA"
+status: "active"
+---
+
+## Root cause
+
+...
 ```
 
-`_fields` is exodia-specific (the source skill uses only `_schema` / `_version` / `_description`). Keep it: it gives future sessions an explicit field list to validate against.
+The field list in `_schema.md` is the contract: it gives future sessions an explicit set to validate an entry against, and it is what an agent reads before writing one.
 
-## Baseline `_fields` for derived JSONL ledgers
+Every `_schema.md` also carries a `## Retrieval` section, and it is not boilerplate. One file per entry only pays off if entries are *searched*: `rg -l '<term>' <dir>/` matches the bodies and the frontmatter, so an agent reads two entries instead of all 114. A directory listing is a weaker index: it carries the title and nothing else, so a task whose trigger word never made it into someone's title finds nothing. Emit the retrieval instruction next to the schema, because "read the ledger" is the habit it has to displace.
 
-When deriving `_fields` for a new ledger (custom category, or any non-core category under A2), every `_fields` array MUST include:
+## Baseline fields for derived ledgers
+
+When deriving the field list for a new ledger (custom category, or any non-core category under A2), every entry schema MUST include:
 
 - `id`: canonical ID format `{schema}_{YYYYMMDD}_{HHMMSS}_{4hex}`.
 - `title`: one-line label for the entry.
-- `status`: lifecycle marker (`active`, `archived`, schema-specific values welcome).
-- timestamp: `created` for append-only logs, `date` for event records (pick one based on schema semantics).
+- `status`: lifecycle marker (`active`, `archived`, schema-specific values welcome). Never omit it: a schema without `status` makes retirement impossible, and the entries pile up forever.
+- timestamp: `created` for growing logs, `date` for event records (pick one based on schema semantics).
 
 Two more SHOULD be included when applicable:
 
@@ -44,7 +54,7 @@ Two more SHOULD be included when applicable:
 
 Schema-specific fields follow these. Place them in semantic order: cause-before-effect for incident-style schemas, before / after for change-style schemas, and so on.
 
-This baseline is not emitted into the runtime kernel: once a ledger is scaffolded, its `_fields` header IS the contract for future agents appending to it. The prescription only applies at scaffolding time.
+This baseline is not emitted into the runtime kernel: once a ledger is scaffolded, its `_schema.md` IS the contract for future agents writing entries into it. The prescription only applies at scaffolding time.
 
 ## YAML stub
 
@@ -52,4 +62,4 @@ Top-level key + a comment block showing one example entry. Mirror `templates/ope
 
 ## ID format
 
-JSONL entry IDs follow `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`. The `{type}` prefix is the file's `_schema` value, verbatim. Each schema's prefix lives only in its `.jsonl` template; keep them unique across the tree.
+Entry IDs follow `{type}_{YYYYMMDD}_{HHMMSS}_{4hex}`, and the file is named `{id}__{slug}.md`. The `{type}` prefix is declared in the directory's `_schema.md`; keep the prefixes unique across the tree.

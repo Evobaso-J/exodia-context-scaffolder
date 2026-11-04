@@ -12,7 +12,7 @@ categories:
     path: docs/releases            # repo-rooted, may escape context_dir
     custom: true
     description: "Release notes per published version"  # optional; one-line purpose passed to the model
-    l3: [release_notes.jsonl]      # optional; filenames only, model writes schema when filename not in canonical ledger registry
+    l3: [release_notes/]      # optional; filenames only, model writes schema when filename not in canonical ledger registry
 ```
 
 | Field | Type | Default | Meaning |
@@ -23,7 +23,7 @@ categories:
 | `categories.<name>.drop` | bool | `false` | Exclude a canonical category. Mutually exclusive with `path` / `custom` / `l3` / `description`. |
 | `categories.<name>.custom` | bool | `false` | Required for non-canonical names. Signals "model drafts L2 + infers L3 if `l3:` absent". |
 | `categories.<name>.description` | string | absent | Optional one-line purpose (single line, &le;200 chars). Passed to the model as `{purpose}` when drafting the L2 `## Purpose` section and inferring custom L3 schemas / scan hints. Most useful for custom categories whose intent is not obvious from the name. |
-| `categories.<name>.l3` | list[string] | absent | Override model's L3 inference. Each entry is a filename ending in `.yaml`, `.jsonl`, or `.md`. Filenames may include `/` to nest under the host category path (e.g. `style/imports.md`); each segment must start with a lowercase letter and contain only lowercase letters, digits, hyphens, or underscores. Leading/trailing `/`, empty segments, and `..` are rejected. For `.yaml` / `.jsonl`, schema is inferred via canonical-name lookup when the filename matches a known ledger; otherwise the model writes the schema. Nested entries always fall through to model-derived schema (canonical lookup is keyed on the flat filename). For `.md`, the entry is a standalone markdown deep-dive (no schema, no ledger semantics): Step 6 drafts prose alongside the L2; Step 9 skips it. |
+| `categories.<name>.l3` | list[string] | absent | Override model's L3 inference. Each entry is either an entry-directory name with a trailing `/` (one file per entry, the shape every ledger uses) or a filename ending in `.yaml` or `.md`. `.jsonl` is rejected: a shared append-only file puts every branch on the same tail line. A legacy tree that still has one is converted when `/exodia` re-runs on it (Step 1). Filenames may include `/` to nest under the host category path (e.g. `style/imports.md`); each segment must start with a lowercase letter and contain only lowercase letters, digits, hyphens, or underscores. Leading `/`, empty segments, and `..` are rejected. For entry directories and `.yaml` files, schema is inferred via canonical-name lookup when the name matches a known ledger; otherwise the model writes the schema. Nested entries always fall through to model-derived schema (canonical lookup is keyed on the flat filename). For `.md`, the entry is a standalone markdown deep-dive (no schema, no ledger semantics): Step 6 drafts prose alongside the L2; Step 9 skips it. |
 
 ## Canonical category names
 
@@ -50,7 +50,7 @@ Any other name in `categories` requires `custom: true` or it is rejected at pars
 3. One category's `path` is a prefix of another's.
 4. Non-canonical name without `custom: true`.
 5. `drop: true` combined with any other field.
-6. `l3` filename with an extension other than `.yaml`, `.jsonl`, or `.md`, or with a segment violating the segment shape (lowercase letters, digits, hyphens, underscores; must start with a letter). This also blocks leading `/`, trailing `/`, empty segments like `//`, and `..`.
+6. `l3` filename with an extension other than `.yaml` or `.md` and no trailing `/` (entry directory), or with a segment violating the segment shape (lowercase letters, digits, hyphens, underscores; must start with a letter). This also blocks leading `/`, empty segments like `//`, and `..`. A name ending in `.jsonl` gets a dedicated error naming the entry-directory replacement.
 7. `description` that is empty, multiline, or longer than 200 characters.
 8. Two `l3:` entries in the same category share an identical filename.
 
@@ -60,7 +60,7 @@ Exact regex patterns live in `src/schemas.ts`.
 
 `.md` filenames in `l3:` declare standalone markdown deep-dives, not ledgers. They carry no `_schema` header, no ID format, no append-only contract, and no Step 9 scan-seeding. The scaffolder treats them as a parallel mechanism to `design-patterns/docs/<slug>.md` deep dives, but located in the host category's path and registered explicitly via `l3:`. Step 6 (`protocol/06-draft-l2.md` § "Markdown L3 deep-dives") drafts each `.md` body interactively, wraps it in a single `<!-- exodia:section:body -->` marker, and writes it to `<host_path>/<filename>`. Nested filenames write to `<host_path>/<segments>/<basename>`; the scaffolder creates intermediate directories at write time. H1 heading derivation uses `basename(<filename>)` only, ignoring intermediate segments.
 
-Use `.md` L3 entries for: per-area rule docs, glossary deep-dives, runbooks, anything prose-shaped that does not fit jsonl/yaml. For appendable logs (decisions, incidents) prefer `.jsonl`; for fixed structured trees (term registries, variant maps) prefer `.yaml`.
+Use `.md` L3 entries for: per-area rule docs, glossary deep-dives, runbooks, anything prose-shaped with no entry semantics. For growing logs (decisions, incidents) use an entry directory (one file per entry never conflicts when two branches write at once); for fixed structured trees (term registries, variant maps) use `.yaml`.
 
 ## Worked example: monorepo with `docs/project/` canonical set and a sibling handbook
 
@@ -73,7 +73,7 @@ categories:
   mobile:                           # custom category
     path: docs/mobile
     custom: true
-    l3: [device_quirks.jsonl, release_train.yaml, quirks/ios.md]
+    l3: [device_quirks/, release_train.yaml, quirks/ios.md]
 ```
 
 Copy-pasteable: [`../examples/exodia.config.yaml`](../examples/exodia.config.yaml). Smallest override: [`../examples/exodia.config.minimal.yaml`](../examples/exodia.config.minimal.yaml).

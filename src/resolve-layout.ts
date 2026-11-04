@@ -57,7 +57,9 @@ function l2TemplatePath(skillDir: string, name: string): string | null {
 function l3TemplatePath(skillDir: string, category: string, filename: string): string | null {
   const src = categoryTemplateDir(skillDir, category);
   if (!src) return null;
-  const candidate = join(src, `${filename}.tmpl`);
+  const candidate = filename.endsWith("/")
+    ? join(src, filename, "_schema.md")
+    : join(src, `${filename}.tmpl`);
   return isFile(candidate) ? candidate : null;
 }
 
@@ -83,15 +85,28 @@ function defaultL3Specs(
   const src = categoryTemplateDir(skillDir, category);
   if (!src) return null;
   const tmpls: string[] = [];
+  const entryDirs: string[] = [];
   for (const entry of readdirSync(src, { withFileTypes: true })) {
     if (entry.isFile() && entry.name.endsWith(".tmpl")) tmpls.push(entry.name);
+    // An entry-directory ledger ships a `_schema.md` instead of a `.tmpl`.
+    if (entry.isDirectory() && isFile(join(src, entry.name, "_schema.md"))) entryDirs.push(entry.name);
   }
   tmpls.sort();
+  entryDirs.sort();
   const specs: L3Spec[] = [];
+  for (const dir of entryDirs) {
+    const filename = `${dir}/`;
+    const { schema } = lookupCanonicalLedger(ledgers, filename, category);
+    specs.push({
+      filename,
+      schema_name: schema,
+      schema_template_path: join(src, dir, "_schema.md"),
+    });
+  }
   for (const tmpl of tmpls) {
     const base = tmpl.slice(0, -".tmpl".length);
     if (base.endsWith(".md")) continue;
-    if (!base.endsWith(".jsonl") && !base.endsWith(".yaml")) continue;
+    if (!base.endsWith(".yaml")) continue;
     const { schema } = lookupCanonicalLedger(ledgers, base, category);
     specs.push({
       filename: base,

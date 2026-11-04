@@ -35,7 +35,7 @@ Iterate until the user confirms.
 The derivation rules below apply to **every non-core category** (model-proposed additions and user-added custom categories alike). Do not ask the user to enumerate L3 ledgers or scan hints. Derive both yourself from the purpose statement and `$SCAN`:
 
 - Decide whether the category warrants any L3 files at all (many non-core categories are L2-only).
-- For each ledger you propose, pick a filename, a `_schema` prefix, and a format (`.jsonl` for append-only / id-keyed records, `.yaml` for named taxonomies) per `$SKILL_DIR/heuristics/format-strategy.md`. When constructing the JSONL schema header `_fields` array, follow the "Baseline `_fields` for derived JSONL ledgers" rule in `$SKILL_DIR/heuristics/format-strategy.md`.
+- For each ledger you propose, pick a name, a schema prefix, and a shape (an entry directory `<name>/` for growing record sets, `.yaml` for named taxonomies) per `$SKILL_DIR/heuristics/format-strategy.md`. When writing the directory's `_schema.md` field list, follow the baseline-fields rule in `$SKILL_DIR/heuristics/format-strategy.md`.
 - For each ledger, derive a one-line **scan hint** that Step 9 will run to seed it (e.g. "scan TODO comments under `src/jobs/`", "parse `docs/playbooks/`", "git log matching `^perf:`"). If no useful seed source exists, set the hint to `none` and Step 9 will leave the file empty.
 
 Carry the proposed `(filename, schema, format, scan_hint)` tuples into Step 6 alongside the L2 draft. `init-structure.mjs` will scaffold an empty L2 stub for any category without a template dir; the L3 stubs you propose are drafted in Step 6 and seeded in Step 9.

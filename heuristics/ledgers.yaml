@@ -10,49 +10,51 @@
 # resolve-layout.mjs, self-update.md, or SKILL.md. Each ledger key is the
 # unique {{path:<key>}} placeholder used in self-update.md (and therefore the
 # row's identifier). `host` is the canonical category whose dir hosts the
-# file. `template` is the .tmpl filename under templates/<host>/. `signals`
+# file (or entry directory, trailing `/`). `template` is the template path
+# under templates/<host>/: `<file>.tmpl`, or `<dir>/_schema.md` for an entry
+# directory. `signals`
 # is a list because some ledgers serve multiple signals (e.g. reviews accepts
 # both "PR review surfaces new check" and "API contract change"). YAML-format
-# ledgers carry skeleton_source / skeleton_shape; jsonl-format ones carry
+# ledgers carry skeleton_source / skeleton_shape; entries-format ones carry
 # scan_source.
 #
 # Field contract (required fields per row, by consumer):
 #   every row:   filename, host, schema, format, signals
 #     - filename, host, schema -> resolve-layout.mjs (filename to
 #       (host, schema) lookup; host scopes shared filenames like
-#       decisions.jsonl)
-#     - format                 -> Step 9 dispatch (jsonl vs yaml clause)
+#       decisions/)
+#     - format                 -> Step 9 dispatch (entries vs yaml clause)
 #     - signals (list of {signal, action})
 #                              -> Step 8 emits one self-update.md "When to
 #                                 update" row per entry; omit -> no row
-#   format: jsonl rows also require:
+#   format: entries rows also require:
 #     - scan_source            -> Step 9 detect-source clause; omit -> no
 #                                 clause emitted for this ledger
 #   format: yaml rows also require:
 #     - skeleton_source, skeleton_shape
 #                              -> Step 9 skeleton clause; omit -> no
 #                                 skeleton proposed
-# Optional: template (informational; resolve-layout.mjs derives the .tmpl
+# Optional: template (informational; resolve-layout.mjs derives the template
 # path from filename + host, so the field is documentation, not input).
 
 ledgers:
 
   decisions:
-    filename: decisions.jsonl
+    filename: decisions/
     host: architecture
     schema: adr
-    format: jsonl
-    template: decisions.jsonl.tmpl
+    format: entries
+    template: decisions/_schema.md
     signals:
       - {signal: "Architecture or design decision taken by the team", action: "New ADR entry"}
     scan_source: "docs/adr/, docs/decisions/, ARCHITECTURE.md headings with decision language"
 
   reviews:
-    filename: reviews.jsonl
+    filename: reviews/
     host: design-patterns
     schema: rv
-    format: jsonl
-    template: reviews.jsonl.tmpl
+    format: entries
+    template: reviews/_schema.md
     signals:
       - {signal: "PR review surfaces new check (prod break, near-miss)", action: "New review entry"}
       - {signal: "API contract changes or deprecated", action: "New entry tagged `migration` with `old_pattern` / `new_pattern`"}
@@ -81,11 +83,11 @@ ledgers:
     skeleton_shape: '`variants:` map with a `default:` key and one key per detected variant, each body `notes: ""`'
 
   playbooks:
-    filename: playbooks.jsonl
+    filename: playbooks/
     host: debugging
     schema: pb
-    format: jsonl
-    template: playbooks.jsonl.tmpl
+    format: entries
+    template: playbooks/_schema.md
     signals:
       - {signal: "Reproducible behaviour worth a future debugger's time: name the symptom(s), root cause, fix. Includes recurring footguns: the footgun IS the symptom.", action: "New playbook entry"}
     scan_source: "docs/postmortems/, POSTMORTEM*.md, rich `^fix:` commits (commit body longer than ~200 chars); TODO/FIXME/HACK/XXX/WARNING comments grouped by directory/area"

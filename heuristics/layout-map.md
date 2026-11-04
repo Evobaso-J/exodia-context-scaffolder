@@ -20,9 +20,9 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
     "l2_template_path": "<SKILL_DIR>/templates/architecture/ARCHITECTURE.md.tmpl",
     "l3_specs": [
       {
-        "filename": "decisions.jsonl",
+        "filename": "decisions/",
         "schema_name": "adr",
-        "schema_template_path": "<SKILL_DIR>/templates/architecture/decisions.jsonl.tmpl"
+        "schema_template_path": "<SKILL_DIR>/templates/architecture/decisions/_schema.md"
       }
     ]
   },
@@ -34,7 +34,7 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
     "l2_template_path": null,
     "l3_specs": [
       {
-        "filename": "release_notes.jsonl",
+        "filename": "release_notes/",
         "schema_name": null,
         "schema_template_path": null
       }
@@ -53,9 +53,9 @@ Output is a JSON array of category objects. Order is preserved and drives L2 dra
 | `description` | string or `null` | Optional one-line purpose statement from `exodia.config.yaml` (single line, &le;200 chars). When non-null, Step 6 feeds it as `{purpose}` to schema inference and seeds the L2 default skeleton's `## Purpose` section; Step 9 reads it as disambiguator for custom L3 scan hints. `null` when config did not declare it or category came from another adapter (interactive / incremental). |
 | `l2_template_path` | string or `null` | Absolute path to the L2 `.md.tmpl` under `$SKILL_DIR/templates/<name>/`. `null` for custom categories without a template; Step 6 falls back to the default stub written by `init-structure.mjs`. |
 | `l3_specs` | array or `null` | Ordered list of L3 file specs. `null` means "Step 6 must infer L3 specs inline" (custom category without a config-declared `l3:`). Empty array means "L2-only category". |
-| `l3_specs[].filename` | string | Matches `^[a-z][a-z0-9_-]*\.(yaml\|jsonl\|md)$`. `.md` entries are standalone prose deep-dives, not ledgers: `schema_name` and `schema_template_path` are always `null`, and Step 6 drafts the body (same flow as `design-patterns/docs/<slug>.md`). Step 9 skips them. |
+| `l3_specs[].filename` | string | Matches `^[a-z][a-z0-9_-]*(\.(yaml\|md)\|/)$`; a trailing `/` marks an entry directory (one file per entry). `.jsonl` is never valid here: Step 1 converts a legacy ledger before a layout map is built. `.md` entries are standalone prose deep-dives, not ledgers: `schema_name` and `schema_template_path` are always `null`, and Step 6 drafts the body (same flow as `design-patterns/docs/<slug>.md`). Step 9 skips them. |
 | `l3_specs[].schema_name` | string or `null` | Canonical schema name (e.g. `adr`, `glossary`, `pb`). `null` when the filename is outside `heuristics/ledgers.yaml` (Step 6 writes the schema body inline) or when the filename ends in `.md` (no schema). |
-| `l3_specs[].schema_template_path` | string or `null` | Absolute path to the L3 `.tmpl` if one ships in the templates tree. `null` when the schema is model-inferred or when the filename ends in `.md`. |
+| `l3_specs[].schema_template_path` | string or `null` | Absolute path to the L3 template if one ships (`<file>.tmpl`, or `<dir>/_schema.md` for an entry directory) in the templates tree. `null` when the schema is model-inferred or when the filename ends in `.md`. |
 
 ## Validation rules
 
@@ -65,7 +65,7 @@ Step 4b applies these in all modes. Any rule violation aborts the run with a cle
 2. No two categories share `path`.
 3. No category's `path` is a strict prefix of another's (e.g. `docs/project` cannot coexist with `docs/project/architecture`).
 4. `name` outside the canonical set requires `kind: custom`. Names violating `^[a-z][a-z0-9_-]*$` are rejected.
-5. Each `l3_specs[].filename` matches `^[a-z][a-z0-9_-]*\.(yaml|jsonl|md)$`. For `.md` entries, `schema_name` and `schema_template_path` MUST be `null`.
+5. Each `l3_specs[].filename` matches `^[a-z][a-z0-9_-]*(\.(yaml|md)|/)$`. For `.md` entries, `schema_name` and `schema_template_path` MUST be `null`.
 
 These are the rules `dist/parse-config.mjs` enforces at config-parse time; Step 4b confirms but does not re-run those checks for config-driven mode. The interactive adapter (Step 4b Fresh/Merge branch) and the router-parse adapter (Step 4b Incremental branch) must apply all five.
 

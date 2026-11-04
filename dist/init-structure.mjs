@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { o as isEntrypoint } from "./schemas-o-IkXWxR.mjs";
+import { o as isEntrypoint } from "./schemas-CymaMktX.mjs";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { basename, dirname, join, resolve } from "node:path";

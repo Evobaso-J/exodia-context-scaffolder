@@ -21,7 +21,7 @@
     "l2_template_path": null,
     "l3_specs": [
       {
-        "filename": "device_quirks.jsonl",
+        "filename": "device_quirks/",
         "schema_name": null,
         "schema_template_path": null
       },
@@ -45,9 +45,9 @@
     "l2_template_path": "<SKILL_DIR>/templates/architecture/ARCHITECTURE.md.tmpl",
     "l3_specs": [
       {
-        "filename": "decisions.jsonl",
+        "filename": "decisions/",
         "schema_name": "adr",
-        "schema_template_path": "<SKILL_DIR>/templates/architecture/decisions.jsonl.tmpl"
+        "schema_template_path": "<SKILL_DIR>/templates/architecture/decisions/_schema.md"
       }
     ]
   },
@@ -59,9 +59,9 @@
     "l2_template_path": "<SKILL_DIR>/templates/design-patterns/DESIGN-PATTERNS.md.tmpl",
     "l3_specs": [
       {
-        "filename": "reviews.jsonl",
+        "filename": "reviews/",
         "schema_name": "rv",
-        "schema_template_path": "<SKILL_DIR>/templates/design-patterns/reviews.jsonl.tmpl"
+        "schema_template_path": "<SKILL_DIR>/templates/design-patterns/reviews/_schema.md"
       }
     ]
   },

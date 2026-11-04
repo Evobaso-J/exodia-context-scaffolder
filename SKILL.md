@@ -4,7 +4,8 @@ description: >
   AGENTS.md scaffolder for context engineering. One-shot generator of a durable,
   agent-agnostic context tree for any repo: an `AGENTS.md` router plus a `context/`
   directory split into 5 narrative modules (architecture, design-patterns, glossary,
-  operations, debugging) with append-only L3 data files (.jsonl + .yaml). Interactive:
+  operations, debugging) with L3 data as entry directories (one Markdown file per
+  entry) plus .yaml registries. Interactive:
   scans the repo, proposes categories, drafts each module section-by-section, and
   embeds self-update rules. Re-runs incrementally diff existing content. Trigger:
   /exodia. Also triggers on "scaffold agent context", "initialize AGENTS.md",
@@ -43,7 +44,7 @@ The run takes one of three modes, classified in Step 1:
 |---|---|---|
 | **Fresh** | No `AGENTS.md`, no `CLAUDE.md`, no existing context tree. | Full scaffold: `AGENTS.md` + L2 + L3. |
 | **Merge** | `AGENTS.md` and/or `CLAUDE.md` exist; no context tree. Requires user consent in Step 1. | Splits the existing root file into per-module sections, then full scaffold. |
-| **Incremental** | A directory containing `<!-- exodia:section:` markers exists. Config (if any) is ignored. | Diff-based updates to auto-filled L2 sections only; never overwrites `AGENTS.md`. |
+| **Incremental** | A directory containing `<!-- exodia:section:` markers exists. Config (if any) is ignored. Legacy `.jsonl` ledgers are converted first, with consent (Step 1). | Diff-based updates to auto-filled L2 sections only; never overwrites `AGENTS.md`. |
 
 A run is **interactive** if `$CONFIG_PATH` is absent, **config-driven** if it is present and parses cleanly. Mode (Fresh / Merge / Incremental) and shape (interactive / config-driven) are orthogonal except that Incremental always ignores config.
 

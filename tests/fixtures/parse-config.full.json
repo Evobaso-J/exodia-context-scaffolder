@@ -22,7 +22,7 @@
       "path": "docs/mobile",
       "kind": "custom",
       "l3_override": [
-        "device_quirks.jsonl",
+        "device_quirks/",
         "release_train.yaml",
         "quirks/ios.md"
       ],

@@ -53,7 +53,13 @@ fi
 
 ## Classify mode
 
-Classify into one of three modes:
+Classify into one of three modes, after one guard. Before reaching for Incremental, check whether the tree
+found still holds **legacy `.jsonl` ledgers** (scaffolded before ledgers became entry directories). That check
+keeps a re-run from appending entries to a file the current convention no longer uses:
+
+```bash
+LEGACY_LEDGERS="$(find "$TARGET/$EXISTING_CONTEXT_DIR" -name '*.jsonl' -not -path '*/node_modules/*' 2>/dev/null)"
+```
 
 - **Fresh**: no `AGENTS.md`, no `CLAUDE.md`, no `$EXISTING_CONTEXT_DIR`. Go to Step 2.
 - **Merge**: `AGENTS.md` or `CLAUDE.md` (or both) exists, but no existing context tree. Before doing anything else, **ask the user for explicit permission** to consume the existing file(s). Use `AskUserQuestion`:
@@ -63,8 +69,13 @@ Classify into one of three modes:
     - "No, stop": exit without changes. You can revisit later by re-running `/exodia`.
 
   If the user declines, stop the skill here and do not scaffold anything. If they accept, continue to Step 2 normally; Step 4 handles the split. If both files exist, `AGENTS.md` is the parse source.
-- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty. Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to `protocol/incremental-rerun.md`; do not ask the dir-name question again. If `$CONFIG_PATH` is also present, ignore it and print one warning line: `Config detected but tree exists; ignoring. Delete \`exodia.config.yaml\` to silence this warning.`
+- **Legacy ledgers → convert first**: `$EXISTING_CONTEXT_DIR` is non-empty and `$LEGACY_LEDGERS` is non-empty. Do not enter Incremental yet. List the files and ask with `AskUserQuestion`:
+  - **Question**: "This tree still uses append-only `.jsonl` ledgers. Convert them to entry directories (one file per entry) before re-running?"
+  - **Options**:
+    - "Convert now": for each `<name>.jsonl`, create `<name>/` next to it with a `_schema.md` (copy `$SKILL_DIR/templates/<host>/<name>/_schema.md` for canonical ledgers; for custom ones write it from the file's `_fields` header, following `heuristics/format-strategy.md` § Entry-directory schema). Then write every non-header line as its own `{id}__{slug}.md`: keep the original `id`, put the fields the schema lists under Frontmatter in YAML frontmatter, each Body field under its `## <section>`. Verify the entry count matches the line count minus the header, then `git rm` the `.jsonl`. Also rewrite the `AGENTS.md` self-update rows and behavioral rules that still say "append to `<name>.jsonl`" to the current wording in `rules/`. Continue with Incremental.
+    - "No, stop": exit without changes.
+- **Incremental**: `$EXISTING_CONTEXT_DIR` is non-empty and `$LEGACY_LEDGERS` is empty (or was just converted). Set `$CONTEXT_DIR=$EXISTING_CONTEXT_DIR` and jump to `protocol/incremental-rerun.md`; do not ask the dir-name question again. If `$CONFIG_PATH` is also present, ignore it and print one warning line: `Config detected but tree exists; ignoring. Delete \`exodia.config.yaml\` to silence this warning.`
 
-When entering the incremental re-run flow, parse the **router region** of `$TARGET/AGENTS.md` for the canonical category → path map. The region is wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers around the `## Context Router` table. Materialize the result as `$LAYOUT_MAP` matching `$SKILL_DIR/heuristics/layout-map.md`: each router row becomes a category object, `l2_template_path` is resolved against `$SKILL_DIR/templates/<name>/<NAME>.md.tmpl` (or `null`), and `l3_specs` is populated by listing existing `*.jsonl` and `*.yaml` files on disk under the host path with `schema_name` resolved via `heuristics/ledgers.yaml`. Step 4b will print it back for confirmation.
+When entering the incremental re-run flow, parse the **router region** of `$TARGET/AGENTS.md` for the canonical category → path map. The region is wrapped in `<!-- exodia:router:start -->` / `<!-- exodia:router:end -->` markers around the `## Context Router` table. Materialize the result as `$LAYOUT_MAP` matching `$SKILL_DIR/heuristics/layout-map.md`: each router row becomes a category object, `l2_template_path` is resolved against `$SKILL_DIR/templates/<name>/<NAME>.md.tmpl` (or `null`), and `l3_specs` is populated by listing, under the host path on disk, every entry directory (a directory holding `_schema.md`, recorded with a trailing `/`) plus any `*.yaml` files, with `schema_name` resolved via `heuristics/ledgers.yaml`. Step 4b will print it back for confirmation.
 
 If the markers are absent (the scaffold pre-dates this feature), fall back to a plain `<!-- exodia:section:` grep across `$TARGET/$EXISTING_CONTEXT_DIR/`, then lazily inject the markers around the router table on the next emit and note the migration in the wrap-up summary.

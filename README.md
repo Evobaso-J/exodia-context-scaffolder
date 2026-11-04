@@ -10,7 +10,7 @@
 
 ## 🧩 Why
 
-A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent reloads in full every turn. `/exodia` splits the same knowledge into a thin router plus five narrative modules, each backed by append-only data logs. The router loads every turn; modules and logs load only when the task touches them. Max two hops to any fact.
+A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent reloads in full every turn. `/exodia` splits the same knowledge into a thin router plus five narrative modules, each backed by a directory of one-file-per-entry data. The router loads every turn; modules and logs load only when the task touches them. Max two hops to any fact.
 
 ## 🧠 Mental model: L1 / L2 / L3
 
@@ -20,7 +20,7 @@ A single `CLAUDE.md` / `AGENTS.md` grows into an unreadable pile that the agent 
 |------|----------------------------------------------|-----------------------------------------------|--------|
 | L1   | The router. Small. Always loaded.            | `AGENTS.md`                                   | Every turn |
 | L2   | A module's narrative. Mid-size. Human-edited.| `context/architecture/ARCHITECTURE.md`        | When the task touches that module |
-| L3   | Append-only data. Grepped, not read whole.   | `decisions.jsonl`, `glossary.yaml`            | When a specific entry is needed |
+| L3   | One file per entry. Grepped, then read selectively. | `decisions/`, `glossary.yaml`           | When a specific entry is needed |
 
 **Two-hop rule**: from L1, every fact is at most two more reads away. The router points to a module; the module narrative either contains the answer (L2) or names the ledger that does (L3).
 
@@ -42,7 +42,7 @@ The router (`AGENTS.md`) holds the routing tables. Abbreviated:
 
 <!-- exodia:section:router -->
 <!-- exodia:router:start -->
-Route by task type. Read the relevant L2 module, then load L3 data (`.jsonl` / `.yaml`) only when needed. **Max 2 hops.**
+Route by task type. Read the relevant L2 module, then load L3 data (entry directories / `.yaml`) only when needed. **Max 2 hops.** An entry directory is searched, never read whole: `rg -l '<term>' <dir>/`, then read the matches.
 
 | Task type                       | Load                                                |
 | ------------------------------- | --------------------------------------------------- |
@@ -60,12 +60,12 @@ Route by task type. Read the relevant L2 module, then load L3 data (`.jsonl` / `
 | ---------------------------------------------------------------- | -------------------------------------- | ------------- |
 | Codebase assumption corrected by user or by evidence             | L2 `.md` file for that area            | Update the incorrect section |
 <!-- exodia:self-update:rows:start -->
-| Architecture or design decision taken by the team                | `context/architecture/decisions.jsonl` | New ADR entry |
-| PR review surfaces new check (prod break, near-miss)             | `context/design-patterns/reviews.jsonl`| New review entry |
-| API contract changes or deprecated                               | `context/design-patterns/reviews.jsonl`| New entry tagged `migration` with `old_pattern` / `new_pattern` |
+| Architecture or design decision taken by the team                | `context/architecture/decisions/` | New ADR file |
+| PR review surfaces new check (prod break, near-miss)             | `context/design-patterns/reviews/`| New review file |
+| API contract changes or deprecated                               | `context/design-patterns/reviews/`| New file tagged `migration` with `old_pattern` / `new_pattern` |
 | Domain term clarified or new entity appears                      | `context/glossary/glossary.yaml`       | New or updated term |
 | Variant-specific behavior confirmed                              | `context/operations/variants.yaml`     | New entry under the relevant variant |
-| Reproducible behaviour worth a future debugger's time            | `context/debugging/playbooks.jsonl`    | New playbook entry |
+| Reproducible behaviour worth a future debugger's time            | `context/debugging/playbooks/`    | New playbook file |
 <!-- exodia:self-update:rows:end -->
 ```
 
@@ -89,20 +89,36 @@ Two-service split: `api/` (FastAPI) handles request routing and auth;
 
 **L3 / ledger**
 
-The L3 ledger is one append-only line per entry, conforming to the schema declared on line 1 of the file:
+An L3 ledger is a directory with one Markdown file per entry, conforming to the directory's `_schema.md`. The filename repeats the id plus a slug of the title, so listing the directory gives a title index; grepping it (`rg -l '<term>' <dir>/`) searches the bodies too, and that is the retrieval path every emitted `_schema.md` prescribes:
 
-```jsonl
-# context/architecture/decisions.jsonl
-{"id":"adr_20260514_103211_a4f2","title":"Move auth to gateway","status":"active","context":"Per-service JWT validation was duplicated across 4 services.","decision":"Validate at the gateway only; downstream services trust the gateway-injected user header.","rationale":"Centralizing cut latency variance and unblocked rate limiting.","consequences_positive":"One place to rotate keys; uniform 401 behaviour.","consequences_negative":"Gateway is now a hard dependency for local dev.","supersedes":null,"date":"2026-05-14"}
+```markdown
+<!-- context/architecture/decisions/adr_20260514_103211_a4f2__move-auth-to-gateway.md -->
+---
+id: "adr_20260514_103211_a4f2"
+title: "Move auth to gateway"
+status: "active"
+supersedes: null
+date: "2026-05-14"
+---
+
+## Context
+
+Per-service JWT validation was duplicated across 4 services.
+
+## Decision
+
+Validate at the gateway only; downstream services trust the gateway-injected user header.
 ```
+
+One file per entry is not cosmetic: two branches that each add an entry create two distinct paths, so they can never conflict on merge. A shared append-only file makes every branch write the same tail line, which is what turns one merge into a conflict on every other open PR.
 
 ## 📚 The 5 modules
 
 ### `architecture/` : what the system *is*
-The shape of the codebase: services, boundaries, data flow, build topology. L2 prose answers "what's where and why". The ledger `decisions.jsonl` is ADR-lite: one append-only entry per architectural decision, capturing the *why* so future sessions don't relitigate it.
+The shape of the codebase: services, boundaries, data flow, build topology. L2 prose answers "what's where and why". The ledger `decisions/` is ADR-lite: one file per architectural decision, capturing the *why* so future sessions don't relitigate it.
 
 ### `design-patterns/` : how to write code here
-Conventions and review rules. The L2 `DESIGN-PATTERNS.md` holds only short guardrails (2-3 lines per topic); detailed explanations live in `design-patterns/docs/<slug>.md` and are linked from the L2. Section headings inside the L2 are model-derived from the scan, not a fixed list. The ledger `reviews.jsonl` logs lessons surfaced in code review: "this PR almost shipped X, the fix is Y".
+Conventions and review rules. The L2 `DESIGN-PATTERNS.md` holds only short guardrails (2-3 lines per topic); detailed explanations live in `design-patterns/docs/<slug>.md` and are linked from the L2. Section headings inside the L2 are model-derived from the scan, not a fixed list. The ledger `reviews/` logs lessons surfaced in code review: "this PR almost shipped X, the fix is Y".
 
 ### `glossary/` : the words you have to know
 Domain terms, abbreviations, and the names this codebase uses for things that have other names elsewhere. `glossary.yaml` is the source of truth; the L2 narrative explains the high-trust ones in context.
@@ -111,7 +127,11 @@ Domain terms, abbreviations, and the names this codebase uses for things that ha
 Commands, environment knobs, gotchas in the dev loop. `variants.yaml` captures behavior that differs across environments or feature flags, so the agent knows "in staging this flag is off" without you re-explaining each time.
 
 ### `debugging/` : what bites you
-Known pitfalls, fragile spots, recurring bug shapes. `playbooks.jsonl` is append-only: one entry per root cause, with the smell, the diagnosis, and the fix.
+Known pitfalls, fragile spots, recurring bug shapes. `playbooks/` holds one file per root cause, with the smell, the diagnosis, and the fix.
+
+## 🔁 Trees scaffolded before entry directories
+
+Older trees kept each ledger in a single append-only `.jsonl`. Re-running `/exodia` on such a tree detects them in Step 1 and, with your consent, converts each one into a directory of `{id}__{slug}.md` files (ids preserved, `.jsonl` removed) before the incremental re-run starts.
 
 ## ⚡ Install
 
@@ -162,7 +182,7 @@ categories:
     path: docs/releases
     custom: true
     description: "Release notes per published version"
-    l3: [release_notes.jsonl]
+    l3: [release_notes/]
 ```
 
 Copy-pasteable: [`examples/exodia.config.yaml`](examples/exodia.config.yaml) (full monorepo example) or [`examples/exodia.config.minimal.yaml`](examples/exodia.config.minimal.yaml) (smallest useful override). Full schema, canonical category names, path semantics, and validation rules: [`docs/config.md`](docs/config.md).
@@ -171,11 +191,11 @@ Copy-pasteable: [`examples/exodia.config.yaml`](examples/exodia.config.yaml) (fu
 
 Inherited from [`digital-brain-skill`](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/digital-brain-skill), adapted to per-repo agent context:
 
-1. **Progressive disclosure**. An agent pays for every token it loads, every turn. A monolithic `AGENTS.md` forces the model to reread the whole thing even when the task only touches one corner of the codebase. Exodia tiers the context so cost matches relevance: the router loads every turn (cheap, always-on map of the repo), a module's narrative loads only when the task touches that module, and an append-only ledger is grepped for the one entry that matters instead of read whole. The payoff is a context budget that scales with task scope, not with repo size.
+1. **Progressive disclosure**. An agent pays for every token it loads, every turn. A monolithic `AGENTS.md` forces the model to reread the whole thing even when the task only touches one corner of the codebase. Exodia tiers the context so cost matches relevance: the router loads every turn (cheap, always-on map of the repo), a module's narrative loads only when the task touches that module, and a ledger directory is listed and only the entry that matters is read. The payoff is a context budget that scales with task scope, not with repo size.
 
-2. **Append-only data**. Ledgers (`decisions.jsonl`, `reviews.jsonl`, `playbooks.jsonl`, etc.) are never deleted. When an entry becomes obsolete, its `status` flips to `archived` (or, for ADRs, `superseded` with a `supersedes: <id>` pointer to the replacement) and a new entry is appended. Within a single branch, an entry on the same topic is replaced in-place so one branch produces one entry per topic; once that branch merges, the entry is settled and a later branch can only supersede it via a new appended entry. The history of how the team's understanding evolved is the artifact: you can read the ledger and see *why* the current answer is the current answer, not just *that* it is.
+2. **One file per entry, never deleted**. Ledgers (`decisions/`, `reviews/`, `playbooks/`, etc.) keep every entry as its own file. When an entry becomes obsolete, its `status` flips to `archived` (or, for ADRs, `superseded` with a `supersedes: <id>` pointer to the replacement) and a new file is added. Within a single branch, an entry on the same topic is replaced in-place so one branch produces one entry per topic; once that branch merges, the entry is settled and a later branch can only supersede it with a new file. The history of how the team's understanding evolved is the artifact: you can read the ledger and see *why* the current answer is the current answer, not just *that* it is.
 
-3. **Module separation**. The five modules (`architecture`, `design-patterns`, `glossary`, `operations`, `debugging`) are chosen so each answers a different question and they do not overlap: "what the system is", "how to write code here", "what the words mean", "how to run it", "what bites you". An architectural decision lives in `architecture/decisions.jsonl`, not smeared across a debugging playbook; a runbook gotcha lives in `operations/`, not in a glossary entry. The payoff is that an agent loading one module gets a coherent slice of context, not a grab bag, and edits in one module never silently drift the meaning of another.
+3. **Module separation**. The five modules (`architecture`, `design-patterns`, `glossary`, `operations`, `debugging`) are chosen so each answers a different question and they do not overlap: "what the system is", "how to write code here", "what the words mean", "how to run it", "what bites you". An architectural decision lives in `architecture/decisions/`, not smeared across a debugging playbook; a runbook gotcha lives in `operations/`, not in a glossary entry. The payoff is that an agent loading one module gets a coherent slice of context, not a grab bag, and edits in one module never silently drift the meaning of another.
 
 4. **Platform agnostic**. The output follows the agents.md convention: a root `AGENTS.md` plus a plain-Markdown `context/` tree, no proprietary frontmatter, no tool-specific directives. Claude Code, Cursor, Codex, Windsurf, Gemini CLI, and anything else that respects the convention read the same files with no adapter. The payoff is no lock-in: switching agents (or running several side by side) does not require regenerating the context tree.
 
