@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { t as require_dist } from "./dist-CygAr3jS.mjs";
-import { o as isEntrypoint } from "./schemas-o-IkXWxR.mjs";
+import { o as isEntrypoint } from "./schemas-CymaMktX.mjs";
 import { readFileSync, readSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 //#region src/resolve-layout.ts
@@ -45,7 +45,7 @@ function l2TemplatePath(skillDir, name) {
 function l3TemplatePath(skillDir, category, filename) {
 	const src = categoryTemplateDir(skillDir, category);
 	if (!src) return null;
-	const candidate = join(src, `${filename}.tmpl`);
+	const candidate = filename.endsWith("/") ? join(src, filename, "_schema.md") : join(src, `${filename}.tmpl`);
 	return isFile(candidate) ? candidate : null;
 }
 function lookupCanonicalLedger(ledgers, filename, hostCategory) {
@@ -68,13 +68,27 @@ function defaultL3Specs(skillDir, ledgers, category) {
 	const src = categoryTemplateDir(skillDir, category);
 	if (!src) return null;
 	const tmpls = [];
-	for (const entry of readdirSync(src, { withFileTypes: true })) if (entry.isFile() && entry.name.endsWith(".tmpl")) tmpls.push(entry.name);
+	const entryDirs = [];
+	for (const entry of readdirSync(src, { withFileTypes: true })) {
+		if (entry.isFile() && entry.name.endsWith(".tmpl")) tmpls.push(entry.name);
+		if (entry.isDirectory() && isFile(join(src, entry.name, "_schema.md"))) entryDirs.push(entry.name);
+	}
 	tmpls.sort();
+	entryDirs.sort();
 	const specs = [];
+	for (const dir of entryDirs) {
+		const filename = `${dir}/`;
+		const { schema } = lookupCanonicalLedger(ledgers, filename, category);
+		specs.push({
+			filename,
+			schema_name: schema,
+			schema_template_path: join(src, dir, "_schema.md")
+		});
+	}
 	for (const tmpl of tmpls) {
 		const base = tmpl.slice(0, -5);
 		if (base.endsWith(".md")) continue;
-		if (!base.endsWith(".jsonl") && !base.endsWith(".yaml")) continue;
+		if (!base.endsWith(".yaml")) continue;
 		const { schema } = lookupCanonicalLedger(ledgers, base, category);
 		specs.push({
 			filename: base,

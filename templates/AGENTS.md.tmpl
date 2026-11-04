@@ -12,7 +12,7 @@ Check `{{MANIFEST_FILE}}` for scripts.
 
 <!-- exodia:section:router -->
 <!-- exodia:router:start -->
-Route by task type. Read the relevant L2 module, then load L3 data (`.jsonl` / `.yaml`) only when needed. **Max 2 hops.**
+Route by task type. Read the relevant L2 module, then load L3 data (entry directories / `.yaml`) only when needed. **Max 2 hops.** An entry directory is searched, never read whole: `rg -l '<term>' <dir>/`, then read the matches.
 
 | Task type | Load |
 | --------- | ---- |

@@ -50,9 +50,9 @@ describe("init-structure", () => {
     const files = walk(tmp);
     expect(files).toContain("context/");
     expect(files).toContain("context/architecture/ARCHITECTURE.md");
-    expect(files).toContain("context/architecture/decisions.jsonl");
+    expect(files).toContain("context/architecture/decisions/_schema.md");
     expect(files).toContain("context/design-patterns/DESIGN-PATTERNS.md");
-    expect(files).toContain("context/design-patterns/reviews.jsonl");
+    expect(files).toContain("context/design-patterns/reviews/_schema.md");
     expect(files).toContain("context/design-patterns/docs/");
     expect(files).toContain("context/design-patterns/docs/.gitkeep");
     expect(files).toContain("context/glossary/GLOSSARY.md");
@@ -111,6 +111,6 @@ describe("init-structure", () => {
 
     const files = walk(tmp);
     expect(files).toContain("context/architecture/ARCHITECTURE.md");
-    expect(files).toContain("context/architecture/decisions.jsonl");
+    expect(files).toContain("context/architecture/decisions/_schema.md");
   });
 });

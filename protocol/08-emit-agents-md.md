@@ -41,6 +41,8 @@ Follow the shape in `$SKILL_DIR/templates/AGENTS.md.tmpl`:
 6. Quick Action Table (common dev phrases → file to read)
 7. Context Structure (tree diagram). Group resolved paths by their longest common prefix and render one tree per group, so multi-root layouts (e.g. `docs/project/...` and `docs/handbook/...`) read cleanly.
 
+**Never write "Read `<dir>/`" for an entry directory**, in either table. A directory of 100+ entries read whole is the cost the entry model exists to avoid, and an agent told to "read" a path will do exactly that. Phrase every entry-directory access as a search: `` Grep `<path>/` for the symptom, read the matches ``. `.md` and `.yaml` L3 files are still read, so "Read" stays correct for those.
+
 ## Placeholders
 
 Rule snippets carry a small, fixed set of substitution tokens; resolve all of them at emit time:

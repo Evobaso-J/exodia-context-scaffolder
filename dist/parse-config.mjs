@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { t as require_dist } from "./dist-CygAr3jS.mjs";
-import { a as RECOGNIZED_CATEGORIES, i as PATH_RE, n as CATEGORY_NAME_RE, o as isEntrypoint, r as L3_FILENAME_RE, t as CANONICAL_CATEGORIES } from "./schemas-o-IkXWxR.mjs";
+import { a as RECOGNIZED_CATEGORIES, i as PATH_RE, n as CATEGORY_NAME_RE, o as isEntrypoint, r as L3_FILENAME_RE, t as CANONICAL_CATEGORIES } from "./schemas-CymaMktX.mjs";
 import { readFileSync, statSync } from "node:fs";
 //#region src/parse-config.ts
 var import_dist = require_dist();
@@ -63,7 +63,9 @@ function validatePath(path) {
 	if (!PATH_RE.test(path)) throw new ConfigError(`path must match ${PATH_RE.source}: '${path}'`);
 }
 function validateL3Filename(name) {
-	if (!L3_FILENAME_RE.test(name)) throw new ConfigError(`l3 filename must match ${L3_FILENAME_RE.source}: '${name}'`);
+	if (L3_FILENAME_RE.test(name)) return;
+	if (name.endsWith(".jsonl")) throw new ConfigError(`l3 '${name}': ledgers are entry directories (one file per entry), use '${name.slice(0, -6)}/'`);
+	throw new ConfigError(`l3 filename must match ${L3_FILENAME_RE.source}: '${name}'`);
 }
 function validateDescription(text) {
 	if (typeof text !== "string") throw new ConfigError(`description must be a string, got ${typeName(text)}`);

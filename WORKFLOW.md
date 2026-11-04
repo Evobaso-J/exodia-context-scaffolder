@@ -138,7 +138,7 @@
                    └─────────────┬────────────────────────┘
                                  ▼
             ┌───────────────────────────────────────────────┐
-            │ Step 9: seed L3 (.jsonl + .yaml)               │
+            │ Step 9: seed L3 (entry dirs + .yaml)           │
             │ Utilities:                                     │
             │  - heuristics/ledgers.yaml                     │
             │    (format / scan_source /                     │

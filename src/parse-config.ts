@@ -80,9 +80,13 @@ function validatePath(path: string): void {
 }
 
 function validateL3Filename(name: string): void {
-  if (!L3_FILENAME_RE.test(name)) {
-    throw new ConfigError(`l3 filename must match ${L3_FILENAME_RE.source}: '${name}'`);
+  if (L3_FILENAME_RE.test(name)) return;
+  // A config author reaching for the old form needs the replacement, not the pattern.
+  if (name.endsWith(".jsonl")) {
+    const dir = name.slice(0, -".jsonl".length);
+    throw new ConfigError(`l3 '${name}': ledgers are entry directories (one file per entry), use '${dir}/'`);
   }
+  throw new ConfigError(`l3 filename must match ${L3_FILENAME_RE.source}: '${name}'`);
 }
 
 function validateDescription(text: unknown): void {

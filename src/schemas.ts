@@ -29,7 +29,10 @@ export const RECOGNIZED_CATEGORIES: ReadonlySet<string> = new Set(CANONICAL_CATE
 
 export const PATH_RE = /^[a-z._-][a-z0-9._/-]*$/;
 export const CATEGORY_NAME_RE = /^[a-z][a-z0-9_-]*$/;
-export const L3_FILENAME_RE = /^[a-z][a-z0-9_-]*(?:\/[a-z][a-z0-9_-]*)*\.(yaml|jsonl|md)$/;
+// A trailing `/` marks an entry directory: one file per entry, no shared file.
+// `.jsonl` is deliberately absent: a shared append-only file puts every branch on
+// the same tail line, so parallel branches conflict on every merge.
+export const L3_FILENAME_RE = /^[a-z][a-z0-9_-]*(?:\/[a-z][a-z0-9_-]*)*(?:\.(yaml|md)|\/)$/;
 export const DESCRIPTION_MAX_LEN = 200;
 
 export type ResolvedCategory = {

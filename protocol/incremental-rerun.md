@@ -19,5 +19,5 @@ Step 1 has already reconstructed `$LAYOUT_MAP` from the existing router region p
    - **`docs/<slug>.md` exists in both**: render whole-file diff, anchor `### \`design-patterns/docs/<slug>.md\``, Accept/Skip.
    - **Fresh draft proposes a new deep dive**: propose creation with full content rendered.
    - **Existing `docs/<slug>.md` not in fresh draft**: leave alone.
-6. Append to L3 files from the scan using the same Step 9 logic.
+6. Add L3 entries from the scan using the same Step 9 logic (one new file per entry).
 7. Never overwrite `AGENTS.md`; only add missing rule snippets if conditions now apply (e.g. an `operations/` category added after initial scaffold).

@@ -12,6 +12,6 @@ categories:
     custom: true
     description: "iOS / Android client quirks, device-specific footguns, release-train cadence"
     l3:
-      - device_quirks.jsonl
+      - device_quirks/           # entry directory: one file per entry
       - release_train.yaml
       - quirks/ios.md           # nested .md deep-dive: writes to docs/mobile/quirks/ios.md
