@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/Evobaso-J/exodia-context-scaffolder/compare/v3.0.0...v3.1.0) (2026-11-04)
+
+
+### Features
+
+* entry-directory ledgers to avoid merge conflicts ([#99](https://github.com/Evobaso-J/exodia-context-scaffolder/issues/99)) ([7a0d489](https://github.com/Evobaso-J/exodia-context-scaffolder/commit/7a0d489d9aaa51939c6d5db3bcf9873e67920fdf))
+
 ## [3.0.0](https://github.com/Evobaso-J/exodia-context-scaffolder/compare/v2.2.0...v3.0.0) (2026-05-29)
 
 
